@@ -132,9 +132,9 @@ export default function NotificationsPage() {
     return (
       <AppLayout breadcrumbs={[{ label: "กำลังโหลด..." }]}>
         <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลดการแจ้งเตือน...</p>
+          <CardContent className="py-12 sm:py-16 text-center">
+            <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 mx-auto animate-spin text-primary mb-4" />
+            <p className="text-sm sm:text-base text-muted-foreground">กำลังโหลดการแจ้งเตือน...</p>
           </CardContent>
         </Card>
       </AppLayout>
@@ -143,6 +143,10 @@ export default function NotificationsPage() {
 
   // Error state
   if (error) {
+    const errorMessage = error instanceof Error
+      ? error.message
+      : 'ไม่สามารถโหลดการแจ้งเตือนได้ กรุณาลองใหม่อีกครั้ง';
+
     return (
       <AppLayout
         breadcrumbs={[
@@ -151,15 +155,21 @@ export default function NotificationsPage() {
         ]}
       >
         <Card>
-          <CardContent className="text-center py-16">
-            <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-bold mb-2">ไม่สามารถโหลดการแจ้งเตือนได้</h2>
-            <p className="text-muted-foreground mb-6">
-              {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
+          <CardContent className="text-center py-12 sm:py-16 px-4">
+            <Bell className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">เกิดข้อผิดพลาด</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto">
+              {errorMessage}
             </p>
-            <Button onClick={() => window.location.reload()}>
-              ลองอีกครั้ง
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button onClick={() => window.location.reload()}>
+                <Loader2 className="mr-2 h-4 w-4" />
+                ลองอีกครั้ง
+              </Button>
+              <Button variant="outline" onClick={() => router.push('/')}>
+                กลับหน้าหลัก
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </AppLayout>
@@ -175,14 +185,14 @@ export default function NotificationsPage() {
     >
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
               <Bell className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">การแจ้งเตือน</h1>
-              <p className="text-muted-foreground mt-1">
+              <h1 className="text-2xl sm:text-3xl font-bold">การแจ้งเตือน</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">
                 {unreadCount > 0
                   ? `คุณมีการแจ้งเตือนใหม่ ${unreadCount} รายการ`
                   : 'ไม่มีการแจ้งเตือนใหม่'
@@ -191,25 +201,27 @@ export default function NotificationsPage() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {unreadCount > 0 && (
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleMarkAllAsReadClick}
                 disabled={markAllAsRead.isPending}
+                className="flex-1 sm:flex-none"
               >
                 {markAllAsRead.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Check className="mr-2 h-4 w-4" />
                 )}
-                อ่านทั้งหมด
+                <span className="whitespace-nowrap">อ่านทั้งหมด</span>
               </Button>
             )}
-            <Link href="/notifications/settings">
-              <Button variant="outline">
+            <Link href="/notifications/settings" className="flex-1 sm:flex-none">
+              <Button variant="outline" size="sm" className="w-full">
                 <Settings className="mr-2 h-4 w-4" />
-                ตั้งค่า
+                <span className="whitespace-nowrap">ตั้งค่า</span>
               </Button>
             </Link>
           </div>
