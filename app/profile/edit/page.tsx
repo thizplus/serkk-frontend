@@ -15,6 +15,8 @@ import { useProfile } from "@/lib/hooks/queries/useUsers";
 import { useUpdateProfile } from "@/lib/hooks/mutations/useUsers";
 import { useUploadImage } from "@/lib/hooks/mutations/useMedia";
 
+export const dynamic = 'force-dynamic';
+
 export default function EditProfilePage() {
   const router = useRouter();
   const hasHydrated = useHasHydrated(); // ⭐ เช็คว่า Zustand hydrate เสร็จแล้วหรือยัง

@@ -6,6 +6,8 @@ import { useGoogleOAuthCallback } from '@/lib/hooks/mutations/useAuth';
 import { useAuthStore } from '@/lib/stores/authStore';
 import userService from '@/lib/services/api/user.service';
 
+export const dynamic = 'force-dynamic';
+
 function AuthCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();

@@ -19,6 +19,8 @@ import {
 } from "@/lib/hooks/queries/useNotifications";
 import type { NotificationType } from "@/lib/types/common";
 
+export const dynamic = 'force-dynamic';
+
 export default function NotificationsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");

@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { usePost, useUpdatePost } from "@/lib/hooks/queries/usePosts";
 import { useUser } from "@/lib/stores/authStore";
 
+export const dynamic = 'force-dynamic';
+
 export default function EditPostPage() {
   const router = useRouter();
   const params = useParams();

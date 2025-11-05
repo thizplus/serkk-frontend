@@ -9,6 +9,8 @@ import { Bookmark, Plus, Loader2 } from "lucide-react";
 import { useUser, useHasHydrated } from "@/lib/stores/authStore";
 import { useSavedPosts } from "@/lib/hooks/mutations/useSaved";
 
+export const dynamic = 'force-dynamic';
+
 export default function SavedPage() {
   const router = useRouter();
   const hasHydrated = useHasHydrated();

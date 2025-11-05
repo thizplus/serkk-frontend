@@ -13,6 +13,8 @@ import {
   useUpdateNotificationSettings
 } from "@/lib/hooks/queries/useNotifications";
 
+export const dynamic = 'force-dynamic';
+
 export default function NotificationSettingsPage() {
   const router = useRouter();
 

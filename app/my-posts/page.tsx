@@ -9,6 +9,8 @@ import { FileText, Plus, Loader2 } from "lucide-react";
 import { useUser, useHasHydrated } from "@/lib/stores/authStore";
 import { useUserPosts } from "@/lib/hooks/queries/usePosts";
 
+export const dynamic = 'force-dynamic';
+
 export default function MyPostsPage() {
   const router = useRouter();
   const hasHydrated = useHasHydrated();

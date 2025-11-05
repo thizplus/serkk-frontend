@@ -12,6 +12,8 @@ import { Search, FileText, User, Loader2 } from "lucide-react";
 import { useSearch } from "@/lib/hooks/queries/useSearch";
 import type { User as UserType } from "@/lib/types/models";
 
+export const dynamic = 'force-dynamic';
+
 function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();

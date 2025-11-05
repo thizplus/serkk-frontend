@@ -9,6 +9,8 @@ import { useUploadMultipleMedia } from "@/lib/hooks/mutations/useMedia";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CreatePostRequest, CreateCrosspostRequest } from "@/lib/types/request";
 
+export const dynamic = 'force-dynamic';
+
 function CreatePostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();

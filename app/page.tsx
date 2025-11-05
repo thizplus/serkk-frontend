@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Loader2 } from "lucide-react";
 import { usePosts } from "@/lib/hooks/queries/usePosts";
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const router = useRouter();
 
