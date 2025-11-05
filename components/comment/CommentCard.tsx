@@ -8,13 +8,13 @@ import { CommentForm } from "./CommentForm";
 import { CommentActions } from "./CommentActions";
 import { DeleteCommentDialog } from "./DeleteCommentDialog";
 import { cn } from "@/lib/utils";
-import type { Comment } from "@/lib/types/models";
+import type { Comment, CommentWithReplies } from "@/lib/types/models";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { useUser } from "@/lib/stores/authStore";
 
 interface CommentCardProps {
-  comment: Comment;
+  comment: Comment | CommentWithReplies;
   depth?: number; // For tree structure
   isCollapsed?: boolean;
   onToggleCollapse?: (commentId: string) => void;
@@ -46,9 +46,14 @@ export function CommentCard({
     locale: th
   });
 
+  // Type guard to check if comment has replies
+  const isCommentWithReplies = (comment: Comment | CommentWithReplies): comment is CommentWithReplies => {
+    return 'replies' in comment && Array.isArray(comment.replies);
+  };
+
   // Use replies array for tree structure (tree API ไม่ส่ง replyCount)
-  const hasReplies = (comment as any).replies && (comment as any).replies.length > 0;
-  const totalReplies = (comment as any).replies?.length || 0;
+  const hasReplies = isCommentWithReplies(comment) && comment.replies.length > 0;
+  const totalReplies = isCommentWithReplies(comment) ? comment.replies.length : 0;
 
   const handleReplyClick = () => {
     setIsReplying(true);
