@@ -251,7 +251,7 @@ export default function NotificationsPage() {
                   return (
                     <Card
                       key={notification.id}
-                      className={`cursor-pointer transition-all hover:shadow-md hover:border-accent ${
+                      className={`cursor-pointer py-0 transition-all hover:shadow-md hover:border-accent ${
                         !notification.isRead ? 'bg-primary/5 border-primary/20' : ''
                       }`}
                       onClick={() => handleNotificationClick(notification)}
@@ -302,7 +302,7 @@ export default function NotificationsPage() {
                                 )}
 
                                 {/* Time & Status */}
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                                   <span>{timeAgo}</span>
                                   <span>•</span>
                                   {notification.isRead ? (
