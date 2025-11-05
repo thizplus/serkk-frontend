@@ -1,55 +1,49 @@
-# Dockerfile for Next.js 16 App Router with Turbopack
-# Multi-stage build for optimal production image
-
-# Stage 1: Dependencies
-FROM node:20-alpine AS deps
-WORKDIR /app
-
-# Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
-RUN npm ci
-
-# Stage 2: Builder
+# Stage 1: Building the code
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Build arguments for environment variables
-ARG NEXT_PUBLIC_API_BASE_URL
+# Add build arguments
+ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
-# Set environment variables for build time
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+# Set environment variables
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
-ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the application
+# Copy package files first for better Docker layer caching
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci && npm cache clean --force
+
+# Copy all source files
+COPY . .
+
+# Build the Next.js application
 RUN npm run build
 
-# Stage 3: Runner
+# Stage 2: Run the built application
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Set to production environment
+# Set environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create a non-root user
+# Create a non-root user for security
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder
+# Copy necessary files from builder stage
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-# Switch to non-root user
+# Change ownership to nextjs user
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-# Expose port
+# Expose port 3000
 EXPOSE 3000
 
 # Set port environment variable
