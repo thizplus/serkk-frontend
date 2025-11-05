@@ -189,14 +189,18 @@ export interface SavedPostRecord {
 export interface Notification {
   id: string;
   type: NotificationType;
-  title: string;
+  title?: string;
   message: string;
   isRead: boolean;
-  actorId: string | null;
-  actor: UserSummary | null;
-  targetId: string;
-  targetType: TargetType | null;
-  link: string;
+  actorId?: string | null;
+  actor?: UserSummary | null;
+  sender?: UserSummary;  // Alternative field for actor from backend
+  user?: UserSummary;    // Another alternative field for user from backend
+  targetId?: string;
+  targetType?: TargetType | null;
+  link?: string;
+  postId?: string;  // For notifications related to posts
+  commentId?: string;  // For notifications related to comments
   createdAt: string;
 }
 

@@ -76,7 +76,7 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
           </div>
 
           {/* Actions: Theme Toggle & Notification */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <ThemeToggle />
             <Link href="/notifications">
               <Button variant="ghost" size="icon" className="relative">

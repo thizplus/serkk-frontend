@@ -18,6 +18,7 @@ import {
   useDeleteNotification,
 } from "@/lib/hooks/queries/useNotifications";
 import type { NotificationType } from "@/lib/types/common";
+import type { Notification } from "@/lib/types/models";
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,7 @@ export default function NotificationsPage() {
 
   // Handle both response formats (with meta or total)
   const notifications = data?.notifications || [];
-  const totalCount = (data as any)?.total || data?.meta?.total || 0;
+  const totalCount = data?.meta?.total || 0;
 
   // Debug response in development
   if (process.env.NODE_ENV === 'development' && data) {
@@ -65,7 +66,7 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: Notification) => {
     // Mark as read if not already read
     if (!notification.isRead) {
       markAsRead.mutate(notification.id);
@@ -201,7 +202,7 @@ export default function NotificationsPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-between">
             {unreadCount > 0 && (
               <Button
                 variant="outline"
@@ -266,10 +267,10 @@ export default function NotificationsPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start gap-3 mb-2">
                               {/* Support both 'actor' and 'user' fields */}
-                              {(notification.actor || (notification as any).user) && (
+                              {(notification.actor || notification.user) && (
                                 <Image
-                                  src={(notification.actor?.avatar || (notification as any).user?.avatar) || "/logo.png"}
-                                  alt={(notification.actor?.displayName || (notification as any).user?.displayName) || "User"}
+                                  src={(notification.actor?.avatar || notification.user?.avatar) || "/logo.png"}
+                                  alt={(notification.actor?.displayName || notification.user?.displayName) || "User"}
                                   width={40}
                                   height={40}
                                   className="rounded-full flex-shrink-0 border-2 border-background shadow-sm"
@@ -277,13 +278,13 @@ export default function NotificationsPage() {
                               )}
                               <div className="flex-1 min-w-0">
                                 {/* Actor/User Name & Action */}
-                                {(notification.actor || (notification as any).user) && (
+                                {(notification.actor || notification.user) && (
                                   <p className="text-sm font-medium mb-1">
                                     <span className="hover:underline">
-                                      {notification.actor?.displayName || (notification as any).user?.displayName}
+                                      {notification.actor?.displayName || notification.user?.displayName}
                                     </span>
                                     <span className="text-muted-foreground ml-1">
-                                      @{notification.actor?.username || (notification as any).user?.username}
+                                      @{notification.actor?.username || notification.user?.username}
                                     </span>
                                   </p>
                                 )}
