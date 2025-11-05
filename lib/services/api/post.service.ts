@@ -96,6 +96,16 @@ const postService = {
   },
 
   /**
+   * ดึงโพสต์ที่มี tag ID ระบุ (เพื่อหลีกเลี่ยงปัญหา URL encoding กับ tag ภาษาไทย)
+   * @param tagId - ID ของ tag
+   * @param params - พารามิเตอร์ (offset, limit, sortBy)
+   * @returns Promise<ListPostsResponse>
+   */
+  getByTagId: async (tagId: string, params?: GetPostsParams): Promise<ListPostsResponse> => {
+    return apiService.get<ListPostsResponse>(API.POST.BY_TAG_ID(tagId), params);
+  },
+
+  /**
    * ค้นหาโพสต์
    * @param params - พารามิเตอร์การค้นหา (q, offset, limit, sortBy)
    * @returns Promise<SearchPostsResponse>

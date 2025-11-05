@@ -41,6 +41,11 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
         });
 
+        // เก็บ token ใน localStorage สำหรับ http-client
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', token);
+        }
+
         // เก็บ cookie สำหรับ middleware
         if (typeof document !== 'undefined') {
           document.cookie = `auth_token=${token}; path=/; max-age=604800`; // 7 days
@@ -67,6 +72,11 @@ export const useAuthStore = create<AuthState>()(
           user: null,
           isAuthenticated: false,
         });
+
+        // ลบ token จาก localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+        }
 
         // ลบ cookie
         if (typeof document !== 'undefined') {
@@ -120,10 +130,17 @@ export const useAuthStore = create<AuthState>()(
           // เมื่อ hydrate เสร็จ set flag เป็น true
           state?.setHasHydrated(true);
 
-          // Sync cookie กับ localStorage
-          if (state?.token && typeof document !== 'undefined') {
-            document.cookie = `auth_token=${state.token}; path=/; max-age=604800`;
-            console.log('🍪 Cookie synced from localStorage');
+          // Sync token กับ localStorage และ cookie
+          if (state?.token) {
+            // Sync auth_token สำหรับ http-client (backward compatibility)
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('auth_token', state.token);
+            }
+
+            // Sync cookie
+            if (typeof document !== 'undefined') {
+              document.cookie = `auth_token=${state.token}; path=/; max-age=604800`;
+            }
           }
         };
       },

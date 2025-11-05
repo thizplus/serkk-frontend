@@ -19,6 +19,9 @@ import {
 } from "@/lib/hooks/queries/useNotifications";
 import type { NotificationType } from "@/lib/types/common";
 import type { Notification } from "@/lib/types/models";
+import { PushNotification } from "@/components/pwa/PushNotification";
+import { TestPushButton } from "@/components/pwa/TestPushButton";
+import { PushDebugPanel } from "@/components/pwa/PushDebugPanel";
 
 export const dynamic = 'force-dynamic';
 
@@ -54,13 +57,13 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
       case 'reply':
-        return <MessageSquare size={20} className="text-primary" />;
+        return <MessageSquare size={20} className="text-muted-foreground" />;
       case 'vote':
-        return <ThumbsUp size={20} className="text-green-500" />;
+        return <ThumbsUp size={20} className="text-muted-foreground" />;
       case 'mention':
-        return <AtSign size={20} className="text-blue-500" />;
+        return <AtSign size={20} className="text-muted-foreground" />;
       case 'follow':
-        return <UserPlus size={20} className="text-purple-500" />;
+        return <UserPlus size={20} className="text-muted-foreground" />;
       default:
         return <Bell size={20} className="text-muted-foreground" />;
     }
@@ -185,10 +188,17 @@ export default function NotificationsPage() {
       ]}
     >
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
+        {/* Header Section */}
+        <div className="space-y-4">
+          {/* Title */}
+          <div className="flex items-center gap-3 justify-between">
+
+
+
+<div className="flex gap-2">
+
+
+            <div className="p-2 bg-primary/10 rounded-lg m-auto">
               <Bell className="h-6 w-6 text-primary" />
             </div>
             <div>
@@ -200,31 +210,47 @@ export default function NotificationsPage() {
                 }
               </p>
             </div>
+</div>
+              <PushNotification />
           </div>
 
-          <div className="flex flex-wrap gap-2 justify-between">
-            {unreadCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMarkAllAsReadClick}
-                disabled={markAllAsRead.isPending}
-                className="flex-1 sm:flex-none"
-              >
-                {markAllAsRead.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Check className="mr-2 h-4 w-4" />
-                )}
-                <span className="whitespace-nowrap">อ่านทั้งหมด</span>
-              </Button>
-            )}
-            <Link href="/notifications/settings" className="flex-1 sm:flex-none">
-              <Button variant="outline" size="sm" className="w-full">
-                <Settings className="mr-2 h-4 w-4" />
-                <span className="whitespace-nowrap">ตั้งค่า</span>
-              </Button>
-            </Link>
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Push Notification Toggle */}
+          
+
+            {/* Right Side: Action Buttons */}
+            <div className="flex justify-between w-full flex-wrap gap-2">
+              {/* Test Push Button (Dev Only) */}
+              {process.env.NODE_ENV === 'development' && <TestPushButton />}
+
+            <div className="flex gap-2">
+                {/* Mark All as Read */}
+              {unreadCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleMarkAllAsReadClick}
+                  disabled={markAllAsRead.isPending}
+                >
+                  {markAllAsRead.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="mr-2 h-4 w-4" />
+                  )}
+                  <span className="whitespace-nowrap">อ่านทั้งหมด</span>
+                </Button>
+              )}
+
+              {/* Settings Button - Icon only on mobile */}
+              <Link href="/notifications/settings">
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline whitespace-nowrap">ตั้งค่า</span>
+                </Button>
+              </Link>
+            </div>
+            </div>
           </div>
         </div>
 
@@ -266,31 +292,25 @@ export default function NotificationsPage() {
                           {/* Avatar & Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start gap-3 mb-2">
-                              {/* Support both 'actor' and 'user' fields */}
-                              {(notification.actor || notification.user) && (
+                              {/* Support 'sender', 'actor', and 'user' fields */}
+                              {(notification.sender || notification.actor || notification.user) && (
                                 <Image
-                                  src={(notification.actor?.avatar || notification.user?.avatar) || "/logo.png"}
-                                  alt={(notification.actor?.displayName || notification.user?.displayName) || "User"}
+                                  src={(notification.sender?.avatar || notification.actor?.avatar || notification.user?.avatar) || "/logo.png"}
+                                  alt={(notification.sender?.displayName || notification.actor?.displayName || notification.user?.displayName) || "User"}
                                   width={40}
                                   height={40}
                                   className="rounded-full flex-shrink-0 border-2 border-background shadow-sm"
                                 />
                               )}
                               <div className="flex-1 min-w-0">
-                                {/* Actor/User Name & Action */}
-                                {(notification.actor || notification.user) && (
-                                  <p className="text-sm font-medium mb-1">
-                                    <span className="hover:underline">
-                                      {notification.actor?.displayName || notification.user?.displayName}
-                                    </span>
-                                    <span className="text-muted-foreground ml-1">
-                                      @{notification.actor?.username || notification.user?.username}
-                                    </span>
-                                  </p>
-                                )}
-
-                                {/* Message */}
+                                {/* Message with Actor Name */}
                                 <p className="text-sm text-foreground/90 mb-2">
+                                  {(notification.sender || notification.actor || notification.user) && (
+                                    <span className="font-semibold">
+                                      {notification.sender?.displayName || notification.actor?.displayName || notification.user?.displayName}
+                                    </span>
+                                  )}
+                                  {(notification.sender || notification.actor || notification.user) && ' '}
                                   {notification.message}
                                 </p>
 
@@ -371,6 +391,13 @@ export default function NotificationsPage() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Debug Panel (Development Only) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-8">
+            <PushDebugPanel />
+          </div>
+        )}
       </div>
     </AppLayout>
   );

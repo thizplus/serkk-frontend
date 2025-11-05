@@ -1,23 +1,35 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
-import { PostFeed } from "@/components/post/PostFeed";
+import { InfinitePostFeed } from "@/components/post/InfinitePostFeed";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Loader2 } from "lucide-react";
-import { usePosts } from "@/lib/hooks/queries/usePosts";
+import { Plus } from "lucide-react";
+import { useInfinitePosts } from "@/lib/hooks/queries/usePosts";
 
 export const dynamic = 'force-dynamic';
 
 export default function Home() {
   const router = useRouter();
 
-  // Fetch posts from backend
-  const { data: posts = [], isLoading, error } = usePosts({
-    sortBy: 'hot', // Default to hot sorting
+  // Infinite scroll query
+  const {
+    data,
+    isLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfinitePosts({
+    sortBy: 'hot',
     limit: 20,
   });
+
+  // Flatten posts from all pages
+  const posts = useMemo(() => {
+    return data?.pages.flatMap((page) => page.posts) ?? [];
+  }, [data]);
 
   return (
     <AppLayout
@@ -40,37 +52,15 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">กำลังโหลดโพสต์...</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <p className="text-lg text-destructive mb-2">
-                ไม่สามารถโหลดโพสต์ได้
-              </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
-              </p>
-              <Button onClick={() => window.location.reload()}>
-                ลองใหม่อีกครั้ง
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Post Feed */}
-        {!isLoading && !error && (
-          <PostFeed posts={posts} />
-        )}
+        {/* Infinite Scroll Post Feed */}
+        <InfinitePostFeed
+          posts={posts}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          isLoading={isLoading}
+          error={error || null}
+        />
       </div>
     </AppLayout>
   );

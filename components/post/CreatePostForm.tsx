@@ -20,6 +20,7 @@ interface CreatePostFormProps {
   sourcePost?: Post;
   isSubmitting?: boolean;
   uploadProgress?: number;
+  initialTags?: string[];
 }
 
 export function CreatePostForm({
@@ -28,10 +29,11 @@ export function CreatePostForm({
   sourcePost,
   isSubmitting = false,
   uploadProgress = 0,
+  initialTags = [],
 }: CreatePostFormProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(initialTags);
   const [tagInput, setTagInput] = useState("");
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);

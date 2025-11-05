@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { MessageSquare, ChevronDown, ChevronRight } from "lucide-react";
 import { VoteButtons } from "../post/VoteButtons";
@@ -36,6 +37,7 @@ export function CommentCard({
   onEditComment,
   onDeleteComment,
 }: CommentCardProps) {
+  const router = useRouter();
   const currentUser = useUser();
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -134,10 +136,14 @@ export function CommentCard({
               alt={comment.author.displayName}
               width={24}
               height={24}
-              className="rounded-full"
+              className="rounded-full cursor-pointer"
+              onClick={() => router.push(`/profile/${comment.author.username}`)}
             />
-            <span className="font-medium hover:underline cursor-pointer">
-              {comment.author.username}
+            <span
+              className="font-medium hover:underline cursor-pointer"
+              onClick={() => router.push(`/profile/${comment.author.username}`)}
+            >
+              {comment.author.displayName}
             </span>
             <span className="text-muted-foreground">•</span>
             <span className="text-muted-foreground">{timeAgo}</span>

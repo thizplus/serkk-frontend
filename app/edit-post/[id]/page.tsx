@@ -40,6 +40,7 @@ export default function EditPostPage() {
   // Initialize form with post data
   useEffect(() => {
     if (post) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTitle(post.title);
       setContent(post.content);
       setTags(post.tags?.map(t => t.name) || []);
@@ -80,7 +81,7 @@ export default function EditPostPage() {
                 : 'ไม่พบโพสต์ที่ต้องการแก้ไข'
               }
             </p>
-            <Button onClick={() => router.push("/")}>
+            <Button size={'sm'} onClick={() => router.push("/")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               กลับหน้าหลัก
             </Button>
@@ -106,7 +107,7 @@ export default function EditPostPage() {
             <p className="text-muted-foreground mb-6">
               คุณไม่มีสิทธิ์แก้ไขโพสต์นี้ เฉพาะเจ้าของโพสต์เท่านั้นที่สามารถแก้ไขได้
             </p>
-            <Button onClick={() => router.push(`/post/${postId}`)}>
+            <Button size={'sm'} onClick={() => router.push(`/post/${postId}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               กลับไปที่โพสต์
             </Button>

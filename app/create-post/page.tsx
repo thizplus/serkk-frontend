@@ -15,6 +15,7 @@ function CreatePostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sourceId = searchParams.get("source_id");
+  const tagParam = searchParams.get("tag");
 
   // Fetch source post if sourceId exists (for crosspost)
   const { data: sourcePost, isLoading: isLoadingSource } = usePost(sourceId || '', {
@@ -142,6 +143,7 @@ function CreatePostContent() {
           sourcePost={sourcePost}
           isSubmitting={isSubmitting}
           uploadProgress={overallProgress}
+          initialTags={tagParam ? [tagParam] : undefined}
         />
       </div>
     </AppLayout>

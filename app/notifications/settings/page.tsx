@@ -34,6 +34,7 @@ export default function NotificationSettingsPage() {
   // Initialize form with fetched settings
   useEffect(() => {
     if (settings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setReplies(settings.replies);
       setMentions(settings.mentions);
       setVotes(settings.votes);
@@ -72,7 +73,7 @@ export default function NotificationSettingsPage() {
             <p className="text-muted-foreground mb-6">
               {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
             </p>
-            <Button onClick={() => router.push("/notifications")}>
+            <Button size={'sm'} onClick={() => router.push("/notifications")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               กลับไปหน้าการแจ้งเตือน
             </Button>
@@ -110,9 +111,7 @@ export default function NotificationSettingsPage() {
     >
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Back Button */}
-        <Button
-          size="sm"
-          variant="ghost"
+        <Button size={'sm'}
           onClick={() => router.push("/notifications")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

@@ -80,14 +80,14 @@ export function PostCard({
               alt={post.author.displayName}
               width={30}
               height={30}
-              className="rounded-full cursor-pointer"
+              className="rounded-full cursor-pointer max-h-[30px] object-cover"
               onClick={() => router.push(`/profile/${post.author.username}`)}
             />
             <span
               className="font-medium text-foreground hover:underline cursor-pointer"
               onClick={() => router.push(`/profile/${post.author.username}`)}
             >
-              {post.author.username}
+              {post.author.displayName}
             </span>
             <span>•</span>
             <span>{timeAgo}</span>
@@ -104,7 +104,7 @@ export function PostCard({
         </div>
 
         {/* Title */}
-        <h2
+        <h1
           onClick={handlePostClick}
           className={cn(
             "font-semibold mb-2 hover:text-primary transition-colors",
@@ -113,7 +113,7 @@ export function PostCard({
           )}
         >
           {post.title}
-        </h2>
+        </h1>
 
         {/* Content */}
         {!compact && post.content && (
@@ -155,19 +155,20 @@ export function PostCard({
 
                 {/* Source Post Media */}
                 {post.sourcePost.media && post.sourcePost.media.length > 0 && (
-                  <div className="relative h-32 rounded-md overflow-hidden bg-muted">
+                  <div className="rounded-md overflow-hidden bg-muted max-h-80">
                     {post.sourcePost.media[0].type === "video" ? (
                       <video
                         src={post.sourcePost.media[0].url}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto max-h-80 object-contain"
                         poster={post.sourcePost.media[0].thumbnail || undefined}
                       />
                     ) : (
                       <Image
                         src={post.sourcePost.media[0].url}
                         alt="Source post media"
-                        fill
-                        className="object-cover"
+                        width={600}
+                        height={400}
+                        className="w-full h-auto max-h-80 object-contain"
                       />
                     )}
                   </div>
@@ -211,7 +212,11 @@ export function PostCard({
             {post.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="px-2 py-1 bg-accent/50 text-xs rounded-full hover:bg-accent cursor-pointer"
+                className="px-2 py-1 bg-accent/50 text-xs rounded-full hover:bg-accent cursor-pointer transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/tag/${encodeURIComponent(tag.name)}`);
+                }}
               >
                 #{tag.name}
               </span>

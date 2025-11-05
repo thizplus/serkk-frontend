@@ -1,189 +1,101 @@
-"use client";
+import { Metadata } from "next";
+import { PostDetailContent } from "./PostDetailContent";
 
 export const dynamic = 'force-dynamic';
 
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import AppLayout from "@/components/layouts/AppLayout";
-import { PostCard } from "@/components/post/PostCard";
-import { CommentTree } from "@/components/comment/CommentTree";
-import { CommentForm } from "@/components/comment/CommentForm";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { usePost } from "@/lib/hooks/queries/usePosts";
-import {
-  useCommentTree,
-  useCreateComment,
-  useUpdateComment,
-  useDeleteComment
-} from "@/lib/hooks/queries/useComments";
-import { useToggleVote } from "@/lib/hooks/mutations/useVotes";
-import type { CommentWithReplies } from "@/lib/types/models";
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
 
-export default function PostDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const postId = params.id as string;
+/**
+ * Generate dynamic metadata for post detail page
+ * - Auto-generates title, description from post data
+ * - Supports OG images, Twitter cards
+ * - SEO optimized
+ */
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
 
-  // Fetch post from API
-  const { data: post, isLoading: isLoadingPost, error: postError } = usePost(postId);
+  try {
+    // Fetch post data using native fetch (no auth required for public posts)
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+    const response = await fetch(`${apiUrl}/posts/${id}`, {
+      cache: 'no-store',
+    });
 
-  // Fetch comments tree from API
-  const { data: comments = [], isLoading: isLoadingComments } = useCommentTree(postId, {
-    maxDepth: 10,
-  });
+    if (!response.ok) {
+      return {
+        title: "ไม่พบโพสต์",
+        description: "ไม่พบโพสต์ที่คุณกำลังมองหา",
+      };
+    }
 
-  // Comment mutations
-  const createComment = useCreateComment();
-  const updateComment = useUpdateComment();
-  const deleteComment = useDeleteComment();
+    const data = await response.json();
 
-  // Vote for comments
-  const { handleVote: handleCommentVoteToggle } = useToggleVote();
+    if (!data.success || !data.data) {
+      return {
+        title: "ไม่พบโพสต์",
+        description: "ไม่พบโพสต์ที่คุณกำลังมองหา",
+      };
+    }
 
-  // Loading state
-  if (isLoadingPost) {
-    return (
-      <AppLayout breadcrumbs={[{ label: "กำลังโหลด..." }]}>
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลดโพสต์...</p>
-          </CardContent>
-        </Card>
-      </AppLayout>
-    );
-  }
+    const post = data.data;
 
-  // Error state
-  if (postError || !post) {
-    return (
-      <AppLayout breadcrumbs={[{ label: "โพสต์ไม่พบ" }]}>
-        <Card>
-          <CardContent className="text-center py-16">
-            <h1 className="text-2xl font-bold mb-4">ไม่พบโพสต์</h1>
-            <p className="text-muted-foreground mb-6">
-              {postError
-                ? postError instanceof Error
-                  ? postError.message
-                  : 'เกิดข้อผิดพลาด'
-                : 'โพสต์ที่คุณกำลังมองหาอาจถูกลบหรือไม่มีอยู่จริง'
-              }
-            </p>
-            <Button onClick={() => router.push("/")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              กลับหน้าหลัก
-            </Button>
-          </CardContent>
-        </Card>
-      </AppLayout>
-    );
-  }
+    // Create description from content (max 160 chars)
+    const description = post.content
+      ? post.content.substring(0, 160) + (post.content.length > 160 ? "..." : "")
+      : "อ่านโพสต์เพิ่มเติมใน VOOBIZE";
 
-  // Handlers
-  const handleCommentVote = (commentId: string, vote: 'up' | 'down') => {
-    // หา comment จาก commentId เพื่อดึง userVote (ต้องค้นหาแบบ recursive ในโครงสร้าง tree)
-    const findComment = (
-      comments: CommentWithReplies[],
-      id: string
-    ): CommentWithReplies | null => {
-      for (const comment of comments) {
-        if (comment.id === id) return comment;
-        if (comment.replies && comment.replies.length > 0) {
-          const found = findComment(comment.replies, id);
-          if (found) return found;
-        }
-      }
-      return null;
+    // Get first image for OG image
+    const ogImage = post.media && post.media.length > 0 && post.media[0].type === 'image'
+      ? post.media[0].url
+      : "/logo.png";
+
+    // Get tags for keywords
+    const keywords = post.tags?.map((tag: { id: string; name: string }) => tag.name) || [];
+
+    return {
+      title: post.title,
+      description,
+      keywords: [...keywords, "VOOBIZE", "โซเชียลไทย"],
+      authors: [{ name: post.author.displayName }],
+      openGraph: {
+        title: post.title,
+        description,
+        type: "article",
+        publishedTime: post.createdAt,
+        modifiedTime: post.updatedAt,
+        authors: [post.author.displayName],
+        tags: keywords,
+        images: [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: post.title,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description,
+        images: [ogImage],
+        creator: `@${post.author.username}`,
+      },
     };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "โพสต์",
+      description: "อ่านโพสต์ใน VOOBIZE",
+    };
+  }
+}
 
-    const comment = findComment(comments, commentId);
-    const currentUserVote = comment?.userVote || null;
-
-    handleCommentVoteToggle(commentId, 'comment', vote, currentUserVote);
-  };
-
-  const handleReply = (commentId: string) => {
-    // Reply functionality is handled by CommentCard internally
-    console.log('Reply to comment:', commentId);
-  };
-
-  const handleCommentSubmit = async (content: string, parentId?: string) => {
-    await createComment.mutateAsync({
-      postId,
-      content,
-      parentId: parentId || null,
-    });
-  };
-
-  const handleEditComment = (commentId: string, newContent: string) => {
-    updateComment.mutate({
-      id: commentId,
-      data: { content: newContent }
-    });
-  };
-
-  const handleDeleteComment = (commentId: string) => {
-    // Dialog confirmation is handled by CommentCard
-    deleteComment.mutate(commentId);
-  };
-
-  return (
-    <AppLayout
-      breadcrumbs={[
-        { label: "หน้าหลัก", href: "/" },
-        { label: post.title },
-      ]}
-    >
-      <div className="space-y-6">
-        {/* Back Button */}
-        <Button size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          กลับ
-        </Button>
-
-        {/* Post Content */}
-        <PostCard
-          post={post}
-          disableNavigation={true}
-        />
-
-        {/* Comments Section */}
-        <div className="bg-card border rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            ความคิดเห็น ({isLoadingComments ? '...' : comments.length})
-          </h2>
-
-          {/* Comment Form */}
-          <div className="mb-6">
-            <CommentForm
-              postId={postId}
-              onSubmit={handleCommentSubmit}
-              placeholder="แสดงความคิดเห็นของคุณ..."
-            />
-          </div>
-
-          {/* Loading Comments */}
-          {isLoadingComments && (
-            <div className="py-8 text-center">
-              <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary mb-2" />
-              <p className="text-sm text-muted-foreground">กำลังโหลดความคิดเห็น...</p>
-            </div>
-          )}
-
-          {/* Comments Tree */}
-          {!isLoadingComments && (
-            <CommentTree
-              comments={comments}
-              onVote={handleCommentVote}
-              onReply={handleReply}
-              onReplySubmit={handleCommentSubmit}
-              onEditComment={handleEditComment}
-              onDeleteComment={handleDeleteComment}
-            />
-          )}
-        </div>
-      </div>
-    </AppLayout>
-  );
+export default async function PostDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  return <PostDetailContent postId={id} />;
 }

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import postService from '@/lib/services/api/post.service';
 import type { GetPostsParams, CreatePostRequest, UpdatePostRequest, CreateCrosspostRequest } from '@/lib/types/request';
@@ -18,6 +18,8 @@ export const postKeys = {
     [...postKeys.all, 'author', userId, params] as const,
   byTag: (tagName: string, params?: GetPostsParams) =>
     [...postKeys.all, 'tag', tagName, params] as const,
+  byTagId: (tagId: string, params?: GetPostsParams) =>
+    [...postKeys.all, 'tag-id', tagId, params] as const,
   feed: (params?: GetPostsParams) => [...postKeys.all, 'feed', params] as const,
 };
 
@@ -89,6 +91,22 @@ export function usePostsByTag(tagName: string, params?: GetPostsParams) {
 }
 
 /**
+ * ดึงโพสต์ที่มี tag ID ระบุ
+ * ใช้สำหรับหลีกเลี่ยงปัญหา URL encoding กับ tag ภาษาไทย
+ */
+export function usePostsByTagId(tagId: string, params?: GetPostsParams, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: postKeys.byTagId(tagId, params),
+    queryFn: async () => {
+      const response = await postService.getByTagId(tagId, params);
+      if (!response.success) throw new Error('Failed to fetch posts by tag ID');
+      return response.data?.posts || [];
+    },
+    enabled: options?.enabled !== undefined ? options.enabled : !!tagId,
+  });
+}
+
+/**
  * ดึง personalized feed
  */
 export function useFeed(params?: GetPostsParams) {
@@ -99,6 +117,129 @@ export function useFeed(params?: GetPostsParams) {
       if (!response.success) throw new Error('Failed to fetch feed');
       return response.data?.posts || [];
     },
+  });
+}
+
+// ============================================================================
+// INFINITE SCROLL QUERIES
+// ============================================================================
+
+/**
+ * Infinite scroll สำหรับรายการโพสต์ทั้งหมด
+ */
+export function useInfinitePosts(params?: Omit<GetPostsParams, 'offset'>) {
+  return useInfiniteQuery({
+    queryKey: [...postKeys.lists(), 'infinite', params] as const,
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await postService.list({
+        ...params,
+        offset: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch posts');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      const { posts, meta } = lastPage;
+      const nextOffset = meta.offset + posts.length;
+      // ถ้ายังมีข้อมูลเหลืออยู่ ให้ return offset ถัดไป
+      return nextOffset < meta.total ? nextOffset : undefined;
+    },
+    initialPageParam: 0,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+/**
+ * Infinite scroll สำหรับ personalized feed
+ */
+export function useInfiniteFeed(params?: Omit<GetPostsParams, 'offset'>) {
+  return useInfiniteQuery({
+    queryKey: [...postKeys.feed(), 'infinite', params] as const,
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await postService.getFeed({
+        ...params,
+        offset: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch feed');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      const { posts, meta } = lastPage;
+      const nextOffset = meta.offset + posts.length;
+      return nextOffset < meta.total ? nextOffset : undefined;
+    },
+    initialPageParam: 0,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+/**
+ * Infinite scroll สำหรับโพสต์ของ user
+ */
+export function useInfiniteUserPosts(
+  userId: string,
+  params?: Omit<GetPostsParams, 'offset'>,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    queryKey: [...postKeys.byAuthor(userId), 'infinite', params] as const,
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await postService.getByAuthor(userId, {
+        ...params,
+        offset: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch user posts');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      const { posts, meta } = lastPage;
+      const nextOffset = meta.offset + posts.length;
+      return nextOffset < meta.total ? nextOffset : undefined;
+    },
+    initialPageParam: 0,
+    enabled: options?.enabled !== undefined ? options.enabled : !!userId,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+/**
+ * Infinite scroll สำหรับโพสต์ที่มี tag ระบุ (by tag ID)
+ */
+export function useInfinitePostsByTagId(
+  tagId: string,
+  params?: Omit<GetPostsParams, 'offset'>,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    queryKey: [...postKeys.byTagId(tagId), 'infinite', params] as const,
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await postService.getByTagId(tagId, {
+        ...params,
+        offset: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch posts by tag');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      const { posts, meta } = lastPage;
+      const nextOffset = meta.offset + posts.length;
+      return nextOffset < meta.total ? nextOffset : undefined;
+    },
+    initialPageParam: 0,
+    enabled: options?.enabled !== undefined ? options.enabled : !!tagId,
+    staleTime: 2 * 60 * 1000,
   });
 }
 

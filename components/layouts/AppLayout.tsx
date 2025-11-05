@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -20,6 +21,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useUnreadNotificationCount } from "@/lib/hooks/queries/useNotifications";
+import { useProfile } from "@/lib/hooks/queries/useUsers";
+import { useAuthStore } from "@/lib/stores/authStore";
+import { useWebSocket } from "@/lib/hooks/useWebSocket";
 
 interface BreadcrumbItem {
   label: string;
@@ -32,8 +36,23 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
+  const setUser = useAuthStore((state) => state.setUser);
+
+  // Connect WebSocket for real-time notifications
+  useWebSocket();
+
   // Fetch unread notification count
   const { data: unreadCount = 0, error, isLoading } = useUnreadNotificationCount();
+
+  // Fetch profile และ sync ไปยัง Zustand store
+  const { data: profileData } = useProfile();
+
+  // Sync profile data ไปยัง Zustand เมื่อได้ข้อมูลใหม่
+  useEffect(() => {
+    if (profileData) {
+      setUser(profileData);
+    }
+  }, [profileData, setUser]);
 
   // Debug
   if (process.env.NODE_ENV === 'development') {

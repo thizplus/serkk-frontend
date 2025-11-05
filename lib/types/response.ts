@@ -48,6 +48,8 @@ export type GoogleOAuthCallbackResponse = ApiResponse<{
  */
 export type GetProfileResponse = ApiResponse<User>;
 
+export type GetUserProfileResponse = ApiResponse<UserWithFollowStatus>;
+
 export type UpdateProfileResponse = ApiResponse<User>;
 
 export type DeleteUserResponse = ApiResponse<null>;

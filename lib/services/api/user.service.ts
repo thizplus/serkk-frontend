@@ -8,6 +8,7 @@ import { API } from '@/lib/constants/api';
 import type { UpdateProfileRequest } from '@/lib/types/request';
 import type {
   GetProfileResponse,
+  GetUserProfileResponse,
   UpdateProfileResponse,
   DeleteUserResponse,
   ListUsersResponse,
@@ -51,6 +52,15 @@ const userService = {
    */
   listUsers: async (params?: PaginationParams): Promise<ListUsersResponse> => {
     return apiService.get<ListUsersResponse>(API.USER.LIST, params);
+  },
+
+  /**
+   * ดึงข้อมูล profile ของผู้ใช้อื่น (Public API)
+   * @param username - username ของผู้ใช้ที่ต้องการดู
+   * @returns Promise<GetUserProfileResponse> - รวม isFollowing ถ้า login อยู่
+   */
+  getUserProfile: async (username: string): Promise<GetUserProfileResponse> => {
+    return apiService.get<GetUserProfileResponse>(API.PROFILE.GET_BY_USERNAME(username));
   },
 };
 

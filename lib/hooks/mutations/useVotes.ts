@@ -89,10 +89,38 @@ export function useVote() {
       // Component จะจัดการ optimistic UI เอง
     },
     onSuccess: (data, variables) => {
-      // Invalidate posts เพื่อ update vote count
-      queryClient.invalidateQueries({
-        queryKey: ['posts']
-      });
+      // Update posts ใน cache โดยตรง (ไม่ invalidate เพื่อไม่ให้ลำดับขยับ)
+      if (variables.targetType === 'post') {
+        queryClient.setQueriesData(
+          { queryKey: ['posts'] },
+          (oldData: any) => {
+            if (!oldData || !Array.isArray(oldData)) return oldData;
+
+            return oldData.map((post) => {
+              if (post.id !== variables.targetId) return post;
+
+              const voteChange = variables.voteType === 'up' ? 1 : -1;
+              const previousVote = post.userVote;
+              let newVotes = post.votes;
+
+              // คำนวณ votes ใหม่
+              if (previousVote === 'up') {
+                newVotes = newVotes - 1 + voteChange; // ยกเลิก +1 เดิม แล้วบวกใหม่
+              } else if (previousVote === 'down') {
+                newVotes = newVotes + 1 + voteChange; // ยกเลิก -1 เดิม แล้วบวกใหม่
+              } else {
+                newVotes = newVotes + voteChange; // ยังไม่เคย vote
+              }
+
+              return {
+                ...post,
+                votes: newVotes,
+                userVote: variables.voteType,
+              };
+            });
+          }
+        );
+      }
 
       // ไม่ต้อง invalidate comments เพื่อไม่ให้เรียงลำดับใหม่ทันที
       // แค่ update cache โดยตรง
@@ -145,13 +173,13 @@ export function useVote() {
           : 'ไม่สามารถโหวตได้ กรุณาลองใหม่อีกครั้ง'
       );
 
-      // Invalidate เพื่อ refetch ข้อมูลจริง
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-
-      // ไม่ invalidate comments เพื่อไม่ให้เรียงลำดับใหม่
-      // แต่ถ้า error จริงๆ ให้ refetch เงียบๆ ในภายหลัง
+      // Refetch เงียบๆ ในภายหลัง (ไม่ทำทันทีเพื่อไม่ให้ลำดับขยับ)
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['comments'] });
+        if (variables.targetType === 'post') {
+          queryClient.refetchQueries({ queryKey: ['posts'] });
+        } else {
+          queryClient.refetchQueries({ queryKey: ['comments'] });
+        }
       }, 5000); // refetch หลัง 5 วินาที
     },
   });
@@ -185,8 +213,35 @@ export function useUnvote() {
       await queryClient.cancelQueries({ queryKey: ['comments'] });
     },
     onSuccess: (data, variables) => {
-      // Invalidate posts เพื่อ update vote count
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      // Update posts ใน cache โดยตรง (ไม่ invalidate เพื่อไม่ให้ลำดับขยับ)
+      if (variables.targetType === 'post') {
+        queryClient.setQueriesData(
+          { queryKey: ['posts'] },
+          (oldData: any) => {
+            if (!oldData || !Array.isArray(oldData)) return oldData;
+
+            return oldData.map((post) => {
+              if (post.id !== variables.targetId) return post;
+
+              const previousVote = post.userVote;
+              let newVotes = post.votes;
+
+              // คำนวณ votes ใหม่เมื่อยกเลิก vote
+              if (previousVote === 'up') {
+                newVotes = newVotes - 1; // ยกเลิก +1
+              } else if (previousVote === 'down') {
+                newVotes = newVotes + 1; // ยกเลิก -1
+              }
+
+              return {
+                ...post,
+                votes: newVotes,
+                userVote: null,
+              };
+            });
+          }
+        );
+      }
 
       // ไม่ต้อง invalidate comments เพื่อไม่ให้เรียงลำดับใหม่ทันที
       // แค่ update cache โดยตรง
@@ -225,20 +280,20 @@ export function useUnvote() {
         queryKey: voteKeys.count(variables.targetType, variables.targetId)
       });
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       toast.error(
         error instanceof Error
           ? error.message
           : 'ไม่สามารถยกเลิกโหวตได้'
       );
 
-      // Invalidate เพื่อ refetch ข้อมูลจริง
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-
-      // ไม่ invalidate comments เพื่อไม่ให้เรียงลำดับใหม่
-      // แต่ถ้า error จริงๆ ให้ refetch เงียบๆ ในภายหลัง
+      // Refetch เงียบๆ ในภายหลัง (ไม่ทำทันทีเพื่อไม่ให้ลำดับขยับ)
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['comments'] });
+        if (variables.targetType === 'post') {
+          queryClient.refetchQueries({ queryKey: ['posts'] });
+        } else {
+          queryClient.refetchQueries({ queryKey: ['comments'] });
+        }
       }, 5000); // refetch หลัง 5 วินาที
     },
   });

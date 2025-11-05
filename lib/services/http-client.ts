@@ -5,6 +5,7 @@
 
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { API_BASE_URL } from '@/lib/constants/api';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 // ============================================================================
 // AXIOS INSTANCE
@@ -23,16 +24,23 @@ const apiClient: AxiosInstance = axios.create({
 
 // ============================================================================
 // TOKEN MANAGEMENT
-// TODO: Migrate to Zustand store for better state management
 // ============================================================================
 
 const TOKEN_KEY = 'auth_token';
 
 /**
- * ดึง token จาก localStorage
+ * ดึง token จาก Zustand store (primary) หรือ localStorage (fallback)
  */
 const getToken = (): string | null => {
   if (typeof window === 'undefined') return null;
+
+  // Try to get from Zustand store first (more reliable after hydration)
+  const zustandToken = useAuthStore.getState().token;
+  if (zustandToken) {
+    return zustandToken;
+  }
+
+  // Fallback to localStorage
   return localStorage.getItem(TOKEN_KEY);
 };
 
@@ -63,17 +71,18 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
 
-    // Debug logging (remove in production)
+    // Debug logging (only in development)
     if (process.env.NODE_ENV === 'development') {
       console.log('🔑 API Request:', config.method?.toUpperCase(), config.url);
+
+      if (!token) {
+        console.warn('⚠️ NO TOKEN - Request will be unauthenticated');
+      }
     }
 
+    // Add Authorization header if token exists
     if (token && config.headers) {
       config.headers['Authorization'] = `Bearer ${token}`;
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Authorization header added');
-      }
     }
 
     return config;

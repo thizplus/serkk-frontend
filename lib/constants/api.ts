@@ -31,6 +31,15 @@ export const USER_API = {
 };
 
 // ============================================================================
+// USER PROFILES (Public)
+// ============================================================================
+
+export const PROFILE_API = {
+  // Public profile endpoints
+  GET_BY_USERNAME: (username: string) => `/profiles/${username}`,  // GET /api/v1/profiles/:username
+};
+
+// ============================================================================
 // POSTS
 // ============================================================================
 
@@ -45,6 +54,7 @@ export const POST_API = {
   // Post queries
   BY_AUTHOR: (userId: string) => `/posts/author/${userId}`,     // GET /api/v1/posts/author/:userId
   BY_TAG: (tagName: string) => `/posts/tag/${tagName}`,        // GET /api/v1/posts/tag/:tagName
+  BY_TAG_ID: (tagId: string) => `/posts/tag-id/${tagId}`,      // GET /api/v1/posts/tag-id/:tagId
   SEARCH: '/posts/search',                         // GET /api/v1/posts/search
   FEED: '/posts/feed',                             // GET /api/v1/posts/feed
 
@@ -193,6 +203,7 @@ export const API = {
 
   // User Management
   USER: USER_API,
+  PROFILE: PROFILE_API,
 
   // Content
   POST: POST_API,

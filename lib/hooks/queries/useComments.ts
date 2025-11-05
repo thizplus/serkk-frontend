@@ -67,6 +67,27 @@ export function useCommentTree(postId: string, params?: { maxDepth?: number }) {
   });
 }
 
+/**
+ * Hook สำหรับดึงความคิดเห็นทั้งหมดของผู้ใช้
+ *
+ * @param userId - ID ของผู้ใช้
+ * @param params - พารามิเตอร์ (offset, limit)
+ */
+export function useCommentsByAuthor(userId: string, params?: GetCommentsParams) {
+  return useQuery({
+    queryKey: [...commentKeys.all, 'author', userId, params] as const,
+    queryFn: async () => {
+      const response = await commentService.getByAuthor(userId, params);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to fetch user comments');
+      }
+      return response.data.comments || [];
+    },
+    enabled: !!userId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
 // ============================================================================
 // MUTATION: CREATE COMMENT
 // ============================================================================

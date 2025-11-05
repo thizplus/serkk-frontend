@@ -2,50 +2,118 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import { toast } from "sonner";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PostFeed } from "@/components/post/PostFeed";
+import { InfinitePostFeed } from "@/components/post/InfinitePostFeed";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   MapPin,
   Globe,
   Edit,
   UserPlus,
+  UserMinus,
   TrendingUp,
   MessageSquare,
   FileText
 } from "lucide-react";
 import { useUser, useHasHydrated } from "@/lib/stores/authStore";
-import { useUserPosts } from "@/lib/hooks/queries/usePosts";
+import { useInfiniteUserPosts } from "@/lib/hooks/queries/usePosts";
+import { useCommentsByAuthor } from "@/lib/hooks/queries/useComments";
+import { useUserProfile } from "@/lib/hooks/queries/useUsers";
+import { useToggleFollow } from "@/lib/hooks/mutations/useFollow";
+import { ProfileCommentCard } from "@/components/comment/ProfileCommentCard";
 
 export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const username = params.username as string;
   const currentUser = useUser(); // ใช้ Zustand
   const hasHydrated = useHasHydrated(); // ใช้ Zustand
-  const [activeTab, setActiveTab] = useState("posts");
 
-  // Check if this is the user's own profile
+  // อ่าน tab จาก URL query params (?tab=posts หรือ ?tab=comments)
+  const tabFromUrl = searchParams.get('tab') || 'posts';
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
+
+  // Sync activeTab with URL when URL changes (back/forward navigation)
+  useEffect(() => {
+    setActiveTab(tabFromUrl);
+  }, [tabFromUrl]);
+
+  // ✅ Refetch profile ของตัวเองเมื่อเข้าหน้าโปรไฟล์
   const isOwnProfile = currentUser?.username === username;
-  const profileUser = isOwnProfile ? currentUser : null;
+  useEffect(() => {
+    if (isOwnProfile && hasHydrated) {
+      // Invalidate profile query เพื่อให้ refetch ข้อมูลล่าสุด
+      queryClient.invalidateQueries({
+        queryKey: ['users', 'profile']
+      });
+    }
+  }, [isOwnProfile, hasHydrated, queryClient]);
 
-  // Fetch user's posts using React Query hook
+  // Function to change tab and update URL
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    // Update URL without page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', newTab);
+    router.push(url.pathname + url.search, { scroll: false });
+  };
+
+  // Fetch user profile (for viewing other user's profile)
+  // เรียก hook เสมอ แต่ใช้ enabled เพื่อควบคุมการ fetch
   const {
-    data: userPosts = [],
-    isLoading: isLoadingPosts,
-    error,
-  } = useUserPosts(currentUser?.id || '', {
-    // Only fetch if user is logged in and viewing own profile
-    enabled: !!currentUser && isOwnProfile,
+    data: otherUserProfile,
+    isLoading: isLoadingOtherProfile,
+    error: errorOtherProfile,
+  } = useUserProfile(username, {
+    enabled: !isOwnProfile && hasHydrated && !!username, // Fetch เฉพาะเมื่อไม่ใช่โปรไฟล์ตัวเอง
   });
 
-  // Loading state - แสดงเหมือนกันทั้ง server และ client
-  if (!hasHydrated) {
+  // Use appropriate profile data
+  const profileUser = isOwnProfile ? currentUser : otherUserProfile;
+
+  // Fetch user's posts using infinite scroll
+  const {
+    data: postsData,
+    isLoading: isLoadingPosts,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteUserPosts(profileUser?.id || '', {
+    limit: 20,
+  }, {
+    enabled: !!profileUser?.id,
+  });
+
+  // Flatten posts from all pages
+  const userPosts = useMemo(() => {
+    return postsData?.pages.flatMap((page) => page.posts) ?? [];
+  }, [postsData]);
+
+  // Fetch user's comments using React Query hook
+  const {
+    data: userComments = [],
+    isLoading: isLoadingComments,
+    error: commentsError,
+  } = useCommentsByAuthor(profileUser?.id || '', {
+    // Fetch comments for the profile being viewed
+    limit: 20,
+  });
+
+  // Follow/Unfollow functionality (ต้องเรียกก่อน early returns)
+  const { handleToggleFollow, isLoading: isFollowLoading } = useToggleFollow();
+
+  // Loading state
+  if (!hasHydrated || isLoadingOtherProfile) {
     return (
       <AppLayout
         breadcrumbs={[
@@ -55,14 +123,14 @@ export default function ProfilePage() {
       >
         <div className="text-center py-16">
           <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 mb-4"></div>
-          <p className="text-muted-foreground">กำลังโหลดข้อมูล...</p>
+          <p className="text-muted-foreground">กำลังโหลดโปรไฟล์...</p>
         </div>
       </AppLayout>
     );
   }
 
-  // Not own profile - feature not supported yet
-  if (!isOwnProfile) {
+  // Error loading other user profile
+  if (errorOtherProfile) {
     return (
       <AppLayout
         breadcrumbs={[
@@ -71,9 +139,9 @@ export default function ProfilePage() {
         ]}
       >
         <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-2">ฟีเจอร์ยังไม่พร้อมใช้งาน</h2>
+          <h2 className="text-2xl font-bold mb-2">ไม่พบโปรไฟล์</h2>
           <p className="text-muted-foreground mb-6">
-            ขณะนี้ยังไม่รองรับการดูโปรไฟล์ของผู้ใช้อื่น
+            {errorOtherProfile instanceof Error ? errorOtherProfile.message : 'ไม่พบผู้ใช้ที่ต้องการ'}
           </p>
           <Button onClick={() => router.push("/")}>
             กลับหน้าหลัก
@@ -83,7 +151,7 @@ export default function ProfilePage() {
     );
   }
 
-  // No user data (not logged in)
+  // No user data
   if (!profileUser) {
     return (
       <AppLayout
@@ -93,22 +161,29 @@ export default function ProfilePage() {
         ]}
       >
         <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-2">กรุณาเข้าสู่ระบบ</h2>
+          <h2 className="text-2xl font-bold mb-2">ไม่พบโปรไฟล์</h2>
           <p className="text-muted-foreground mb-6">
-            คุณต้องเข้าสู่ระบบเพื่อดูโปรไฟล์
+            ไม่พบข้อมูลผู้ใช้
           </p>
-          <Button onClick={() => router.push("/login")}>
-            เข้าสู่ระบบ
+          <Button onClick={() => router.push("/")}>
+            กลับหน้าหลัก
           </Button>
         </div>
       </AppLayout>
     );
   }
 
-
   const handleFollow = () => {
-    console.log(`Follow user ${username}`);
-    // TODO: Implement follow functionality
+    if (!currentUser) {
+      toast.error('กรุณาเข้าสู่ระบบก่อนติดตามผู้ใช้');
+      router.push('/login');
+      return;
+    }
+
+    if (profileUser && 'isFollowing' in profileUser) {
+      const isFollowing = profileUser.isFollowing === true;
+      handleToggleFollow(profileUser.id, isFollowing);
+    }
   };
 
   return (
@@ -160,9 +235,23 @@ export default function ProfilePage() {
                       แก้ไขโปรไฟล์
                     </Button>
                   ) : (
-                    <Button onClick={handleFollow} size="sm">
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      ติดตาม
+                    <Button
+                      onClick={handleFollow}
+                      size="sm"
+                      variant={'isFollowing' in profileUser && profileUser.isFollowing ? "outline" : "default"}
+                      disabled={isFollowLoading}
+                    >
+                      {'isFollowing' in profileUser && profileUser.isFollowing ? (
+                        <>
+                          <UserMinus className="mr-2 h-4 w-4" />
+                          เลิกติดตาม
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          ติดตาม
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
@@ -203,11 +292,17 @@ export default function ProfilePage() {
                   <span className="font-bold">{profileUser.karma?.toLocaleString() || 0}</span>
                   <span className="text-muted-foreground">Karma</span>
                 </div>
-                <button className="flex items-center gap-1 hover:underline">
+                <button
+                  className="flex items-center gap-1 hover:underline"
+                  onClick={() => router.push(`/profile/${profileUser.username}/followers`)}
+                >
                   <span className="font-bold">{profileUser.followersCount?.toLocaleString() || 0}</span>
                   <span className="text-muted-foreground">ผู้ติดตาม</span>
                 </button>
-                <button className="flex items-center gap-1 hover:underline">
+                <button
+                  className="flex items-center gap-1 hover:underline"
+                  onClick={() => router.push(`/profile/${profileUser.username}/following`)}
+                >
                   <span className="font-bold">{profileUser.followingCount?.toLocaleString() || 0}</span>
                   <span className="text-muted-foreground">ติดตาม</span>
                 </button>
@@ -216,7 +311,7 @@ export default function ProfilePage() {
           </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="posts" className="gap-2">
               <FileText size={16} />
@@ -224,49 +319,53 @@ export default function ProfilePage() {
             </TabsTrigger>
             <TabsTrigger value="comments" className="gap-2">
               <MessageSquare size={16} />
-              คอมเมนต์
+              คอมเมนต์ ({userComments.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts" className="mt-6">
-            {isLoadingPosts ? (
+            <InfinitePostFeed
+              posts={userPosts}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              fetchNextPage={fetchNextPage}
+              isLoading={isLoadingPosts}
+              error={error || null}
+            />
+          </TabsContent>
+
+          <TabsContent value="comments" className="mt-6">
+            {isLoadingComments ? (
               <Card>
                 <CardContent className="py-16 text-center">
                   <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 mb-4"></div>
-                  <p className="text-muted-foreground">กำลังโหลดโพสต์...</p>
+                  <p className="text-muted-foreground">กำลังโหลดคอมเมนต์...</p>
                 </CardContent>
               </Card>
-            ) : error ? (
+            ) : commentsError ? (
               <Card>
                 <CardContent className="py-16 text-center">
                   <p className="text-lg text-destructive">
-                    {error instanceof Error ? error.message : 'ไม่สามารถโหลดโพสต์ได้'}
+                    {commentsError instanceof Error ? commentsError.message : 'ไม่สามารถโหลดคอมเมนต์ได้'}
                   </p>
                 </CardContent>
               </Card>
-            ) : userPosts.length > 0 ? (
-              <PostFeed posts={userPosts} />
+            ) : userComments.length > 0 ? (
+              <div className="space-y-3">
+                {userComments.map((comment) => (
+                  <ProfileCommentCard key={comment.id} comment={comment} />
+                ))}
+              </div>
             ) : (
               <Card>
                 <CardContent className="py-16 text-center">
-                  <FileText className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
+                  <MessageSquare className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
                   <p className="text-lg text-muted-foreground">
-                    {isOwnProfile ? "คุณยังไม่มีโพสต์" : "ผู้ใช้ยังไม่มีโพสต์"}
+                    {isOwnProfile ? "คุณยังไม่มีคอมเมนต์" : "ผู้ใช้ยังไม่มีคอมเมนต์"}
                   </p>
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
-
-          <TabsContent value="comments" className="mt-6">
-            <Card>
-              <CardContent className="py-16 text-center">
-                <MessageSquare className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-                <p className="text-lg text-muted-foreground">
-                  ยังไม่มีคอมเมนต์
-                </p>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </div>
