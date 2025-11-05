@@ -18,6 +18,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useUnreadNotificationCount } from "@/lib/hooks/queries/useNotifications";
 
 interface BreadcrumbItem {
@@ -74,20 +75,23 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
             )}
           </div>
 
-          {/* Notification Bell Icon */}
-          <Link href="/notifications">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              {!isLoading && unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                  {unreadCount > 9 ? '9+' : unreadCount}
+          {/* Actions: Theme Toggle & Notification */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/notifications">
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {!isLoading && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+                <span className="sr-only">
+                  การแจ้งเตือน {unreadCount > 0 ? `(${unreadCount} ข้อความใหม่)` : ''}
                 </span>
-              )}
-              <span className="sr-only">
-                การแจ้งเตือน {unreadCount > 0 ? `(${unreadCount} ข้อความใหม่)` : ''}
-              </span>
-            </Button>
-          </Link>
+              </Button>
+            </Link>
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-4">
           <div className="w-full max-w-xl mx-auto px-0">
