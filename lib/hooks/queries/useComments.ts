@@ -1,0 +1,198 @@
+// ============================================================================
+// Comment Queries
+// React Query hooks สำหรับ Comments
+// ============================================================================
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import commentService from '@/lib/services/api/comment.service';
+import type {
+  CreateCommentRequest,
+  UpdateCommentRequest,
+  GetCommentsParams
+} from '@/lib/types/request';
+
+// ============================================================================
+// QUERY KEYS
+// ============================================================================
+
+export const commentKeys = {
+  all: ['comments'] as const,
+  lists: () => [...commentKeys.all, 'list'] as const,
+  list: (postId: string, params?: GetCommentsParams) =>
+    [...commentKeys.lists(), postId, params] as const,
+  details: () => [...commentKeys.all, 'detail'] as const,
+  detail: (id: string) => [...commentKeys.details(), id] as const,
+  tree: (postId: string) => [...commentKeys.all, 'tree', postId] as const,
+};
+
+// ============================================================================
+// QUERY: GET COMMENTS
+// ============================================================================
+
+/**
+ * Hook สำหรับดึงความคิดเห็นของโพสต์
+ *
+ * @param postId - ID ของโพสต์
+ * @param params - พารามิเตอร์ (sortBy, offset, limit)
+ */
+export function useComments(postId: string, params?: GetCommentsParams) {
+  return useQuery({
+    queryKey: commentKeys.list(postId, params),
+    queryFn: async () => {
+      const response = await commentService.getByPostId(postId, params);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to fetch comments');
+      }
+      return response.data.comments || [];
+    },
+    enabled: !!postId,
+  });
+}
+
+/**
+ * Hook สำหรับดึง comment tree แบบ nested ของทั้ง post
+ */
+export function useCommentTree(postId: string, params?: { maxDepth?: number }) {
+  return useQuery({
+    queryKey: commentKeys.tree(postId),
+    queryFn: async () => {
+      const response = await commentService.getPostTree(postId, params);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to fetch comment tree');
+      }
+      return response.data.comments || [];
+    },
+    enabled: !!postId,
+  });
+}
+
+// ============================================================================
+// MUTATION: CREATE COMMENT
+// ============================================================================
+
+/**
+ * Hook สำหรับสร้างความคิดเห็นใหม่
+ */
+export function useCreateComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateCommentRequest) => {
+      const response = await commentService.create(data);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to create comment');
+      }
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate ALL comment queries to refresh everything
+      queryClient.invalidateQueries({
+        queryKey: commentKeys.all
+      });
+      // Invalidate post to update comment count
+      queryClient.invalidateQueries({
+        queryKey: ['posts']
+      });
+
+      toast.success('เพิ่มความคิดเห็นสำเร็จ!');
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'ไม่สามารถเพิ่มความคิดเห็นได้'
+      );
+    },
+  });
+}
+
+// ============================================================================
+// MUTATION: UPDATE COMMENT
+// ============================================================================
+
+/**
+ * Hook สำหรับแก้ไขความคิดเห็น
+ */
+export function useUpdateComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data
+    }: {
+      id: string;
+      data: UpdateCommentRequest
+    }) => {
+      const response = await commentService.update(id, data);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to update comment');
+      }
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // Update comment in cache
+      queryClient.setQueryData(commentKeys.detail(data.id), data);
+
+      // Invalidate ALL comment queries to refresh everything
+      queryClient.invalidateQueries({
+        queryKey: commentKeys.all
+      });
+
+      toast.success('แก้ไขความคิดเห็นสำเร็จ!');
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'ไม่สามารถแก้ไขความคิดเห็นได้'
+      );
+    },
+  });
+}
+
+// ============================================================================
+// MUTATION: DELETE COMMENT
+// ============================================================================
+
+/**
+ * Hook สำหรับลบความคิดเห็น
+ */
+export function useDeleteComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await commentService.delete(id);
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to delete comment');
+      }
+      return id;
+    },
+    onSuccess: (id) => {
+      // Remove from cache
+      queryClient.removeQueries({
+        queryKey: commentKeys.detail(id)
+      });
+
+      // Invalidate ALL comment queries (lists, trees, etc.)
+      queryClient.invalidateQueries({
+        queryKey: commentKeys.all
+      });
+      // Invalidate post to update comment count
+      queryClient.invalidateQueries({
+        queryKey: ['posts']
+      });
+
+      toast.success('ลบความคิดเห็นสำเร็จ!');
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'ไม่สามารถลบความคิดเห็นได้'
+      );
+    },
+  });
+}
