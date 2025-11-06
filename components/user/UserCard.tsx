@@ -45,7 +45,7 @@ export function UserCard({ user, showFollowButton = true }: UserCardProps) {
             onClick={() => router.push(`/profile/${user.username}`)}
           >
             {/* Avatar */}
-            <div className="relative flex-shrink-0">
+            <div className="relative shrink-0">
               <Image
                 src={user.avatar || "/logo.png"}
                 alt={user.displayName}
@@ -84,7 +84,7 @@ export function UserCard({ user, showFollowButton = true }: UserCardProps) {
               size="sm"
               variant={user.isFollowing ? "outline" : "default"}
               disabled={isFollowLoading}
-              className="flex-shrink-0"
+              className="shrink-0"
             >
               {user.isFollowing ? (
                 <>

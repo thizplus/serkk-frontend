@@ -80,7 +80,7 @@ export function CommentForm({
       {/* Comment input */}
       <div className="flex gap-3">
         {/* User avatar */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Image
             src={currentUser?.avatar || "/logo.png"}
             alt={currentUser?.displayName || "Your avatar"}

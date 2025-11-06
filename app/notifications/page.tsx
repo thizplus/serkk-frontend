@@ -285,7 +285,7 @@ export default function NotificationsPage() {
                       <CardContent className="p-4">
                         <div className="flex gap-3">
                           {/* Icon */}
-                          <div className="flex-shrink-0 mt-1">
+                          <div className="shrink-0 mt-1">
                             {getNotificationIcon(notification.type)}
                           </div>
 
@@ -299,7 +299,7 @@ export default function NotificationsPage() {
                                   alt={(notification.sender?.displayName || notification.actor?.displayName || notification.user?.displayName) || "User"}
                                   width={40}
                                   height={40}
-                                  className="rounded-full flex-shrink-0 border-2 border-background shadow-sm max-h-10 object-cover "
+                                  className="rounded-full shrink-0 border-2 border-background shadow-sm max-h-10 object-cover "
                                 />
                               )}
                               <div className="flex-1 min-w-0">
@@ -339,7 +339,7 @@ export default function NotificationsPage() {
                           </div>
 
                           {/* Actions */}
-                          <div className="flex items-start gap-1 flex-shrink-0">
+                          <div className="flex items-start gap-1 shrink-0">
                             {!notification.isRead && (
                               <button
                                 onClick={(e) => handleMarkAsReadClick(notification.id, e)}

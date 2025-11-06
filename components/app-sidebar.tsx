@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   Home,
@@ -15,16 +14,15 @@ import {
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { AppLogo } from "@/components/ui/app-logo"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
@@ -91,30 +89,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
   return (
     <Sidebar variant="inset" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="px-4 py-3 border-b">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="p-0 hover:bg-transparent active:bg-transparent">
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Image
-                    src="/logo.png"
-                    alt="Logo"
-                    width={36}
-                    height={36}
-                    className="rounded-lg"
-                  />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {process.env.NEXT_PUBLIC_APP_NAME}
-                  </span>
-                  <span className="truncate text-xs">
-                    {process.env.NEXT_PUBLIC_APP_PLAN}
-                  </span>
-                </div>
-              </a>
-            </SidebarMenuButton>
+            <AppLogo size="lg" showPlan={true} />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

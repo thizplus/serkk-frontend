@@ -121,7 +121,7 @@ export function CommentCard({
             {hasReplies && (
               <button
                 onClick={() => onToggleCollapse?.(comment.id)}
-                className="flex-shrink-0 hover:bg-accent rounded p-0.5 transition-colors"
+                className="shrink-0 hover:bg-accent rounded p-0.5 transition-colors"
               >
                 {isCollapsed ? (
                   <ChevronRight size={16} className="text-muted-foreground" />

@@ -28,7 +28,7 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
       <CardContent className="py-0">
         {/* Post Title with Link */}
         <div className="flex items-start gap-2 mb-3">
-          <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <Link
               href={`/post/${comment.postId}`}

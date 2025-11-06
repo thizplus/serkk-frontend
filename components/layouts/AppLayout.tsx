@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AppLogo } from "@/components/ui/app-logo";
+import { MobileBottomNav } from "@/components/layouts/MobileBottomNav";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -60,64 +62,77 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            {breadcrumbs && breadcrumbs.length > 0 && (
-              <Breadcrumb>
-                <BreadcrumbList>
-                  {breadcrumbs.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      {index > 0 && (
-                        <BreadcrumbSeparator className="hidden md:block" />
-                      )}
-                      <BreadcrumbItem className="hidden md:block">
-                        {item.href ? (
-                          <BreadcrumbLink href={item.href}>
-                            {item.label}
-                          </BreadcrumbLink>
-                        ) : (
-                          <BreadcrumbPage>{item.label}</BreadcrumbPage>
+    <>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <Separator
+                orientation="vertical"
+                className="mr-2 data-[orientation=vertical]:h-4"
+              />
+              {/* Mobile: แสดง AppLogo */}
+              <AppLogo
+                size="sm"
+                showPlan={true}
+                className="md:hidden"
+              />
+              {/* Desktop: แสดง Breadcrumb */}
+              {breadcrumbs && breadcrumbs.length > 0 && (
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    {breadcrumbs.map((item, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        {index > 0 && (
+                          <BreadcrumbSeparator className="hidden md:block" />
                         )}
-                      </BreadcrumbItem>
-                    </div>
-                  ))}
-                </BreadcrumbList>
-              </Breadcrumb>
-            )}
-          </div>
+                        <BreadcrumbItem className="hidden md:block">
+                          {item.href ? (
+                            <BreadcrumbLink href={item.href}>
+                              {item.label}
+                            </BreadcrumbLink>
+                          ) : (
+                            <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                          )}
+                        </BreadcrumbItem>
+                      </div>
+                    ))}
+                  </BreadcrumbList>
+                </Breadcrumb>
+              )}
+            </div>
 
-          {/* Actions: Theme Toggle & Notification */}
-          <div className="flex items-center">
-            <ThemeToggle />
-            <Link href="/notifications">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {!isLoading && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+            {/* Actions: Theme Toggle & Notification */}
+            <div className="flex items-center">
+              <ThemeToggle />
+              <Link href="/notifications">
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {!isLoading && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                  <span className="sr-only">
+                    การแจ้งเตือน {unreadCount > 0 ? `(${unreadCount} ข้อความใหม่)` : ''}
                   </span>
-                )}
-                <span className="sr-only">
-                  การแจ้งเตือน {unreadCount > 0 ? `(${unreadCount} ข้อความใหม่)` : ''}
-                </span>
-              </Button>
-            </Link>
+                </Button>
+              </Link>
+            </div>
+          </header>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-4 pb-20 md:pb-4">
+            {/* pb-20 (80px) บน mobile เพื่อไม่ให้ content ถูกบังโดย bottom nav */}
+            <div className="w-full max-w-xl mx-auto px-0">
+              {children}
+            </div>
           </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-4">
-          <div className="w-full max-w-xl mx-auto px-0">
-            {children}
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+
+      {/* Mobile Bottom Navigation - แสดงเฉพาะ mobile */}
+      <MobileBottomNav />
+    </>
   );
 }
