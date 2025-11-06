@@ -89,7 +89,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
   return (
     <Sidebar variant="inset" {...props}>
-      <SidebarHeader className="px-4 py-3 border-b">
+      <SidebarHeader className="px-4 py-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <AppLogo size="lg" showPlan={true} />

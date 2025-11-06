@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AppLogo } from "@/components/ui/app-logo";
 import { MobileBottomNav } from "@/components/layouts/MobileBottomNav";
 import { UpdatePromptAuto } from "@/components/pwa/UpdatePromptAuto";
+import { PWAInstallButton } from "@/components/pwa/PWAInstallButton";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -105,8 +106,9 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
               )}
             </div>
 
-            {/* Actions: Theme Toggle & Notification */}
-            <div className="flex items-center">
+            {/* Actions: Install PWA, Theme Toggle & Notification */}
+            <div className="flex items-center gap-1">
+              <PWAInstallButton />
               <ThemeToggle />
               <Link href="/notifications">
                 <Button variant="ghost" size="icon" className="relative">
