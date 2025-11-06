@@ -22,7 +22,7 @@ console.log('%c⚡ Runtime Cache: ' + RUNTIME_CACHE, 'font-size: 12px; color: #f
 const PRECACHE_ASSETS = [
   '/',
   '/logo.png',
-  '/manifest.json',
+  // Note: /manifest.json is now a dynamic route, not cached
 ];
 
 // Install event - cache essential assets

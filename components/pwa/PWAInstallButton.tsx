@@ -41,12 +41,31 @@ export function PWAInstallButton() {
     console.log("🔍 [PWA Install] Component mounted, checking status...");
     console.log("🌐 [PWA Install] Current URL:", window.location.href);
 
-    // ตรวจสอบว่าติดตั้ง PWA แล้วหรือยัง
-    const checkIfInstalled = () => {
+    // 🎯 Hybrid Detection: 3-Layer Check
+    const checkIfInstalled = async () => {
+      // === Layer 1: getInstalledRelatedApps() API (Chrome/Edge) ===
+      if ('getInstalledRelatedApps' in navigator) {
+        try {
+          const relatedApps = await (navigator as any).getInstalledRelatedApps();
+          if (relatedApps && relatedApps.length > 0) {
+            console.log("✅ [PWA Install] Detected via getInstalledRelatedApps():", relatedApps);
+            setIsInstalled(true);
+            return true;
+          }
+        } catch (error) {
+          console.log("⚠️ [PWA Install] getInstalledRelatedApps() failed:", error);
+        }
+      }
+
+      // === Layer 2: Standalone Mode Detection (All browsers) ===
       // Check if running in standalone mode (installed)
       if (window.matchMedia("(display-mode: standalone)").matches) {
         console.log("✅ [PWA Install] Already installed (standalone mode)");
         setIsInstalled(true);
+        // Set localStorage flag for future checks
+        try {
+          localStorage.setItem("pwa-installed", "true");
+        } catch (e) {}
         return true;
       }
 
@@ -54,10 +73,26 @@ export function PWAInstallButton() {
       if ((window.navigator as any).standalone === true) {
         console.log("✅ [PWA Install] Already installed (iOS standalone)");
         setIsInstalled(true);
+        // Set localStorage flag for future checks
+        try {
+          localStorage.setItem("pwa-installed", "true");
+        } catch (e) {}
         return true;
       }
 
-      console.log("ℹ️ [PWA Install] Not installed yet");
+      // === Layer 3: localStorage Flag (Fallback) ===
+      try {
+        const installedFlag = localStorage.getItem("pwa-installed");
+        if (installedFlag === "true") {
+          console.log("✅ [PWA Install] Already installed (localStorage flag)");
+          setIsInstalled(true);
+          return true;
+        }
+      } catch (error) {
+        console.error("❌ [PWA Install] localStorage error:", error);
+      }
+
+      console.log("ℹ️ [PWA Install] Not installed yet (checked 3 layers)");
       return false;
     };
 
@@ -86,32 +121,36 @@ export function PWAInstallButton() {
       return false;
     };
 
-    // ถ้าติดตั้งแล้ว ไม่ต้องแสดงปุ่ม
-    if (checkIfInstalled()) {
-      setIsLoading(false);
-      return;
-    }
+    // Run async checks
+    const runChecks = async () => {
+      // ถ้าติดตั้งแล้ว ไม่ต้องแสดงปุ่ม
+      const installed = await checkIfInstalled();
+      if (installed) {
+        setIsLoading(false);
+        return;
+      }
 
-    // ถ้า dismiss ไปแล้ว (กดปุ่ม × เอง) ไม่แสดง
-    if (checkDismissed()) {
-      setIsLoading(false);
-      return;
-    }
+      // ถ้า dismiss ไปแล้ว (กดปุ่ม × เอง) ไม่แสดง
+      if (checkDismissed()) {
+        setIsLoading(false);
+        return;
+      }
 
-    // เช็คว่ามี prompt ใน global state หรือยัง
-    if (window.__pwaInstallPrompt) {
-      console.log("🔄 [PWA Install] Found existing prompt in global state");
-      console.log("📦 [PWA Install] Prompt object:", window.__pwaInstallPrompt);
-      setDeferredPrompt(window.__pwaInstallPrompt);
+      // เช็คว่ามี prompt ใน global state หรือยัง
+      if (window.__pwaInstallPrompt) {
+        console.log("🔄 [PWA Install] Found existing prompt in global state");
+        console.log("📦 [PWA Install] Prompt object:", window.__pwaInstallPrompt);
+        setDeferredPrompt(window.__pwaInstallPrompt);
+        setIsInstallable(true);
+      } else {
+        console.log("⏳ [PWA Install] No prompt in global state yet, waiting for event...");
+      }
+
+      // แสดงปุ่มทันที (fallback) แม้ beforeinstallprompt ยังไม่มา
       setIsInstallable(true);
-    } else {
-      console.log("⏳ [PWA Install] No prompt in global state yet, waiting for event...");
-    }
-
-    // แสดงปุ่มทันที (fallback) แม้ beforeinstallprompt ยังไม่มา
-    setIsInstallable(true);
-    setIsLoading(false);
-    console.log("✅ [PWA Install] Button ready (fallback mode)");
+      setIsLoading(false);
+      console.log("✅ [PWA Install] Button ready (fallback mode)");
+    };
 
     // Listen for beforeinstallprompt event (fire ครั้งเดียวต่อ session)
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -158,6 +197,9 @@ export function PWAInstallButton() {
         }
       });
     }
+
+    // Run all checks
+    runChecks();
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
