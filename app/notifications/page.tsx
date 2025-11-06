@@ -299,7 +299,7 @@ export default function NotificationsPage() {
                                   alt={(notification.sender?.displayName || notification.actor?.displayName || notification.user?.displayName) || "User"}
                                   width={40}
                                   height={40}
-                                  className="rounded-full flex-shrink-0 border-2 border-background shadow-sm"
+                                  className="rounded-full flex-shrink-0 border-2 border-background shadow-sm max-h-10 object-cover "
                                 />
                               )}
                               <div className="flex-1 min-w-0">

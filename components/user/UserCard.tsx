@@ -51,7 +51,7 @@ export function UserCard({ user, showFollowButton = true }: UserCardProps) {
                 alt={user.displayName}
                 width={48}
                 height={48}
-                className="rounded-full object-cover border-2 border-background"
+                className="rounded-full max-h-12 object-cover border-2 border-background"
               />
             </div>
 
