@@ -24,9 +24,17 @@ export function PWAInstaller() {
       try {
         const reg = await navigator.serviceWorker.register("/service-worker.js", {
           scope: "/",
+          updateViaCache: "none", // Always check for updates
         });
 
-        console.log("[PWA] Service Worker registered successfully:", reg.scope);
+        console.log("✅ [PWA] Service Worker registered successfully");
+        console.log("📂 [PWA] Scope:", reg.scope);
+
+        // Get current SW version
+        if (reg.active) {
+          console.log("🔄 [PWA] Active Service Worker:", reg.active.scriptURL);
+        }
+
         setRegistration(reg);
 
         // Check for updates
@@ -34,9 +42,13 @@ export function PWAInstaller() {
           const newWorker = reg.installing;
           if (!newWorker) return;
 
+          console.log("🆕 [PWA] New Service Worker found! Installing...");
+
           newWorker.addEventListener("statechange", () => {
+            console.log("📌 [PWA] Service Worker state:", newWorker.state);
+
             if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-              console.log("[PWA] New Service Worker available");
+              console.log("✨ [PWA] New version is ready to activate!");
               setUpdateAvailable(true);
             }
           });

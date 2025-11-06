@@ -6,6 +6,7 @@ import { Bell } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppLogo } from "@/components/ui/app-logo";
 import { MobileBottomNav } from "@/components/layouts/MobileBottomNav";
+import { UpdatePrompt } from "@/components/pwa/UpdatePrompt";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -133,6 +134,9 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
 
       {/* Mobile Bottom Navigation - แสดงเฉพาะ mobile */}
       <MobileBottomNav />
+
+      {/* Update Prompt - แสดงเมื่อมี version ใหม่ */}
+      <UpdatePrompt />
     </>
   );
 }
