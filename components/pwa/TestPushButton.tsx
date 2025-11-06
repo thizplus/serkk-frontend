@@ -36,7 +36,6 @@ export function TestPushButton() {
           testId: Date.now(),
         },
         requireInteraction: false,
-        vibrate: [200, 100, 200],
       });
 
       console.log("✅ Test notification sent successfully!");
