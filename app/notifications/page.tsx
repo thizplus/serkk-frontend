@@ -19,7 +19,6 @@ import {
 } from "@/lib/hooks/queries/useNotifications";
 import type { NotificationType } from "@/lib/types/common";
 import type { Notification } from "@/lib/types/models";
-import { PushNotification } from "@/components/pwa/PushNotification";
 import { TestPushButton } from "@/components/pwa/TestPushButton";
 import { PushDebugPanel } from "@/components/pwa/PushDebugPanel";
 
@@ -192,26 +191,28 @@ export default function NotificationsPage() {
         <div className="space-y-4">
           {/* Title */}
           <div className="flex items-center gap-3 justify-between">
-
-
-
-<div className="flex gap-2">
-
-
-            <div className="p-2 bg-primary/10 rounded-lg m-auto">
-              <Bell className="h-6 w-6 text-primary" />
+            <div className="flex gap-2">
+              <div className="p-2 bg-primary/10 rounded-lg m-auto">
+                <Bell className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">การแจ้งเตือน</h1>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1">
+                  {unreadCount > 0
+                    ? `คุณมีการแจ้งเตือนใหม่ ${unreadCount} รายการ`
+                    : 'ไม่มีการแจ้งเตือนใหม่'
+                  }
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">การแจ้งเตือน</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                {unreadCount > 0
-                  ? `คุณมีการแจ้งเตือนใหม่ ${unreadCount} รายการ`
-                  : 'ไม่มีการแจ้งเตือนใหม่'
-                }
-              </p>
-            </div>
-</div>
-              <PushNotification />
+
+            {/* Settings Button */}
+            <Link href="/notifications/settings">
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline whitespace-nowrap">ตั้งค่า</span>
+              </Button>
+            </Link>
           </div>
 
           {/* Action Buttons */}
@@ -224,32 +225,22 @@ export default function NotificationsPage() {
               {/* Test Push Button (Dev Only) */}
               {process.env.NODE_ENV === 'development' && <TestPushButton />}
 
-            <div className="flex gap-2">
-                {/* Mark All as Read */}
-              {unreadCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleMarkAllAsReadClick}
-                  disabled={markAllAsRead.isPending}
-                >
-                  {markAllAsRead.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="mr-2 h-4 w-4" />
-                  )}
-                  <span className="whitespace-nowrap">อ่านทั้งหมด</span>
-                </Button>
-              )}
-
-              {/* Settings Button - Icon only on mobile */}
-              <Link href="/notifications/settings">
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline whitespace-nowrap">ตั้งค่า</span>
-                </Button>
-              </Link>
-            </div>
+            {/* Mark All as Read */}
+            {unreadCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleMarkAllAsReadClick}
+                disabled={markAllAsRead.isPending}
+              >
+                {markAllAsRead.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="mr-2 h-4 w-4" />
+                )}
+                <span className="whitespace-nowrap">อ่านทั้งหมด</span>
+              </Button>
+            )}
             </div>
           </div>
         </div>

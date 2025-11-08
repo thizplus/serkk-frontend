@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, BellOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { pushService } from "@/lib/services/push.service";
 
@@ -193,31 +194,37 @@ export function PushNotification() {
     return null;
   }
 
+  // Handle switch toggle
+  const handleToggle = async (checked: boolean) => {
+    if (checked) {
+      await subscribe();
+    } else {
+      await unsubscribe();
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2">
-      {isSubscribed ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={unsubscribe}
-          disabled={isLoading}
-        >
-          <BellOff className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline whitespace-nowrap">ปิดการแจ้งเตือน</span>
-        </Button>
-      ) : (
-        <Button
-          variant="default"
-          size="sm"
-          onClick={subscribe}
+    <div className="flex items-center gap-3">
+      <Bell className="h-4 w-4 text-muted-foreground" />
+      <div className="flex items-center gap-2">
+        <Switch
+          id="push-notifications"
+          checked={isSubscribed}
+          onCheckedChange={handleToggle}
           disabled={isLoading || permission === "denied"}
+        />
+        <Label
+          htmlFor="push-notifications"
+          className="text-sm font-medium cursor-pointer"
         >
-          <Bell className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline whitespace-nowrap">
-            {permission === "denied" ? "ถูกปฏิเสธ" : "เปิดการแจ้งเตือน"}
-          </span>
-        </Button>
-      )}
+          {permission === "denied"
+            ? "การแจ้งเตือนถูกปฏิเสธ"
+            : "การแจ้งเตือน"}
+        </Label>
+        {isLoading && (
+          <span className="text-xs text-muted-foreground">กำลังโหลด...</span>
+        )}
+      </div>
     </div>
   );
 }

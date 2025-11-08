@@ -12,6 +12,7 @@ import {
   useNotificationSettings,
   useUpdateNotificationSettings
 } from "@/lib/hooks/queries/useNotifications";
+import { PushNotification } from "@/components/pwa/PushNotification";
 
 export const dynamic = 'force-dynamic';
 
@@ -130,6 +131,12 @@ export default function NotificationSettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Push Notification Toggle */}
+            <div className="pb-6 border-b">
+              <h3 className="font-semibold mb-4">การแจ้งเตือนแบบ Push</h3>
+              <PushNotification />
+            </div>
+
             {/* Replies Notification */}
             <Field>
               <div className="flex items-center justify-between">
