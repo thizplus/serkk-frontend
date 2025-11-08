@@ -13,6 +13,7 @@ import type { Comment, CommentWithReplies } from "@/lib/types/models";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { useUser } from "@/lib/stores/authStore";
+import { LinkifiedContent } from "@/components/ui/linkified-content";
 
 interface CommentCardProps {
   comment: Comment | CommentWithReplies;
@@ -203,12 +204,12 @@ export function CommentCard({
               </div>
             ) : (
               /* View Mode */
-              <p className="text-sm text-foreground/90 mb-2 whitespace-pre-wrap">
-                {comment.content}
+              <div className="text-sm text-foreground/90 mb-2 whitespace-pre-wrap">
+                <LinkifiedContent>{comment.content}</LinkifiedContent>
                 {comment.updatedAt && comment.updatedAt !== comment.createdAt && (
                   <span className="text-xs text-muted-foreground ml-2">(แก้ไขแล้ว)</span>
                 )}
-              </p>
+              </div>
             )}
 
             {/* Action Buttons */}

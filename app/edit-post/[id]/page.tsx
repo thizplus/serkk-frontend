@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { HLSVideoPlayer } from "@/components/common/HLSVideoPlayer";
 import { X, Loader2, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -246,11 +247,14 @@ export default function EditPostPage() {
                   <FieldLabel>สื่อ (ไม่สามารถแก้ไขได้)</FieldLabel>
                   <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
                     {post.media[0].type === "video" ? (
-                      <video
-                        src={post.media[0].url}
-                        controls
+                      <HLSVideoPlayer
+                        hlsUrl={post.media[0].hlsUrl}
+                        fallbackUrl={post.media[0].url}
+                        thumbnail={post.media[0].thumbnail || undefined}
+                        encodingStatus={post.media[0].encodingStatus}
+                        encodingProgress={post.media[0].encodingProgress}
+                        controls={true}
                         className="w-full h-full object-cover"
-                        poster={post.media[0].thumbnail || undefined}
                       />
                     ) : (
                       <Image

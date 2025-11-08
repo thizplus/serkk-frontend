@@ -9,6 +9,7 @@ import type { GetUserMediaParams } from '@/lib/types/request';
 import type {
   UploadImageResponse,
   UploadVideoResponse,
+  UploadFileResponse,
   GetMediaResponse,
   GetUserMediaResponse,
   DeleteMediaResponse,
@@ -23,12 +24,27 @@ import type {
  */
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
 const MAX_VIDEO_SIZE = 300 * 1024 * 1024; // 300 MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
 /**
  * ประเภทไฟล์ที่อนุญาต
  */
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PPTX
+  'application/zip',
+  'application/x-rar-compressed',
+  'application/x-7z-compressed',
+  'text/plain',
+  'text/csv',
+];
 
 // ============================================================================
 // TYPES
@@ -95,6 +111,27 @@ const validateVideoFile = (file: File): void => {
   }
 };
 
+/**
+ * ตรวจสอบความถูกต้องของไฟล์เอกสาร
+ */
+const validateDocumentFile = (file: File): void => {
+  if (!file) {
+    throw new MediaValidationError('กรุณาเลือกไฟล์');
+  }
+
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+    throw new MediaValidationError(
+      `ประเภทไฟล์ไม่ถูกต้อง รองรับเฉพาะ PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR, TXT, CSV`
+    );
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    throw new MediaValidationError(
+      `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${MAX_FILE_SIZE / 1024 / 1024} MB)`
+    );
+  }
+};
+
 // ============================================================================
 // MEDIA SERVICE
 // ============================================================================
@@ -143,11 +180,12 @@ const mediaService = {
   },
 
   /**
-   * อัพโหลดวิดีโอ
+   * อัพโหลดวิดีโอ (Async - ใช้ Bunny Stream)
    * @param file - ไฟล์วิดีโอที่ต้องการอัพโหลด
-   * @param onProgress - Callback function สำหรับติดตามความคืบหน้า
-   * @returns Promise<UploadVideoResponse>
+   * @param onProgress - Callback function สำหรับติดตามความคืบหน้าการอัพโหลด
+   * @returns Promise<UploadVideoResponse> - รวมถึง encodingStatus, encodingProgress, hlsUrl
    * @throws {MediaValidationError} เมื่อไฟล์ไม่ผ่านการตรวจสอบ
+   * @note การ encode วิดีโอเป็น async process - ใช้ encodingStatus เพื่อติดตามความคืบหน้า
    */
   uploadVideo: async (
     file: File,
@@ -177,6 +215,44 @@ const mediaService = {
       }
 
       throw new Error('การอัพโหลดวิดีโอล้มเหลว');
+    }
+  },
+
+  /**
+   * อัพโหลดไฟล์เอกสาร (ใช้ Bunny Storage)
+   * @param file - ไฟล์เอกสารที่ต้องการอัพโหลด (PDF, DOC, XLS, ZIP, etc.)
+   * @param onProgress - Callback function สำหรับติดตามความคืบหน้า
+   * @returns Promise<UploadFileResponse>
+   * @throws {MediaValidationError} เมื่อไฟล์ไม่ผ่านการตรวจสอบ
+   */
+  uploadFile: async (
+    file: File,
+    onProgress?: UploadProgressCallback
+  ): Promise<UploadFileResponse> => {
+    try {
+      // ตรวจสอบความถูกต้องของไฟล์
+      validateDocumentFile(file);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      return await apiService.upload<UploadFileResponse>(
+        API.MEDIA.UPLOAD_FILE,
+        formData,
+        onProgress
+      );
+    } catch (error) {
+      // Re-throw validation errors
+      if (error instanceof MediaValidationError) {
+        throw error;
+      }
+
+      // Handle API errors
+      if (error instanceof Error) {
+        throw new Error(`การอัพโหลดไฟล์ล้มเหลว: ${error.message}`);
+      }
+
+      throw new Error('การอัพโหลดไฟล์ล้มเหลว');
     }
   },
 
@@ -245,6 +321,8 @@ export default mediaService;
 export {
   MAX_IMAGE_SIZE,
   MAX_VIDEO_SIZE,
+  MAX_FILE_SIZE,
   ALLOWED_IMAGE_TYPES,
   ALLOWED_VIDEO_TYPES,
+  ALLOWED_FILE_TYPES,
 };

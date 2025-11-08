@@ -20,7 +20,8 @@ import {
   UserMinus,
   TrendingUp,
   MessageSquare,
-  FileText
+  FileText,
+  MessageCircle
 } from "lucide-react";
 import { useUser, useHasHydrated } from "@/lib/stores/authStore";
 import { useInfiniteUserPosts } from "@/lib/hooks/queries/usePosts";
@@ -28,6 +29,7 @@ import { useCommentsByAuthor } from "@/lib/hooks/queries/useComments";
 import { useUserProfile } from "@/lib/hooks/queries/useUsers";
 import { useToggleFollow } from "@/lib/hooks/mutations/useFollow";
 import { ProfileCommentCard } from "@/components/comment/ProfileCommentCard";
+import { LinkifiedContent } from "@/components/ui/linkified-content";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -235,31 +237,50 @@ export default function ProfilePage() {
                       แก้ไขโปรไฟล์
                     </Button>
                   ) : (
-                    <Button
-                      onClick={handleFollow}
-                      size="sm"
-                      variant={'isFollowing' in profileUser && profileUser.isFollowing ? "outline" : "default"}
-                      disabled={isFollowLoading}
-                    >
-                      {'isFollowing' in profileUser && profileUser.isFollowing ? (
-                        <>
-                          <UserMinus className="mr-2 h-4 w-4" />
-                          เลิกติดตาม
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          ติดตาม
-                        </>
-                      )}
-                    </Button>
+                    <>
+                      <Button
+                        onClick={() => {
+                          if (!currentUser) {
+                            toast.error('กรุณาเข้าสู่ระบบก่อนส่งข้อความ');
+                            router.push('/login');
+                            return;
+                          }
+                          router.push(`/chat/${profileUser.username}`);
+                        }}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        แชท
+                      </Button>
+                      <Button
+                        onClick={handleFollow}
+                        size="sm"
+                        variant={'isFollowing' in profileUser && profileUser.isFollowing ? "outline" : "default"}
+                        disabled={isFollowLoading}
+                      >
+                        {'isFollowing' in profileUser && profileUser.isFollowing ? (
+                          <>
+                            <UserMinus className="mr-2 h-4 w-4" />
+                            เลิกติดตาม
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            ติดตาม
+                          </>
+                        )}
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
 
               {/* Bio */}
               {profileUser.bio && (
-                <p className="mt-2 text-sm text-foreground/90 line-clamp-2">{profileUser.bio}</p>
+                <div className="mt-2 text-sm text-foreground/90 line-clamp-2">
+                  <LinkifiedContent>{profileUser.bio}</LinkifiedContent>
+                </div>
               )}
 
               {/* Meta Info */}
@@ -276,7 +297,7 @@ export default function ProfilePage() {
                     <a
                       href={profileUser.website}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
                       className="text-primary hover:underline truncate max-w-[200px]"
                     >
                       {profileUser.website.replace(/^https?:\/\//, '')}

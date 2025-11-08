@@ -8,6 +8,7 @@ import type { CommentWithPost } from "@/lib/types/models";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { LinkifiedContent } from "@/components/ui/linkified-content";
 
 interface ProfileCommentCardProps {
   comment: CommentWithPost;
@@ -45,9 +46,9 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
 
         {/* Comment Content */}
         <div className="pl-6">
-          <p className="text-sm text-foreground/90 whitespace-pre-wrap line-clamp-3 mb-3">
-            {comment.content}
-          </p>
+          <div className="text-sm text-foreground/90 whitespace-pre-wrap line-clamp-3 mb-3">
+            <LinkifiedContent>{comment.content}</LinkifiedContent>
+          </div>
 
           {/* Footer: Votes, Time, Link */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">

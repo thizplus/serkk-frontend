@@ -12,9 +12,9 @@ import type {
 import type {
   GetNotificationsResponse,
   GetUnreadNotificationsResponse,
-  GetUnreadCountResponse,
+  GetNotificationUnreadCountResponse,
   GetNotificationResponse,
-  MarkAsReadResponse,
+  MarkNotificationAsReadResponse,
   MarkAllAsReadResponse,
   DeleteNotificationResponse,
   DeleteAllNotificationsResponse,
@@ -49,10 +49,10 @@ const notificationService = {
 
   /**
    * ดึงจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน
-   * @returns Promise<GetUnreadCountResponse>
+   * @returns Promise<GetNotificationUnreadCountResponse>
    */
-  getUnreadCount: async (): Promise<GetUnreadCountResponse> => {
-    return apiService.get<GetUnreadCountResponse>(API.NOTIFICATION.UNREAD_COUNT);
+  getUnreadCount: async (): Promise<GetNotificationUnreadCountResponse> => {
+    return apiService.get<GetNotificationUnreadCountResponse>(API.NOTIFICATION.UNREAD_COUNT);
   },
 
   /**
@@ -67,14 +67,14 @@ const notificationService = {
   /**
    * ทำเครื่องหมายการแจ้งเตือนว่าอ่านแล้ว
    * @param id - ID ของการแจ้งเตือน
-   * @returns Promise<MarkAsReadResponse>
+   * @returns Promise<MarkNotificationAsReadResponse>
    */
-  markAsRead: async (id: string): Promise<MarkAsReadResponse> => {
+  markAsRead: async (id: string): Promise<MarkNotificationAsReadResponse> => {
     if (!id) {
       throw new Error('Notification ID is required');
     }
     console.log('📬 Mark as read ID:', id);
-    return apiService.put<MarkAsReadResponse>(API.NOTIFICATION.MARK_READ(id));
+    return apiService.put<MarkNotificationAsReadResponse>(API.NOTIFICATION.MARK_READ(id));
   },
 
   /**

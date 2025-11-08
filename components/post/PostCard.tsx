@@ -6,6 +6,7 @@ import { MessageSquare, Bookmark, Repeat2 } from "lucide-react";
 import { VoteButtons } from "./VoteButtons";
 import { ShareDropdown } from "./ShareDropdown";
 import { PostActions } from "./PostActions";
+import { HLSVideoPlayer } from "@/components/common/HLSVideoPlayer";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/lib/types/models";
 import { formatDistanceToNow } from "date-fns";
@@ -14,6 +15,7 @@ import { useToggleVote } from "@/lib/hooks/mutations/useVotes";
 import { useToggleSave } from "@/lib/hooks/mutations/useSaved";
 import { useDeletePost } from "@/lib/hooks/queries/usePosts";
 import { useUser } from "@/lib/stores/authStore";
+import { LinkifiedContent } from "@/components/ui/linkified-content";
 
 interface PostCardProps {
   post: Post;
@@ -117,15 +119,15 @@ export function PostCard({
 
         {/* Content */}
         {!compact && post.content && (
-          <p
+          <div
             onClick={handlePostClick}
             className={cn(
               "text-sm text-foreground/90 mb-3 whitespace-pre-wrap line-clamp-3",
               !disableNavigation && "cursor-pointer hover:text-foreground"
             )}
           >
-            {post.content}
-          </p>
+            <LinkifiedContent>{post.content}</LinkifiedContent>
+          </div>
         )}
 
         {/* Crosspost - Source Post */}
@@ -149,18 +151,22 @@ export function PostCard({
                 <h3 className="font-semibold text-sm mb-1 hover:text-primary transition-colors">
                   {post.sourcePost.title}
                 </h3>
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                  {post.sourcePost.content}
-                </p>
+                <div className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                  <LinkifiedContent>{post.sourcePost.content}</LinkifiedContent>
+                </div>
 
                 {/* Source Post Media */}
                 {post.sourcePost.media && post.sourcePost.media.length > 0 && (
                   <div className="rounded-md overflow-hidden bg-muted max-h-80">
                     {post.sourcePost.media[0].type === "video" ? (
-                      <video
-                        src={post.sourcePost.media[0].url}
+                      <HLSVideoPlayer
+                        hlsUrl={post.sourcePost.media[0].hlsUrl}
+                        fallbackUrl={post.sourcePost.media[0].url}
+                        thumbnail={post.sourcePost.media[0].thumbnail || undefined}
+                        encodingStatus={post.sourcePost.media[0].encodingStatus}
+                        encodingProgress={post.sourcePost.media[0].encodingProgress}
+                        controls={false}
                         className="w-full h-auto max-h-80 object-contain"
-                        poster={post.sourcePost.media[0].thumbnail || undefined}
                       />
                     ) : (
                       <Image
@@ -188,11 +194,14 @@ export function PostCard({
             )}
           >
             {post.media[0].type === "video" ? (
-              <video
-                src={post.media[0].url}
-                controls
+              <HLSVideoPlayer
+                hlsUrl={post.media[0].hlsUrl}
+                fallbackUrl={post.media[0].url}
+                thumbnail={post.media[0].thumbnail || undefined}
+                encodingStatus={post.media[0].encodingStatus}
+                encodingProgress={post.media[0].encodingProgress}
+                controls={true}
                 className="w-full h-auto object-cover max-h-[500px]"
-                poster={post.media[0].thumbnail || undefined}
               />
             ) : (
               <Image
