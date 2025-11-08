@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, LogOut } from "lucide-react";
+import { Search, Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChatListItem } from "./ChatListItem";
 import { OnlineStatus } from "./OnlineStatus";
+import { UserSearchDialog } from "./UserSearchDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sidebar,
@@ -65,8 +66,9 @@ export function ChatSidebar({ conversations, activeUsername, isLoading = false }
     <Sidebar variant="inset">
       {/* Header */}
       <SidebarHeader className="px-4 py-3">
-        {/* Current User Profile */}
+        {/* Current User Profile & Home Button Row */}
         <div className="flex items-center gap-2 mb-2">
+          {/* Current User Profile */}
           <Link
             href={`/profile/${currentUser.username}`}
             className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors flex-1 min-w-0"
@@ -95,18 +97,16 @@ export function ChatSidebar({ conversations, activeUsername, isLoading = false }
             </div>
           </Link>
 
-          {/* Exit/Back Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="flex-shrink-0"
-            asChild
+          {/* Back to Home Button */}
+          <Link
+            href="/"
+            className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-accent transition-colors min-w-[60px] group"
           >
-            <Link href="/">
-              <LogOut className="h-5 w-5" />
-              <span className="sr-only">กลับไปหน้าหลัก</span>
-            </Link>
-          </Button>
+            <Home className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors">
+              ฟีดข่าว
+            </span>
+          </Link>
         </div>
 
         {/* Search */}
@@ -120,6 +120,9 @@ export function ChatSidebar({ conversations, activeUsername, isLoading = false }
             className="pl-9"
           />
         </div>
+
+        {/* New Chat Button */}
+        
       </SidebarHeader>
 
       {/* Content */}

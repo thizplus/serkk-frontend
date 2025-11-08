@@ -14,6 +14,7 @@ import type {
 import type {
   GetConversationsResponse,
   GetConversationByUsernameResponse,
+  SearchChatUsersResponse,
   GetMessagesResponse,
   SendMessageResponse,
   MarkChatAsReadResponse,
@@ -35,6 +36,33 @@ import type {
  * จัดการการเรียก API สำหรับ Chat feature
  */
 const chatService = {
+  // ==========================================================================
+  // SEARCH
+  // ==========================================================================
+
+  /**
+   * Search users for chat (excludes self and blocked users)
+   * @param query - Search query
+   * @param limit - Number of results
+   * @returns Promise<SearchChatUsersResponse>
+   */
+  searchUsers: async (
+    query?: string,
+    limit: number = 20
+  ): Promise<SearchChatUsersResponse> => {
+    try {
+      return await apiService.get<SearchChatUsersResponse>(
+        API.CHAT.SEARCH_USERS,
+        { q: query, limit }
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`ไม่สามารถค้นหาผู้ใช้ได้: ${error.message}`);
+      }
+      throw new Error('ไม่สามารถค้นหาผู้ใช้ได้');
+    }
+  },
+
   // ==========================================================================
   // CONVERSATIONS
   // ==========================================================================

@@ -106,13 +106,13 @@ export function ChatMessage({ message, sender, isOwnMessage }: ChatMessageProps)
             <span className="flex items-center">
               {isSending ? (
                 // Sending state - gray single check
-                <Check className="h-4 w-4 text-gray-400" />
+                <Check className="h-3 w-3 text-muted-foreground" />
               ) : message.isRead ? (
-                // Read - blue double check
-                <CheckCheck className="h-4 w-4 text-blue-500" />
+                // Read - chart-2 color (blue/green)
+                <CheckCheck className="h-3 w-3 text-chart-2" />
               ) : (
                 // Sent but not read - gray double check
-                <CheckCheck className="h-4 w-4 text-gray-400" />
+                <CheckCheck className="h-3 w-3 text-muted-foreground" />
               )}
             </span>
           )}

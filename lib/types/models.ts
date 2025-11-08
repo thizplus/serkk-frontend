@@ -259,6 +259,20 @@ export interface ChatUser {
 }
 
 /**
+ * Chat User Search Result (for chat/search-users endpoint)
+ */
+export interface ChatUserSearchResult {
+  id: string;
+  username: string;
+  displayName: string;
+  avatar: string | null;
+  bio: string | null;
+  isFollowing: boolean;
+  isOnline: boolean;
+  lastActive: string;
+}
+
+/**
  * Chat Message Media Model
  */
 export interface ChatMessageMedia {

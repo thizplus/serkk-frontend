@@ -22,6 +22,7 @@ import type {
   Media,
   Conversation,
   ChatMessage,
+  ChatUserSearchResult,
   BlockedUser,
   ChatMessageMedia,
 } from './models';
@@ -325,6 +326,11 @@ export type GetConversationsResponse = ApiResponse<{
 
 export type GetConversationByUsernameResponse = ApiResponse<{
   conversation: Conversation;
+}>;
+
+export type SearchChatUsersResponse = ApiResponse<{
+  users: ChatUserSearchResult[];
+  suggested: ChatUserSearchResult[];
 }>;
 
 export type GetChatUnreadCountResponse = ApiResponse<{

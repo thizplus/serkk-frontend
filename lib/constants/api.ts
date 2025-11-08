@@ -185,6 +185,9 @@ export const SEARCH_API = {
 // ============================================================================
 
 export const CHAT_API = {
+  // Search
+  SEARCH_USERS: '/chat/search-users',                                      // GET /api/v1/chat/search-users
+
   // Conversations
   CONVERSATIONS: '/chat/conversations',                                    // GET /api/v1/chat/conversations
   CONVERSATION_BY_USERNAME: (username: string) => `/chat/conversations/with/${username}`,  // GET /api/v1/chat/conversations/with/:username
