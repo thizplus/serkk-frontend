@@ -169,3 +169,39 @@ export interface UploadVideoRequest {
 }
 
 export type GetUserMediaParams = PaginationParams;
+
+/**
+ * Chat Requests
+ */
+export interface GetConversationsParams {
+  cursor?: string;
+  limit?: number;
+}
+
+export interface GetMessagesParams {
+  cursor?: string;
+  limit?: number;
+}
+
+export interface SendMessageRequest {
+  type: 'text' | 'image' | 'video' | 'file';
+  content?: string | null;
+  mediaUrls?: string[];
+  mediaMetadata?: Array<{
+    filename?: string;
+    size?: number;
+    mimeType?: string;
+  }>;
+}
+
+export interface MarkAsReadRequest {
+  // Empty - just POST to mark as read
+}
+
+export interface BlockUserRequest {
+  username: string;
+}
+
+export interface UnblockUserRequest {
+  username: string;
+}

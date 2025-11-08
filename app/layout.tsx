@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/lib/providers/query-provider";
+import { ChatProvider } from "@/components/providers/ChatProvider";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/GoogleTagManager";
 import { PWAInstaller } from "@/components/pwa/PWAInstaller";
 
@@ -127,8 +128,10 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            {children}
-            <Toaster />
+            <ChatProvider>
+              {children}
+              <Toaster />
+            </ChatProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

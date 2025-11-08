@@ -69,7 +69,12 @@ export type UserVote = VoteType | null;
 /**
  * Media Type
  */
-export type MediaType = 'image' | 'video';
+export type MediaType = 'image' | 'video' | 'file';
+
+/**
+ * Video Encoding Status
+ */
+export type EncodingStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 /**
  * Notification Type

@@ -20,6 +20,10 @@ import type {
   SearchHistory,
   PopularSearch,
   Media,
+  Conversation,
+  ChatMessage,
+  BlockedUser,
+  ChatMessageMedia,
 } from './models';
 
 /**
@@ -210,13 +214,13 @@ export type GetUnreadNotificationsResponse = ApiResponse<{
   meta: PaginationMeta & { unreadCount: number };
 }>;
 
-export type GetUnreadCountResponse = ApiResponse<{
+export type GetNotificationUnreadCountResponse = ApiResponse<{
   count: number;
 }>;
 
 export type GetNotificationResponse = ApiResponse<Notification>;
 
-export type MarkAsReadResponse = ApiResponse<null>;
+export type MarkNotificationAsReadResponse = ApiResponse<null>;
 
 export type MarkAllAsReadResponse = ApiResponse<null>;
 
@@ -297,6 +301,8 @@ export type UploadImageResponse = ApiResponse<Media>;
 
 export type UploadVideoResponse = ApiResponse<Media>;
 
+export type UploadFileResponse = ApiResponse<Media>;
+
 export type GetMediaResponse = ApiResponse<Media>;
 
 export type GetUserMediaResponse = ApiResponse<{
@@ -305,3 +311,62 @@ export type GetUserMediaResponse = ApiResponse<{
 }>;
 
 export type DeleteMediaResponse = ApiResponse<null>;
+
+/**
+ * Chat Responses
+ */
+export type GetConversationsResponse = ApiResponse<{
+  conversations: Conversation[];
+  meta: {
+    hasMore: boolean;
+    nextCursor?: string;
+  };
+}>;
+
+export type GetConversationByUsernameResponse = ApiResponse<{
+  conversation: Conversation;
+}>;
+
+export type GetChatUnreadCountResponse = ApiResponse<{
+  count: number;
+}>;
+
+export type GetMessagesResponse = ApiResponse<{
+  messages: ChatMessage[];
+  meta: {
+    hasMore: boolean;
+    nextCursor?: string;
+  };
+}>;
+
+export type SendMessageResponse = ApiResponse<ChatMessage>;
+
+export type MarkChatAsReadResponse = ApiResponse<{
+  conversationId: string;
+  readCount: number;
+}>;
+
+export type GetMessageResponse = ApiResponse<ChatMessage>;
+
+export type GetMessageContextResponse = ApiResponse<{
+  messages: ChatMessage[];
+  targetIndex: number;
+}>;
+
+export type GetConversationMediaResponse = ApiResponse<{
+  media: ChatMessageMedia[];
+  meta: {
+    hasMore: boolean;
+    nextCursor?: string;
+  };
+}>;
+
+export type BlockUserResponse = ApiResponse<{
+  blockedUser: BlockedUser;
+}>;
+
+export type UnblockUserResponse = ApiResponse<null>;
+
+export type GetBlockedUsersResponse = ApiResponse<{
+  users: BlockedUser[];
+}>;

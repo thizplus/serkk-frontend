@@ -181,13 +181,44 @@ export const SEARCH_API = {
 };
 
 // ============================================================================
+// CHAT
+// ============================================================================
+
+export const CHAT_API = {
+  // Conversations
+  CONVERSATIONS: '/chat/conversations',                                    // GET /api/v1/chat/conversations
+  CONVERSATION_BY_USERNAME: (username: string) => `/chat/conversations/with/${username}`,  // GET /api/v1/chat/conversations/with/:username
+  UNREAD_COUNT: '/chat/conversations/unread-count',                       // GET /api/v1/chat/conversations/unread-count
+
+  // Messages
+  MESSAGES: (conversationId: string) => `/chat/conversations/${conversationId}/messages`,  // GET /api/v1/chat/conversations/:id/messages
+  SEND_MESSAGE: (conversationId: string) => `/chat/conversations/${conversationId}/messages`,  // POST /api/v1/chat/conversations/:id/messages
+  MARK_AS_READ: (conversationId: string) => `/chat/conversations/${conversationId}/read`,  // POST /api/v1/chat/conversations/:id/read
+  GET_MESSAGE: (messageId: string) => `/chat/messages/${messageId}`,      // GET /api/v1/chat/messages/:id
+  GET_MESSAGE_CONTEXT: (messageId: string) => `/chat/messages/${messageId}/context`,  // GET /api/v1/chat/messages/:id/context
+
+  // Media queries (Phase 2)
+  GET_MEDIA: (conversationId: string) => `/chat/conversations/${conversationId}/media`,  // GET /api/v1/chat/conversations/:id/media
+  GET_LINKS: (conversationId: string) => `/chat/conversations/${conversationId}/links`,  // GET /api/v1/chat/conversations/:id/links
+  GET_FILES: (conversationId: string) => `/chat/conversations/${conversationId}/files`,  // GET /api/v1/chat/conversations/:id/files
+
+  // Blocks
+  BLOCK_USER: '/chat/blocks',                                             // POST /api/v1/chat/blocks
+  UNBLOCK_USER: (username: string) => `/chat/blocks/${username}`,        // DELETE /api/v1/chat/blocks/:username
+  GET_BLOCKS: '/chat/blocks',                                             // GET /api/v1/chat/blocks
+};
+
+// ============================================================================
 // MEDIA
 // ============================================================================
 
 export const MEDIA_API = {
-  // Public endpoints
-  UPLOAD_IMAGE: '/media/upload/image',             // POST /api/v1/media/upload/image
-  UPLOAD_VIDEO: '/media/upload/video',             // POST /api/v1/media/upload/video
+  // Upload endpoints
+  UPLOAD_IMAGE: '/media/upload/image',             // POST /api/v1/media/upload/image → Bunny Storage
+  UPLOAD_VIDEO: '/media/upload/video',             // POST /api/v1/media/upload/video → Bunny Stream (async)
+  UPLOAD_FILE: '/upload/file',                     // POST /api/v1/upload/file → Bunny Storage (Phase 1)
+
+  // Media queries
   GET_BY_ID: (id: string) => `/media/${id}`,      // GET /api/v1/media/:id
   GET_BY_USER: (userId: string) => `/media/user/${userId}`,  // GET /api/v1/media/user/:userId
   DELETE: (id: string) => `/media/${id}`,         // DELETE /api/v1/media/:id
@@ -218,6 +249,7 @@ export const API = {
   NOTIFICATION: NOTIFICATION_API,
   TAG: TAG_API,
   SEARCH: SEARCH_API,
+  CHAT: CHAT_API,
   MEDIA: MEDIA_API,
 };
 

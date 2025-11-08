@@ -6,6 +6,7 @@
 import type {
   UserVote,
   MediaType,
+  EncodingStatus,
   NotificationType,
   TargetType,
   UserRole,
@@ -64,6 +65,16 @@ export interface Media {
   width?: number;
   height?: number;
   duration?: number; // For videos
+
+  // File-specific fields
+  extension?: string; // For files (pdf, docx, zip, etc.)
+
+  // Video streaming fields (Bunny Stream)
+  videoId?: string; // Bunny Stream video ID
+  encodingStatus?: EncodingStatus; // pending | processing | completed | failed
+  encodingProgress?: number; // 0-100
+  hlsUrl?: string; // HLS playlist URL (.m3u8) for adaptive streaming
+
   createdAt: string;
 }
 
@@ -233,4 +244,92 @@ export interface SearchHistory {
 export interface PopularSearch {
   query: string;
   count: number;
+}
+
+/**
+ * Chat User Model
+ */
+export interface ChatUser {
+  id: string;
+  username: string;
+  displayName: string;
+  avatar: string | null;
+  isOnline: boolean;
+  lastSeen: string;
+}
+
+/**
+ * Chat Message Media Model
+ */
+export interface ChatMessageMedia {
+  url: string;
+  thumbnail?: string | null;
+  type: 'image' | 'video' | 'file';
+  filename?: string;
+  mimeType?: string;
+  size?: number;
+  width?: number;
+  height?: number;
+  duration?: number;
+
+  // Video streaming fields (from Media model)
+  videoId?: string;
+  encodingStatus?: EncodingStatus;
+  encodingProgress?: number;
+  hlsUrl?: string;
+  extension?: string;
+}
+
+/**
+ * Chat Message Model
+ */
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  // Support both API response formats:
+  senderId?: string;           // Simple format (our original type)
+  sender?: User;                // API response format (includes full user object)
+  receiver?: User;              // API response format
+  type: 'text' | 'image' | 'video' | 'file';
+  content: string | null;
+  media?: ChatMessageMedia[];
+  isRead: boolean;
+  readAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+/**
+ * Last Message Summary
+ */
+export interface LastMessage {
+  id: string;
+  type: 'text' | 'image' | 'video' | 'file';
+  content: string | null;
+  senderId?: string; // Optional: Backend should send this for proper sender detection
+  media?: ChatMessageMedia[]; // Optional: For showing media count
+  mediaCount?: number; // Alternative: Just the count
+  createdAt: string;
+}
+
+/**
+ * Conversation Model
+ */
+export interface Conversation {
+  id: string;
+  otherUser: ChatUser;
+  lastMessage: LastMessage | null;
+  unreadCount: number;
+  updatedAt: string;
+}
+
+/**
+ * Blocked User Model
+ */
+export interface BlockedUser {
+  id: string;
+  username: string;
+  displayName: string;
+  avatar: string | null;
+  blockedAt: string;
 }

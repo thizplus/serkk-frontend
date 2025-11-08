@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, PlusCircle, Bookmark, User } from "lucide-react";
+import { Home, Search, PlusCircle, MessageCircle, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { useChatStore } from "@/lib/stores/chatStore";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -30,6 +31,7 @@ interface NavItem {
 export function MobileBottomNav() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuthStore();
+  const { unreadCount } = useChatStore();
 
   const navItems: NavItem[] = [
     {
@@ -49,9 +51,9 @@ export function MobileBottomNav() {
       requireAuth: true,
     },
     {
-      label: "โพสบันทึก",
-      href: "/saved",
-      icon: Bookmark,
+      label: "ข้อความ",
+      href: "/chat",
+      icon: MessageCircle,
       requireAuth: true,
     },
     {
@@ -118,6 +120,13 @@ export function MobileBottomNav() {
                       active && "scale-110"
                     )}
                   />
+                )}
+
+                {/* Unread count badge for chat */}
+                {item.href === "/chat" && unreadCount > 0 && (
+                  <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1 ring-2 ring-background">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </div>
                 )}
 
                 {/* Active indicator dot */}

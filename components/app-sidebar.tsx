@@ -9,6 +9,7 @@ import {
   Bookmark,
   Search,
   Bell,
+  MessageCircle,
   LifeBuoy,
   Send,
 } from "lucide-react"
@@ -17,6 +18,7 @@ import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import { AppLogo } from "@/components/ui/app-logo"
+import { useChatStore } from "@/lib/stores/chatStore"
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +30,7 @@ import {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { unreadCount } = useChatStore();
 
   const data = {
     user: {
@@ -53,6 +56,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/notifications",
         icon: Bell,
         isActive: pathname === "/notifications",
+      },
+      {
+        title: "ข้อความ",
+        url: "/chat",
+        icon: MessageCircle,
+        isActive: pathname.startsWith("/chat"),
+        badge: unreadCount > 0 ? unreadCount : undefined,
       },
       {
         title: "สร้างโพสต์",

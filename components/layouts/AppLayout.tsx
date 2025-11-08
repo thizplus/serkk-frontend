@@ -2,12 +2,13 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { Bell, MessageCircle } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppLogo } from "@/components/ui/app-logo";
 import { MobileBottomNav } from "@/components/layouts/MobileBottomNav";
 import { UpdatePromptAuto } from "@/components/pwa/UpdatePromptAuto";
 import { PWAInstallButton } from "@/components/pwa/PWAInstallButton";
+import { useHydration } from "@/lib/hooks/useHydration";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,6 +28,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useUnreadNotificationCount } from "@/lib/hooks/queries/useNotifications";
 import { useProfile } from "@/lib/hooks/queries/useUsers";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { useChatStore } from "@/lib/stores/chatStore";
 import { useWebSocket } from "@/lib/hooks/useWebSocket";
 
 interface BreadcrumbItem {
@@ -41,12 +43,16 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
   const setUser = useAuthStore((state) => state.setUser);
+  const isMounted = useHydration();
 
   // Connect WebSocket for real-time notifications
   useWebSocket();
 
   // Fetch unread notification count
   const { data: unreadCount = 0, error, isLoading } = useUnreadNotificationCount();
+
+  // Get chat unread count
+  const chatUnreadCount = useChatStore((state) => state.unreadCount);
 
   // Fetch profile และ sync ไปยัง Zustand store
   const { data: profileData } = useProfile();
@@ -106,20 +112,31 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
               )}
             </div>
 
-            {/* Actions: Install PWA, Theme Toggle & Notification */}
+            {/* Actions: Install PWA, Theme Toggle, Chat & Notification */}
             <div className="flex items-center gap-1">
               <PWAInstallButton />
               <ThemeToggle />
+              <Link href="/chat" className="hidden md:inline-flex">
+                <Button variant="ghost" size="icon" className="relative">
+                  <MessageCircle className="h-5 w-5" />
+                  {isMounted && chatUnreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
+                      {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+                    </span>
+                  )}
+                  <span className="sr-only">ข้อความ</span>
+                </Button>
+              </Link>
               <Link href="/notifications">
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
-                  {!isLoading && unreadCount > 0 && (
+                  {isMounted && !isLoading && unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                   <span className="sr-only">
-                    การแจ้งเตือน {unreadCount > 0 ? `(${unreadCount} ข้อความใหม่)` : ''}
+                    การแจ้งเตือน
                   </span>
                 </Button>
               </Link>

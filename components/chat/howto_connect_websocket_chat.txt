@@ -1,0 +1,430 @@
+📝 วิธีเชื่อมต่อ Chat WebSocket ที่ถูกต้อง
+
+  ปัญหาที่เจอ:
+
+  ❌ Frontend เชื่อม: ws://localhost:8080/ws/chat✅ Backend endpoint: ws://localhost:8080/chat/ws
+
+  ---
+  1. WebSocket Connection Setup
+
+  TypeScript/JavaScript Code:
+
+  // chatWebSocket.ts
+  class ChatWebSocketManager {
+    private ws: WebSocket | null = null;
+    private reconnectAttempts = 0;
+    private maxReconnectAttempts = 5;
+    private reconnectDelay = 1000; // Start with 1 second
+    private pingInterval: NodeJS.Timeout | null = null;
+    private token: string;
+
+    constructor(token: string) {
+      this.token = token;
+    }
+
+    // ✅ Correct WebSocket URL
+    connect() {
+      const wsUrl = `ws://localhost:8080/chat/ws?token=${this.token}`;
+
+      console.log('🔌 Connecting to Chat WebSocket:', wsUrl);
+
+      try {
+        this.ws = new WebSocket(wsUrl);
+
+        this.ws.onopen = this.handleOpen.bind(this);
+        this.ws.onmessage = this.handleMessage.bind(this);
+        this.ws.onerror = this.handleError.bind(this);
+        this.ws.onclose = this.handleClose.bind(this);
+      } catch (error) {
+        console.error('❌ Failed to create WebSocket:', error);
+        this.scheduleReconnect();
+      }
+    }
+
+    private handleOpen(event: Event) {
+      console.log('✅ Chat WebSocket connected');
+      this.reconnectAttempts = 0;
+      this.reconnectDelay = 1000;
+
+      // Start sending ping every 30 seconds to keep connection alive
+      this.startPing();
+    }
+
+    private handleMessage(event: MessageEvent) {
+      try {
+        const message = JSON.parse(event.data);
+        console.log('📩 Received message:', message);
+
+        switch (message.type) {
+          case 'message.new':
+            this.handleNewMessage(message.payload.message);
+            break;
+          case 'message.sent':
+            this.handleMessageSent(message.payload.message, message.payload.tempId);
+            break;
+          case 'message.read_receipt':
+            this.handleReadReceipt(message.payload);
+            break;
+          case 'typing':
+            this.handleTyping(message.payload);
+            break;
+          case 'user.status':
+            this.handleUserStatus(message.payload);
+            break;
+          case 'pong':
+            // Keep-alive response
+            break;
+          case 'error':
+            console.error('❌ Server error:', message.error);
+            break;
+          default:
+            console.warn('Unknown message type:', message.type);
+        }
+      } catch (error) {
+        console.error('Failed to parse message:', error);
+      }
+    }
+
+    private handleError(event: Event) {
+      console.error('❌ WebSocket error:', event);
+    }
+
+    private handleClose(event: CloseEvent) {
+      console.log(`🔌 WebSocket closed: ${event.code}`, event.reason);
+
+      this.stopPing();
+
+      // Auto-reconnect unless it's a permanent error
+      if (event.code !== 1000 && event.code !== 1001) {
+        this.scheduleReconnect();
+      }
+    }
+
+    private scheduleReconnect() {
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.error('❌ Max reconnect attempts reached');
+        return;
+      }
+
+      this.reconnectAttempts++;
+      const delay = Math.min(this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1), 30000);
+
+      console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})...`);
+
+      setTimeout(() => {
+        this.connect();
+      }, delay);
+    }
+
+    private startPing() {
+      this.stopPing();
+
+      this.pingInterval = setInterval(() => {
+        if (this.isConnected()) {
+          this.send({
+            type: 'ping',
+            payload: {}
+          });
+        }
+      }, 30000); // Ping every 30 seconds
+    }
+
+    private stopPing() {
+      if (this.pingInterval) {
+        clearInterval(this.pingInterval);
+        this.pingInterval = null;
+      }
+    }
+
+    // ==================== Send Methods ====================
+
+    sendMessage(conversationId: string, content: string, tempId?: string) {
+      this.send({
+        type: 'message.send',
+        payload: {
+          conversationId,
+          type: 'text',
+          content,
+          tempId: tempId || `temp-${Date.now()}`
+        }
+      });
+    }
+
+    sendMediaMessage(conversationId: string, media: any[], content?: string, tempId?: string) {
+      this.send({
+        type: 'message.send',
+        payload: {
+          conversationId,
+          type: media[0].type, // 'image', 'video', 'file'
+          content,
+          media,
+          tempId: tempId || `temp-${Date.now()}`
+        }
+      });
+    }
+
+    markAsRead(conversationId: string, messageId: string) {
+      this.send({
+        type: 'message.read',
+        payload: {
+          conversationId,
+          messageId
+        }
+      });
+    }
+
+    startTyping(conversationId: string) {
+      this.send({
+        type: 'typing.start',
+        payload: {
+          conversationId
+        }
+      });
+    }
+
+    stopTyping(conversationId: string) {
+      this.send({
+        type: 'typing.stop',
+        payload: {
+          conversationId
+        }
+      });
+    }
+
+    // ==================== Helper Methods ====================
+
+    private send(message: any) {
+      if (this.isConnected()) {
+        this.ws!.send(JSON.stringify(message));
+      } else {
+        console.error('❌ WebSocket not connected');
+      }
+    }
+
+    isConnected(): boolean {
+      return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+    }
+
+    disconnect() {
+      this.stopPing();
+      if (this.ws) {
+        this.ws.close(1000, 'Client disconnect');
+        this.ws = null;
+      }
+    }
+
+    // ==================== Event Handlers (override these) ====================
+
+    private handleNewMessage(message: any) {
+      console.log('New message received:', message);
+      // Override this in your app to update UI
+    }
+
+    private handleMessageSent(message: any, tempId?: string) {
+      console.log('Message sent confirmation:', message, tempId);
+      // Override this to replace optimistic message with real one
+    }
+
+    private handleReadReceipt(payload: any) {
+      console.log('Message read:', payload);
+      // Override this to update message status
+    }
+
+    private handleTyping(payload: any) {
+      console.log('User typing:', payload);
+      // Override this to show typing indicator
+    }
+
+    private handleUserStatus(payload: any) {
+      console.log('User status changed:', payload);
+      // Override this to update online/offline status
+    }
+  }
+
+  export default ChatWebSocketManager;
+
+  ---
+  2. React Hook Usage Example:
+
+  // useChatWebSocket.ts
+  import { useEffect, useRef, useState } from 'react';
+  import ChatWebSocketManager from './chatWebSocket';
+
+  export function useChatWebSocket(token: string) {
+    const wsRef = useRef<ChatWebSocketManager | null>(null);
+    const [isConnected, setIsConnected] = useState(false);
+    const [messages, setMessages] = useState<any[]>([]);
+
+    useEffect(() => {
+      if (!token) return;
+
+      // Create WebSocket manager
+      const ws = new ChatWebSocketManager(token);
+
+      // Override event handlers
+      ws.handleNewMessage = (message) => {
+        setMessages(prev => [...prev, message]);
+      };
+
+      ws.handleMessageSent = (message, tempId) => {
+        setMessages(prev =>
+          prev.map(m => m.tempId === tempId ? message : m)
+        );
+      };
+
+      ws.connect();
+      wsRef.current = ws;
+
+      // Update connection status
+      const checkConnection = setInterval(() => {
+        setIsConnected(ws.isConnected());
+      }, 1000);
+
+      return () => {
+        clearInterval(checkConnection);
+        ws.disconnect();
+      };
+    }, [token]);
+
+    return {
+      isConnected,
+      messages,
+      sendMessage: (conversationId: string, content: string) =>
+        wsRef.current?.sendMessage(conversationId, content),
+      markAsRead: (conversationId: string, messageId: string) =>
+        wsRef.current?.markAsRead(conversationId, messageId),
+      startTyping: (conversationId: string) =>
+        wsRef.current?.startTyping(conversationId),
+      stopTyping: (conversationId: string) =>
+        wsRef.current?.stopTyping(conversationId),
+    };
+  }
+
+  ---
+  3. Message Protocol
+
+  Client → Server Messages:
+
+  // 1. Send Text Message
+  {
+    type: "message.send",
+    payload: {
+      conversationId: "uuid",
+      type: "text",
+      content: "Hello!",
+      tempId: "temp-123" // Optional, for optimistic updates
+    }
+  }
+
+  // 2. Send Media Message
+  {
+    type: "message.send",
+    payload: {
+      conversationId: "uuid",
+      type: "image", // or "video", "file"
+      content: "Optional caption",
+      media: [{
+        type: "image",
+        url: "https://...",
+        thumbnail: "https://...",
+        width: 1920,
+        height: 1080
+      }],
+      tempId: "temp-456"
+    }
+  }
+
+  // 3. Mark as Read
+  {
+    type: "message.read",
+    payload: {
+      conversationId: "uuid",
+      messageId: "uuid"
+    }
+  }
+
+  // 4. Typing Indicators
+  {
+    type: "typing.start",
+    payload: { conversationId: "uuid" }
+  }
+
+  {
+    type: "typing.stop",
+    payload: { conversationId: "uuid" }
+  }
+
+  // 5. Keep-Alive Ping
+  {
+    type: "ping",
+    payload: {}
+  }
+
+  Server → Client Messages:
+
+  // 1. New Message from Other User
+  {
+    type: "message.new",
+    payload: {
+      message: { /* full message object */ }
+    }
+  }
+
+  // 2. Message Sent Confirmation
+  {
+    type: "message.sent",
+    payload: {
+      message: { /* full message object */ },
+      tempId: "temp-123" // For matching with optimistic update
+    }
+  }
+
+  // 3. Read Receipt
+  {
+    type: "message.read_receipt",
+    payload: {
+      conversationId: "uuid",
+      messageId: "uuid",
+      readBy: "uuid",
+      readAt: "2025-11-07T..."
+    }
+  }
+
+  // 4. Typing Indicator
+  {
+    type: "typing",
+    payload: {
+      conversationId: "uuid",
+      userId: "uuid",
+      isTyping: true
+    }
+  }
+
+  // 5. User Status (Online/Offline)
+  {
+    type: "user.status",
+    payload: {
+      userId: "uuid",
+      status: "online" // or "offline"
+    }
+  }
+
+  // 6. Error
+  {
+    type: "error",
+    error: {
+      code: "validation_error",
+      message: "Error message"
+    }
+  }
+
+  ---
+  สรุป:
+
+  1. ✅ URL ที่ถูกต้อง: ws://localhost:8080/chat/ws?token=YOUR_JWT_TOKEN
+  2. ✅ Authentication: ผ่าน query parameter ?token=...
+  3. ✅ Keep-Alive: ส่ง ping ทุก 30 วินาที
+  4. ✅ Auto-Reconnect: Exponential backoff (1s, 2s, 4s, 8s, 16s, max 30s)
+  5. ✅ Message Format: JSON with type and payload
+
+  ลองใช้ code ด้านบนแทนที่ใน chatWebSocket.ts ของคุณครับ! 🚀
