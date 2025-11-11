@@ -155,64 +155,8 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push notification event - will be implemented later
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Push notification received');
-
-  if (!event.data) {
-    console.log('[Service Worker] Push event has no data');
-    return;
-  }
-
-  try {
-    const data = event.data.json();
-    const title = data.title || 'SUEKK';
-    const options = {
-      body: data.body || 'คุณมีการแจ้งเตือนใหม่',
-      icon: data.icon || '/logo.png',
-      badge: '/logo.png',
-      tag: data.tag || 'notification',
-      data: {
-        url: data.url || '/',
-        ...data.data,
-      },
-      requireInteraction: false,
-      vibrate: [200, 100, 200],
-    };
-
-    event.waitUntil(
-      self.registration.showNotification(title, options)
-    );
-  } catch (error) {
-    console.error('[Service Worker] Error handling push:', error);
-  }
-});
-
-// Notification click event
-self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification clicked');
-
-  event.notification.close();
-
-  const urlToOpen = event.notification.data?.url || '/';
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((clientList) => {
-        // Check if there's already a window open
-        for (const client of clientList) {
-          if (client.url === urlToOpen && 'focus' in client) {
-            return client.focus();
-          }
-        }
-
-        // Open new window
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen);
-        }
-      })
-  );
-});
+// Push notifications removed (iOS not supported)
+// Use WebSocket notifications instead for real-time updates
 
 // Message event - for communication with main thread
 self.addEventListener('message', (event) => {

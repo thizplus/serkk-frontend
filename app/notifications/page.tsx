@@ -21,8 +21,6 @@ import {
 } from "@/features/notifications";
 import type { NotificationType } from "@/types/common";
 import type { Notification } from "@/types/models";
-import { TestPushButton } from "@/features/pwa";
-import { PushDebugPanel } from "@/features/pwa";
 import { LoadingState } from "@/components/common/LoadingState";
 import { LOADING_MESSAGES } from "@/config";
 
@@ -220,14 +218,6 @@ export default function NotificationsPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            {/* Push Notification Toggle */}
-          
-
-            {/* Right Side: Action Buttons */}
-            <div className="flex justify-between w-full flex-wrap gap-2">
-              {/* Test Push Button (Dev Only) */}
-              {process.env.NODE_ENV === 'development' && <TestPushButton />}
-
             {/* Mark All as Read */}
             {unreadCount > 0 && (
               <Button
@@ -244,7 +234,6 @@ export default function NotificationsPage() {
                 <span className="whitespace-nowrap">อ่านทั้งหมด</span>
               </Button>
             )}
-            </div>
           </div>
         </div>
 
@@ -380,13 +369,6 @@ export default function NotificationsPage() {
             )}
           </TabsContent>
         </Tabs>
-
-        {/* Debug Panel (Development Only) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-8">
-            <PushDebugPanel />
-          </div>
-        )}
       </div>
     </AppLayout>
   );
