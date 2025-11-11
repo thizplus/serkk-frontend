@@ -15,9 +15,9 @@ import type {
   FileValidation,
   UploadProgressCallback,
   UploadAdditionalData,
-} from '@/shared/types/upload';
-import { API_BASE_URL } from '@/shared/lib/constants/api';
-import { MEDIA_API } from '@/shared/lib/constants/api';
+} from '@/types/upload';
+import { API_BASE_URL } from '@/lib/constants/api';
+import { MEDIA_API } from '@/lib/constants/api';
 
 /**
  * Get JWT token from storage

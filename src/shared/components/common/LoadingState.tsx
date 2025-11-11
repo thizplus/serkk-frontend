@@ -3,7 +3,7 @@
 // คอมโพเนนต์แสดงสถานะกำลังโหลด
 
 import { cn } from '@/lib/utils';
-import { Loader2 } from '@/shared/config/icons';
+import { Loader2 } from '@/config/icons';
 
 interface LoadingStateProps {
   message?: string;

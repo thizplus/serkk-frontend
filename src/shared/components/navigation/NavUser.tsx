@@ -7,7 +7,7 @@ import {
   ChevronsUpDown,
   LogOut,
   User,
-} from '@/shared/config/icons';
+} from '@/config/icons';
 
 import {
   Avatar,

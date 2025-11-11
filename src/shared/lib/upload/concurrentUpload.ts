@@ -5,9 +5,9 @@ import {
   uploadToR2,
   confirmUpload,
   confirmBatchUpload
-} from '@/shared/lib/api/r2-upload.service';
+} from '@/lib/api/r2-upload.service';
 import type { UploadProgress, UploadOptions, UploadResult } from './types';
-import { FORM_LIMITS } from '@/shared/config';
+import { FORM_LIMITS } from '@/config';
 
 /**
  * Upload หลายไฟล์พร้อมกัน (concurrent) ด้วย p-limit + Batch API

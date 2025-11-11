@@ -4,9 +4,9 @@
 // Updated: ใช้ Cloudflare R2 Direct Upload (Presigned URL)
 // ============================================================================
 
-import apiService from '@/shared/lib/api/http-client';
+import apiService from '@/lib/api/http-client';
 import { API } from '@/lib/constants/api';
-import type { GetUserMediaParams } from '@/shared/types/request';
+import type { GetUserMediaParams } from '@/types/request';
 import type {
   UploadImageResponse,
   UploadVideoResponse,
@@ -14,7 +14,7 @@ import type {
   GetMediaResponse,
   GetUserMediaResponse,
   DeleteMediaResponse,
-} from '@/shared/types/response';
+} from '@/types/response';
 import {
   uploadFileToR2,
   validateFile as r2ValidateFile,
@@ -22,8 +22,8 @@ import {
   requestPresignedURL,
   uploadToR2,
   confirmUpload,
-} from '@/shared/lib/api/r2-upload.service';
-import type { UploadAdditionalData } from '@/shared/types/upload';
+} from '@/lib/api/r2-upload.service';
+import type { UploadAdditionalData } from '@/types/upload';
 
 // ============================================================================
 // CONSTANTS

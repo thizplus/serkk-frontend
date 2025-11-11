@@ -3,17 +3,17 @@
 // จัดการการเรียก API ที่เกี่ยวกับ Voting (Upvote/Downvote)
 // ============================================================================
 
-import apiService from '@/shared/lib/api/http-client';
+import apiService from '@/lib/api/http-client';
 import { API } from '@/lib/constants/api';
-import type { VoteRequest, GetUserVotesParams } from '@/shared/types/request';
+import type { VoteRequest, GetUserVotesParams } from '@/types/request';
 import type {
   VoteResponse,
   UnvoteResponse,
   GetVoteResponse,
   GetVoteCountResponse,
   GetUserVotesResponse,
-} from '@/shared/types/response';
-import type { TargetType } from '@/shared/types';
+} from '@/types/response';
+import type { TargetType } from '@/types';
 
 /**
  * Vote Service

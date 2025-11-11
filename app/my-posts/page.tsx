@@ -5,11 +5,11 @@ import AppLayout from "@/components/layouts/AppLayout";
 import { PostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Plus, Loader2 } from "@/shared/config/icons";
+import { FileText, Plus, Loader2 } from "@/config/icons";
 import { useUser, useHasHydrated } from "@/features/auth";
 import { useUserPosts } from "@/features/posts";
 import { LoadingState, EmptyState } from "@/components/common";
-import { LOADING_MESSAGES, PAGINATION } from "@/shared/config";
+import { LOADING_MESSAGES, PAGINATION } from "@/config";
 
 export const dynamic = 'force-dynamic';
 

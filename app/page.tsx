@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
 import { InfinitePostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
-import { Plus } from "@/shared/config/icons";
-import { PAGINATION } from "@/shared/config";
+import { Plus } from "@/config/icons";
+import { PAGINATION } from "@/config";
 import { useInfinitePosts } from "@/features/posts";
 
 export const dynamic = 'force-dynamic';

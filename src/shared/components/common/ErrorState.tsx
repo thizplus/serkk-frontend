@@ -4,9 +4,9 @@
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw, Home } from '@/shared/config/icons';
-import type { IconName } from '@/shared/config/icons';
-import * as Icons from '@/shared/config/icons';
+import { AlertCircle, RefreshCw, Home } from '@/config/icons';
+import type { IconName } from '@/config/icons';
+import * as Icons from '@/config/icons';
 
 interface ErrorStateProps {
   title?: string;

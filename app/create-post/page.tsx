@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
 import { CreatePostForm, useCreatePost, useCreateCrosspost, usePost } from "@/features/posts";
 import { Card, CardContent } from "@/components/ui/card";
-import type { CreatePostRequest, CreateCrosspostRequest } from "@/shared/types/request";
+import type { CreatePostRequest, CreateCrosspostRequest } from "@/types/request";
 
 export const dynamic = 'force-dynamic';
 

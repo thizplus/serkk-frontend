@@ -8,7 +8,7 @@ import { useChatStore, useConversationMessages } from "@/features/chat";
 import { useAuthStore } from "@/features/auth";
 import ChatLayout from "@/components/layouts/ChatLayout";
 import { toast } from "sonner";
-import { TOAST_MESSAGES } from "@/shared/config";
+import { TOAST_MESSAGES } from "@/config";
 
 interface SelectedFile {
   file: File;

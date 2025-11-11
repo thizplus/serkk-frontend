@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Loader2, ArrowLeft, Bell, MessageSquare, Heart, UserPlus, Mail } from "@/shared/config/icons";
+import { Loader2, ArrowLeft, Bell, MessageSquare, Heart, UserPlus, Mail } from "@/config/icons";
 import {
   useNotificationSettings,
   useUpdateNotificationSettings

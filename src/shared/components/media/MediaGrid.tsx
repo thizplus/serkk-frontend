@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { X, Video as VideoIcon, Play } from "@/shared/config/icons";
+import { X, Video as VideoIcon, Play } from "@/config/icons";
 import { cn } from "@/lib/utils";
-import { FORM_LIMITS } from "@/shared/config";
+import { FORM_LIMITS } from "@/config";
 import { MediaLightbox } from "./MediaLightbox";
 
 interface MediaItem {

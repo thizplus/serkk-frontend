@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Hash, Plus } from "@/shared/config/icons";
+import { ArrowLeft, Hash, Plus } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InfinitePostFeed } from "@/features/posts";
 import { useInfinitePostsByTagId } from "@/features/posts";
 import { useSearchTags } from "@/features/tags";
-import { PAGINATION } from "@/shared/config";
+import { PAGINATION } from "@/config";
 
 type SortBy = 'hot' | 'new' | 'top';
 

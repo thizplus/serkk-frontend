@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, UserPlus, Loader2 } from "@/shared/config/icons";
+import { ArrowLeft, UserPlus, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { useFollowing } from "@/features/profile";
 import { useUserProfile } from "@/features/profile";
 import { useUser, useHasHydrated } from '@/features/auth';
 import { UserCard } from "@/features/profile";
-import { PAGINATION } from "@/shared/config";
+import { PAGINATION } from "@/config";
 
 export default function FollowingPage() {
   const params = useParams();

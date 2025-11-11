@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
-import { XIcon } from "@/shared/config/icons"
+import { XIcon } from "@/config/icons"
 
 import { cn } from "@/lib/utils"
 

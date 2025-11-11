@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, MessageCircle, ArrowLeft, MoreVertical, Ban } from "@/shared/config/icons";
+import { Bell, MessageCircle, ArrowLeft, MoreVertical, Ban } from "@/config/icons";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,9 +25,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useProfile } from "@/features/profile";
 import { useAuthStore } from '@/features/auth';
-import { useNotificationWebSocket } from "@/shared/hooks/useNotificationWebSocket";
+import { useNotificationWebSocket } from "@/hooks/useNotificationWebSocket";
 import { useUnreadNotificationCount } from "@/features/notifications";
-import { useHydration } from "@/shared/hooks/useHydration";
+import { useHydration } from "@/hooks/useHydration";
 import { formatLastSeen } from "@/lib/data/mockChats";
 import type { ChatUser } from "@/lib/data/mockChats";
 

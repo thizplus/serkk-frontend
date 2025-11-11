@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "@/shared/config/icons";
+import { ArrowLeft, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { PostCard } from "@/features/posts";
 import { CommentTree } from "@/features/comments";
@@ -16,7 +16,7 @@ import {
   useDeleteComment
 } from "@/features/comments";
 import { useToggleVote } from "@/features/posts";
-import type { CommentWithReplies } from "@/shared/types/models";
+import type { CommentWithReplies } from "@/types/models";
 
 interface PostDetailContentProps {
   postId: string;

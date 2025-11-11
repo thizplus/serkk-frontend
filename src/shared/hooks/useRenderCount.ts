@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { logger, DEBUG_CATEGORIES } from '@/shared/lib/utils/logger';
+import { logger, DEBUG_CATEGORIES } from '@/lib/utils/logger';
 
 /**
  * Hook to track component render count

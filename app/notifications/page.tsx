@@ -7,8 +7,8 @@ import AppLayout from "@/components/layouts/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Bell, MessageSquare, ThumbsUp, AtSign, UserPlus, Check, Trash2, Loader2, Settings } from "@/shared/config/icons";
-import { PAGINATION } from "@/shared/config";
+import { Bell, MessageSquare, ThumbsUp, AtSign, UserPlus, Check, Trash2, Loader2, Settings } from "@/config/icons";
+import { PAGINATION } from "@/config";
 import { EmptyState } from "@/components/common";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
@@ -19,12 +19,12 @@ import {
   useMarkAllAsRead,
   useDeleteNotification,
 } from "@/features/notifications";
-import type { NotificationType } from "@/shared/types/common";
-import type { Notification } from "@/shared/types/models";
+import type { NotificationType } from "@/types/common";
+import type { Notification } from "@/types/models";
 import { TestPushButton } from "@/features/pwa";
 import { PushDebugPanel } from "@/features/pwa";
 import { LoadingState } from "@/components/common/LoadingState";
-import { LOADING_MESSAGES } from "@/shared/config";
+import { LOADING_MESSAGES } from "@/config";
 
 export const dynamic = 'force-dynamic';
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Search, PlusCircle, MessageCircle, User } from "@/shared/config/icons";
+import { Home, Search, PlusCircle, MessageCircle, User } from "@/config/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from '@/features/auth';
 import { useChatStore } from "@/features/chat/stores/chat";

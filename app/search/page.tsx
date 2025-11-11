@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, FileText, User, Loader2 } from "@/shared/config/icons";
+import { Search, FileText, User, Loader2 } from "@/config/icons";
 import { useSearch } from "@/features/search";
-import type { User as UserType } from "@/shared/types/models";
+import type { User as UserType } from "@/types/models";
 import { LoadingState, EmptyState } from "@/components/common";
-import { LOADING_MESSAGES, PAGINATION } from "@/shared/config";
+import { LOADING_MESSAGES, PAGINATION } from "@/config";
 
 export const dynamic = 'force-dynamic';
 

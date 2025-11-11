@@ -10,8 +10,8 @@ import {
   uploadFileWithRetry,
   validateFile,
   getUploadErrorMessage,
-} from '@/shared/lib/api/r2-upload.service';
-import type { UploadAdditionalData } from '@/shared/types/upload';
+} from '@/lib/api/r2-upload.service';
+import type { UploadAdditionalData } from '@/types/upload';
 
 /**
  * Hook Options

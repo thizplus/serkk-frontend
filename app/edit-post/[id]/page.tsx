@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { X, Loader2, ArrowLeft } from "@/shared/config/icons";
+import { X, Loader2, ArrowLeft } from "@/config/icons";
 import Image from "next/image";
 import { toast } from "sonner";
 import { usePost, useUpdatePost } from "@/features/posts";
 import { useUser } from '@/features/auth';
-import { FORM_LIMITS } from "@/shared/config";
+import { FORM_LIMITS } from "@/config";
 
 export const dynamic = 'force-dynamic';
 

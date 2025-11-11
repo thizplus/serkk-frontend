@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Bell, MessageCircle } from "@/shared/config/icons";
+import { Bell, MessageCircle } from "@/config/icons";
 
 import { AppLogo } from "@/components/common";
 import { MobileBottomNav } from "@/components/layouts/MobileBottomNav";
 import { UpdatePromptAuto } from "@/features/pwa/components/UpdatePromptAuto";
 import { PWAInstallButton } from "@/features/pwa/components/PWAInstallButton";
-import { useHydration } from "@/shared/hooks/useHydration";
+import { useHydration } from "@/hooks/useHydration";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,10 +29,10 @@ import { useUnreadNotificationCount } from "@/features/notifications";
 import { useProfile } from "@/features/profile";
 import { useAuthStore } from '@/features/auth';
 
-import { useNotificationWebSocket } from "@/shared/hooks/useNotificationWebSocket";
-import { AppSidebar } from "@/shared/components/navigation/AppSidebar";
+import { useNotificationWebSocket } from "@/hooks/useNotificationWebSocket";
+import { AppSidebar } from "@/components/navigation/AppSidebar";
 import { useChatStore } from "@/features/chat";
-import { ThemeToggle } from "@/shared/components/navigation/ThemeToggle";
+import { ThemeToggle } from "@/components/navigation/ThemeToggle";
 
 interface BreadcrumbItem {
   label: string;

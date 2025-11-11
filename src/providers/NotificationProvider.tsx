@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/features/auth";
-import notificationService from "@/shared/lib/websocket/notification.service";
+import notificationService from "@/lib/websocket/notification.service";
 import { useQueryClient } from "@tanstack/react-query";
 
 /**

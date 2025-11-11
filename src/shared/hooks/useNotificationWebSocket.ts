@@ -5,7 +5,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import notificationService from '@/shared/lib/websocket/notification.service';
+import notificationService from '@/lib/websocket/notification.service';
 import { useAuthStore } from '@/features/auth';
 import { useChatStore } from '@/features/chat/stores/chat';
 

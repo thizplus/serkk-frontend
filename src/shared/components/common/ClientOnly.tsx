@@ -1,6 +1,6 @@
 'use client';
 
-import { useHydration } from '@/shared/hooks/useHydration';
+import { useHydration } from '@/hooks/useHydration';
 
 interface ClientOnlyProps {
   children: React.ReactNode;

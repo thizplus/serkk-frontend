@@ -12,12 +12,12 @@ import {
   MessageCircle,
   LifeBuoy,
   Send,
-} from "@/shared/config/icons"
+} from "@/config/icons"
 
-import { NavMain } from "@/shared/components/navigation/NavMain"
-import { NavSecondary } from "@/shared/components/navigation/NavSecondary"
-import { NavUser } from "@/shared/components/navigation/NavUser"
-import { AppLogo } from "@/shared/components/common/AppLogo"
+import { NavMain } from "@/components/navigation/NavMain"
+import { NavSecondary } from "@/components/navigation/NavSecondary"
+import { NavUser } from "@/components/navigation/NavUser"
+import { AppLogo } from "@/components/common/AppLogo"
 import { useChatStore } from "@/features/chat"
 import {
   Sidebar,
