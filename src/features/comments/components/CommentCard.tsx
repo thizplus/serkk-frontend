@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { MessageSquare, ChevronDown, ChevronRight } from "lucide-react";
-import { VoteButtons } from "@/features/posts/components/VoteButtons";
+import { VoteButtons } from "@/features/posts";
 import { CommentForm } from "./CommentForm";
 import { CommentActions } from "./CommentActions";
 import { DeleteCommentDialog } from "./DeleteCommentDialog";
