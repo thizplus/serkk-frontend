@@ -12,8 +12,8 @@ const webpush = require('web-push');
 
 // VAPID Keys (ต้องตรงกับ backend)
 const vapidKeys = {
-  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'YOUR_VAPID_PUBLIC_KEY',
-  privateKey: process.env.VAPID_PRIVATE_KEY || 'YOUR_VAPID_PRIVATE_KEY',
+  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BEZ3oy9yXimkiImDecQs-GC5rr9FMp9Y_u0AfmpYbpm3f9lB0pgQ-VdAeI10iPrN1zP6L_DLLnpur1lwzuQhFDo',
+  privateKey: process.env.VAPID_PRIVATE_KEY || '7iN1LJaE-x7-X6EbL92mVUErWm4fBrpkbXkDJwYxEKA',
 };
 
 // ตั้งค่า VAPID
