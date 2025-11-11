@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import userService from '../services/user.service';
 import { useAuthStore } from '@/features/auth';
-import type { UpdateProfileRequest } from '@/shared/types/request';
+import type { UpdateProfileRequest } from '@/types/request';
 import { toast } from 'sonner';
 import { userKeys } from './useUsers';
 

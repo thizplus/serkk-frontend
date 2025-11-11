@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { UserPlus, UserMinus } from "lucide-react";
 import { useUser } from '@/features/auth';
 import { useToggleFollow } from "../hooks/useFollowMutations";
-import type { UserWithFollowStatus } from "@/shared/types/models";
+import type { UserWithFollowStatus } from "@/types/models";
 
 interface UserCardProps {
   user: UserWithFollowStatus;

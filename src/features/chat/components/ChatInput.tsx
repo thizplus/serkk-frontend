@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, memo, KeyboardEvent, ChangeEvent } from "react";
-import { Send, Paperclip, ImageIcon, X } from "@/shared/config/icons";
+import { Send, Paperclip, ImageIcon, X } from "@/config/icons";
 import { Button } from "@/components/ui/button";
 import { EmojiPicker } from "./EmojiPicker";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { TOAST_MESSAGES } from "@/shared/config";
+import { TOAST_MESSAGES } from "@/config";
 
 interface SelectedFile {
   file: File;

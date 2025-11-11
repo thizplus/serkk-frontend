@@ -26,4 +26,4 @@ export type {
   CreateCommentRequest,
   UpdateCommentRequest,
   GetCommentsParams
-} from '@/shared/types';
+} from '@/types';

@@ -4,10 +4,10 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { OnlineStatus } from "./OnlineStatus";
-import { formatMessageTime } from "@/shared/lib/data/mockChats";
-import { useHydration } from "@/shared/hooks/useHydration";
+import { formatMessageTime } from "@/lib/data/mockChats";
+import { useHydration } from "@/hooks/useHydration";
 import { cn } from "@/lib/utils";
-import type { Conversation, ChatMessage, LastMessage } from "@/shared/types/models";
+import type { Conversation, ChatMessage, LastMessage } from "@/types/models";
 
 interface ChatListItemProps {
   conversation: Conversation;

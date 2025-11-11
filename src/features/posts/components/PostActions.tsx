@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Edit, Trash2 } from "@/shared/config/icons";
+import { MoreHorizontal, Edit, Trash2 } from "@/config/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,

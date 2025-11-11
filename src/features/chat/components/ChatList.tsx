@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "@/shared/config/icons";
+import { Search } from "@/config/icons";
 import { Input } from "@/components/ui/input";
 import { ChatListItem } from "./ChatListItem";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Conversation } from "@/shared/types/models";
+import type { Conversation } from "@/types/models";
 
 interface ChatListProps {
   conversations: Conversation[];

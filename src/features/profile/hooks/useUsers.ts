@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import userService from '../services/user.service';
-import type { PaginationParams } from '@/shared/types/common';
+import type { PaginationParams } from '@/types/common';
 
 /**
  * Query Keys สำหรับ User-related queries

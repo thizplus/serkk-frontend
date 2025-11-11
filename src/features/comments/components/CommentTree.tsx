@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { CommentCard } from "./CommentCard";
-import { EmptyComments } from "@/shared/components/common";
-import type { CommentWithReplies } from "@/shared/types/models";
+import { EmptyComments } from "@/components/common";
+import type { CommentWithReplies } from "@/types/models";
 
 interface CommentTreeProps {
   comments: CommentWithReplies[];

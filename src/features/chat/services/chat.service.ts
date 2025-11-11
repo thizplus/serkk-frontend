@@ -3,14 +3,14 @@
 // จัดการการเรียก API ที่เกี่ยวกับ Chat (Conversations, Messages, Blocks)
 // ============================================================================
 
-import apiService from '@/shared/lib/api/http-client';
-import { API } from '@/shared/lib/constants/api';
+import apiService from '@/lib/api/http-client';
+import { API } from '@/lib/constants/api';
 import type {
   GetConversationsParams,
   GetMessagesParams,
   SendMessageRequest,
   MarkAsReadRequest,
-} from '@/shared/types/request';
+} from '@/types/request';
 import type {
   GetConversationsResponse,
   GetConversationByUsernameResponse,
@@ -25,7 +25,7 @@ import type {
   GetMessageResponse,
   GetMessageContextResponse,
   GetConversationMediaResponse,
-} from '@/shared/types/response';
+} from '@/types/response';
 
 // ============================================================================
 // CHAT SERVICE

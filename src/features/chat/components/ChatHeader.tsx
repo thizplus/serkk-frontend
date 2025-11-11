@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { OnlineStatus } from "./OnlineStatus";
 import { ChatProfileSheet } from "./ChatProfileSheet";
-import { formatLastSeen } from "@/shared/lib/data/mockChats";
-import { useHydration } from "@/shared/hooks/useHydration";
-import type { ChatUser } from "@/shared/lib/data/mockChats";
-import type { ChatUser as RealChatUser } from "@/shared/types/models";
+import { formatLastSeen } from "@/lib/data/mockChats";
+import { useHydration } from "@/hooks/useHydration";
+import type { ChatUser } from "@/lib/data/mockChats";
+import type { ChatUser as RealChatUser } from "@/types/models";
 
 interface ChatHeaderProps {
   user: ChatUser | RealChatUser;

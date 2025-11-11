@@ -9,9 +9,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import followService from '../services/follow.service';
 import { userKeys } from './useUsers';
-import type { UserWithFollowStatus } from '@/shared/types/models';
+import type { UserWithFollowStatus } from '@/types/models';
 import { useAuthStore } from '@/features/auth';
-import { TOAST_MESSAGES } from '@/shared/config';
+import { TOAST_MESSAGES } from '@/config';
 
 // ============================================================================
 // MUTATION: FOLLOW USER

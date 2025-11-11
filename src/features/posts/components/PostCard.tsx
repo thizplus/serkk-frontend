@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { MessageSquare, Bookmark, Repeat2, FileText, Loader2 } from "@/shared/config/icons";
+import { MessageSquare, Bookmark, Repeat2, FileText, Loader2 } from "@/config/icons";
 import { VoteButtons } from "./VoteButtons";
 import { ShareDropdown } from "./ShareDropdown";
 import { PostActions } from "./PostActions";
-import { Badge } from "@/shared/components/ui/badge";
-import { Progress } from "@/shared/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import type { Post } from "@/shared/types/models";
+import type { Post } from "@/types/models";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { useToggleVote } from "../hooks/useVotes";
@@ -17,7 +17,7 @@ import { useToggleSave } from "../hooks/useSaved";
 import { useDeletePost } from "../hooks/usePosts";
 import { useUser } from '@/features/auth';
 import { LinkifiedContent } from "@/components/common";
-import { MediaGrid } from "@/shared/components/media/MediaGrid";
+import { MediaGrid } from "@/components/media/MediaGrid";
 
 interface PostCardProps {
   post: Post;

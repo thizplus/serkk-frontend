@@ -50,7 +50,10 @@
       "Bash(tree:*)",
       "Bash(echo:*)",
       "Bash(powershell \"Get-PSDrive C | Select-Object Used,Free,@{Name=''Total'';Expression={$_Used+$_Free}}\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git checkout:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(node refactor-temp.js:*)"
     ],
     "deny": [],
     "ask": []

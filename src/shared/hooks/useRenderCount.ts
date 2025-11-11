@@ -57,7 +57,7 @@ export function useRenderCount(componentName: string, props?: any) {
  * }
  */
 export function useWhyDidYouUpdate(componentName: string, props: any) {
-  const previousProps = useRef<any>();
+  const previousProps = useRef<any>(undefined);
 
   useEffect(() => {
     if (previousProps.current) {

@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import tagService from '../services/tag.service';
-import type { GetTagsParams, GetPopularTagsParams, SearchTagsParams } from '@/shared/types/request';
+import type { GetTagsParams, GetPopularTagsParams, SearchTagsParams } from '@/types/request';
 
 // ============================================================================
 // QUERY KEYS

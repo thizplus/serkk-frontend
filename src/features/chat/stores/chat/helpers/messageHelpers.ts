@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@/shared/types/models';
+import type { ChatMessage } from '@/types/models';
 
 /**
  * Sort messages by date (ascending)

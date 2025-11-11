@@ -193,10 +193,20 @@ const mediaService = {
 
       // Return response with mediaId from backend
       return {
-        id: presignedData.mediaId, // ✅ ใช้ mediaId จาก backend
-        url: presignedData.fileUrl,
-        mediaType: 'image',
-        createdAt: new Date().toISOString(),
+        success: true,
+        message: 'Upload successful',
+        data: {
+          id: presignedData.mediaId, // ✅ ใช้ mediaId จาก backend
+          type: 'image' as const,
+          fileName: file.name,
+          mimeType: file.type,
+          size: file.size,
+          url: presignedData.fileUrl,
+          thumbnail: null,
+          width: undefined,
+          height: undefined,
+          duration: undefined,
+        },
       } as UploadImageResponse;
     } catch (error) {
       // Re-throw validation errors
@@ -254,11 +264,20 @@ const mediaService = {
 
       // Return response with mediaId from backend (no encoding needed - plays immediately)
       return {
-        id: presignedData.mediaId, // ✅ ใช้ mediaId จาก backend
-        url: presignedData.fileUrl,
-        mediaType: 'video',
-        createdAt: new Date().toISOString(),
-        // No encoding fields needed - video plays immediately
+        success: true,
+        message: 'Upload successful',
+        data: {
+          id: presignedData.mediaId, // ✅ ใช้ mediaId จาก backend
+          type: 'video' as const,
+          fileName: file.name,
+          mimeType: file.type,
+          size: file.size,
+          url: presignedData.fileUrl,
+          thumbnail: null,
+          width: undefined,
+          height: undefined,
+          duration: undefined,
+        },
       } as UploadVideoResponse;
     } catch (error) {
       // Re-throw validation errors
@@ -315,12 +334,18 @@ const mediaService = {
 
       // Return response with mediaId from backend
       return {
-        id: presignedData.mediaId, // ✅ ใช้ mediaId จาก backend
-        url: presignedData.fileUrl,
-        mediaType: 'file',
-        filename: file.name,
-        size: file.size,
-        createdAt: new Date().toISOString(),
+        success: true,
+        message: 'Upload successful',
+        data: {
+          id: presignedData.mediaId, // ✅ ใช้ mediaId จาก backend
+          type: 'file' as const,
+          fileName: file.name,
+          mimeType: file.type,
+          size: file.size,
+          url: presignedData.fileUrl,
+          thumbnail: null,
+          extension: file.name.split('.').pop(),
+        },
       } as UploadFileResponse;
     } catch (error) {
       // Re-throw validation errors

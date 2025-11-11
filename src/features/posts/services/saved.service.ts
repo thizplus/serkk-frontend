@@ -4,15 +4,15 @@
 // ============================================================================
 
 
-import apiService from '@/shared/lib/api/http-client';
-import { API } from '@/shared/lib/constants/api';
-import type { GetSavedPostsParams } from '@/shared/types/request';
+import apiService from '@/lib/api/http-client';
+import { API } from '@/lib/constants/api';
+import type { GetSavedPostsParams } from '@/types/request';
 import type {
   SavePostResponse,
   UnsavePostResponse,
   GetSavedStatusResponse,
   GetSavedPostsResponse,
-} from '@/shared/types/response';
+} from '@/types/response';
 
 /**
  * Saved Post Service

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import { Loader2 } from "@/shared/config/icons";
+import { Loader2 } from "@/config/icons";
 import { cn } from "@/lib/utils";
-import type { MessageMedia } from "@/shared/lib/data/mockChats";
-import type { ChatMessageMedia } from "@/shared/types/models";
+import type { MessageMedia } from "@/lib/data/mockChats";
+import type { ChatMessageMedia } from "@/types/models";
 
 interface ChatMessageImageProps {
   media: MessageMedia[] | ChatMessageMedia[];

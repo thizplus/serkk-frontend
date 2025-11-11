@@ -3,12 +3,12 @@
 // จัดการการเรียก API ที่เกี่ยวกับ Notifications (การแจ้งเตือน)
 // ============================================================================
 
-import apiService from '@/shared/lib/api/http-client';
-import { API } from '@/shared/lib/constants/api';
+import apiService from '@/lib/api/http-client';
+import { API } from '@/lib/constants/api';
 import type {
   GetNotificationsParams,
   UpdateNotificationSettingsRequest,
-} from '@/shared/types/request';
+} from '@/types/request';
 import type {
   GetNotificationsResponse,
   GetUnreadNotificationsResponse,
@@ -20,7 +20,7 @@ import type {
   DeleteAllNotificationsResponse,
   GetNotificationSettingsResponse,
   UpdateNotificationSettingsResponse,
-} from '@/shared/types/response';
+} from '@/types/response';
 
 /**
  * Notification Service

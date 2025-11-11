@@ -5,11 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { toast } from "sonner";
-import AppLayout from "@/shared/components/layouts/AppLayout";
-import { Button } from "@/shared/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import AppLayout from "@/components/layouts/AppLayout";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InfinitePostFeed } from "@/features/posts";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   MapPin,
   Globe,
@@ -20,16 +20,16 @@ import {
   MessageSquare,
   FileText,
   MessageCircle
-} from "@/shared/config/icons";
+} from "@/config/icons";
 import { useUser, useHasHydrated } from '@/features/auth';
 import { useInfiniteUserPosts } from "@/features/posts";
 import { useCommentsByAuthor } from "@/features/comments";
 import { useUserProfile } from "../hooks/useUsers";
 import { useToggleFollow } from "../hooks/useFollowMutations";
 import { ProfileCommentCard } from "@/features/comments";
-import { LinkifiedContent } from "@/shared/components/common";
-import { LoadingState, EmptyState } from "@/shared/components/common";
-import { LOADING_MESSAGES, TOAST_MESSAGES, PAGINATION } from "@/shared/config";
+import { LinkifiedContent } from "@/components/common";
+import { LoadingState, EmptyState } from "@/components/common";
+import { LOADING_MESSAGES, TOAST_MESSAGES, PAGINATION } from "@/config";
 
 interface ProfileContentProps {
   params: Promise<{

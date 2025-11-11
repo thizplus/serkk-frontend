@@ -16,4 +16,4 @@ export {
 export type {
   Notification,
   NotificationSettings
-} from '@/shared/types';
+} from '@/types';

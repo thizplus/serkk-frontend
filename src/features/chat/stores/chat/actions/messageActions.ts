@@ -1,10 +1,10 @@
 import type { StoreApi } from 'zustand';
 import type { ChatStoreState, MessageActions } from '../chatTypes';
-import type { ChatMessage } from '@/shared/types/models';
+import type { ChatMessage } from '@/types/models';
 import chatService from '../../../services/chat.service';
-import mediaService from '@/shared/lib/api/media.service';
+import mediaService from '@/lib/api/media.service';
 import { toast } from 'sonner';
-import { PAGINATION } from '@/shared/config';
+import { PAGINATION } from '@/config';
 import { reverseMessages, generateTempMessageId, getMessageType } from '../helpers/messageHelpers';
 
 /**
@@ -279,11 +279,13 @@ export const createMessageActions = (
             }
 
             // ✅ Push media object (not just URL string)
-            uploadedMedia.push({
-              url: uploadResult.url,
-              type: uploadResult.mediaType, // 'image', 'video', or 'file'
-              mediaId: uploadResult.id, // UUID from backend
-            });
+            if (uploadResult.data) {
+              uploadedMedia.push({
+                url: uploadResult.data.url,
+                type: uploadResult.data.type, // 'image', 'video', or 'file'
+                mediaId: uploadResult.data.id, // UUID from backend
+              });
+            }
           } catch (uploadError) {
             console.error('Failed to upload file:', uploadError);
             throw new Error(`ไม่สามารถอัปโหลดไฟล์ ${file.name} ได้`);

@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { CommentCard } from "./CommentCard";
-import { EmptyComments } from "@/shared/components/common";
-import type { Comment } from "@/shared/types/models";
+import { EmptyComments } from "@/components/common";
+import type { Comment } from "@/types/models";
 
 interface CommentListProps {
   comments: Comment[];

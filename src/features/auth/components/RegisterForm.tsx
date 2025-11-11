@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { useRegister, useGoogleOAuthUrl } from '../hooks/useAuth';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { TOAST_MESSAGES } from '@/shared/config';
+import { TOAST_MESSAGES } from '@/config';
 
 export function RegisterForm({
   className,

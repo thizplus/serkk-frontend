@@ -7,10 +7,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import voteService from '@/shared/lib/api/vote.service';
-import type { VoteRequest } from '@/shared/types/request';
-import type { TargetType, UserVote } from '@/shared/types/common';
-import { TOAST_MESSAGES } from '@/shared/config';
+import voteService from '@/lib/api/vote.service';
+import type { VoteRequest } from '@/types/request';
+import type { TargetType, UserVote } from '@/types/common';
+import { TOAST_MESSAGES } from '@/config';
 
 // ============================================================================
 // HELPER FUNCTIONS

@@ -4,10 +4,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import authService from '../services/auth.service';
 import { useAuthStore } from '../stores/authStore';
-import type { LoginRequest, RegisterRequest } from '@/shared/types/request';
-import type { User } from '@/shared/types/models';
+import type { LoginRequest, RegisterRequest } from '@/types/request';
+import type { User } from '@/types/models';
 import { toast } from 'sonner';
-import { TOAST_MESSAGES } from '@/shared/config';
+import { TOAST_MESSAGES } from '@/config';
 
 /**
  * Login mutation

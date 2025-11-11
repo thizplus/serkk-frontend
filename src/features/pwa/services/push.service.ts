@@ -4,7 +4,7 @@
  * - Handles push subscription/unsubscription
  */
 
-import apiService from '@/shared/lib/api/http-client';
+import apiService from '@/lib/api/http-client';
 
 export interface PushSubscriptionData {
   endpoint: string;

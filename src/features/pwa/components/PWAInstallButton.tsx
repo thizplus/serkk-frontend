@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X } from "@/shared/config/icons";
-import { Button } from "@/shared/components/ui/button";
+import { Download, X } from "@/config/icons";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**

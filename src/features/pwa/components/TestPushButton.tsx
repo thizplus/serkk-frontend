@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/shared/components/ui/button";
-import { Bell } from "@/shared/config/icons";
+import { Button } from "@/components/ui/button";
+import { Bell } from "@/config/icons";
 
 /**
  * Test Push Notification Button

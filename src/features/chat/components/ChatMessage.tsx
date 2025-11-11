@@ -1,14 +1,14 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useHydration } from "@/shared/hooks/useHydration";
+import { useHydration } from "@/hooks/useHydration";
 import { cn } from "@/lib/utils";
-import { Check, CheckCheck } from "@/shared/config/icons";
+import { Check, CheckCheck } from "@/config/icons";
 import { ChatMessageImage } from "./ChatMessageImage";
 import { ChatMessageVideo } from "./ChatMessageVideo";
 import { ChatMessageFile } from "./ChatMessageFile";
-import type { ChatMessage as ChatMessageType, ChatUser } from "@/shared/lib/data/mockChats";
-import type { ChatMessage as RealChatMessage, ChatUser as RealChatUser } from "@/shared/types/models";
+import type { ChatMessage as ChatMessageType, ChatUser } from "@/lib/data/mockChats";
+import type { ChatMessage as RealChatMessage, ChatUser as RealChatUser } from "@/types/models";
 
 interface ChatMessageProps {
   message: ChatMessageType | RealChatMessage;

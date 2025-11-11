@@ -1,8 +1,8 @@
 "use client";
 
-import type { MessageMedia } from "@/shared/lib/data/mockChats";
-import type { ChatMessageMedia } from "@/shared/types/models";
-import { Loader2 } from "@/shared/config/icons";
+import type { MessageMedia } from "@/lib/data/mockChats";
+import type { ChatMessageMedia } from "@/types/models";
+import { Loader2 } from "@/config/icons";
 
 interface ChatMessageVideoProps {
   media: MessageMedia[] | ChatMessageMedia[];

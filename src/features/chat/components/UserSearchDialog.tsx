@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Loader2, MessageSquarePlus, X, Clock } from "@/shared/config/icons";
+import { Search, Loader2, MessageSquarePlus, X, Clock } from "@/config/icons";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OnlineStatus } from "./OnlineStatus";
 import chatService from "../services/chat.service";
-import type { ChatUserSearchResult } from "@/shared/types/models";
+import type { ChatUserSearchResult } from "@/types/models";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";

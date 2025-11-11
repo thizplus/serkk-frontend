@@ -16,4 +16,4 @@ export type {
   GetTagsParams,
   GetPopularTagsParams,
   SearchTagsParams
-} from '@/shared/types';
+} from '@/types';

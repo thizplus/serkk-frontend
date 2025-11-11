@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import searchService from '../services/search.service';
-import type { SearchParams } from '@/shared/types/request';
+import type { SearchParams } from '@/types/request';
 
 // ============================================================================
 // QUERY KEYS

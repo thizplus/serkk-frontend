@@ -3,15 +3,15 @@
 // จัดการการเรียก API ที่เกี่ยวกับ Authentication
 // ============================================================================
 
-import apiService, { setToken, clearToken } from '@/shared/lib/api/http-client';
-import { API } from '@/shared/lib/constants/api';
-import type { LoginRequest, RegisterRequest } from '@/shared/types/request';
+import apiService, { setToken, clearToken } from '@/lib/api/http-client';
+import { API } from '@/lib/constants/api';
+import type { LoginRequest, RegisterRequest } from '@/types/request';
 import type {
   LoginResponse,
   RegisterResponse,
   GoogleOAuthUrlResponse,
   GoogleOAuthCallbackResponse,
-} from '@/shared/types/response';
+} from '@/types/response';
 
 /**
  * Authentication Service

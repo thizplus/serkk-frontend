@@ -3,12 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MessageSquare, ArrowUpCircle, ExternalLink } from "lucide-react";
-import { Card, CardContent } from "@/shared/components/ui/card";
-import type { CommentWithPost } from "@/shared/types/models";
+import { Card, CardContent } from "@/components/ui/card";
+import type { CommentWithPost } from "@/types/models";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { LinkifiedContent } from "@/shared/components/common";
+import { LinkifiedContent } from "@/components/common";
 
 interface ProfileCommentCardProps {
   comment: CommentWithPost;

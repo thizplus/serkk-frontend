@@ -9,11 +9,11 @@ import { CommentForm } from "./CommentForm";
 import { CommentActions } from "./CommentActions";
 import { DeleteCommentDialog } from "./DeleteCommentDialog";
 import { cn } from "@/lib/utils";
-import type { Comment, CommentWithReplies } from "@/shared/types/models";
+import type { Comment, CommentWithReplies } from "@/types/models";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { useUser } from '@/features/auth';
-import { LinkifiedContent } from "@/shared/components/common";
+import { LinkifiedContent } from "@/components/common";
 
 interface CommentCardProps {
   comment: Comment | CommentWithReplies;

@@ -8,7 +8,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import notificationService from '../services/notification.service';
-import type { UpdateNotificationSettingsRequest } from '@/shared/types/request';
+import type { UpdateNotificationSettingsRequest } from '@/types/request';
 
 // ============================================================================
 // QUERY KEYS

@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import { PostCard } from "./PostCard";
-import type { Post } from "@/shared/types/models";
-import { Loader2 } from "@/shared/config/icons";
+import type { Post } from "@/types/models";
+import { Loader2 } from "@/config/icons";
 import { useOptimisticPostStore } from "@/features/posts/stores/optimisticPostStore";
 
 interface PostFeedProps {

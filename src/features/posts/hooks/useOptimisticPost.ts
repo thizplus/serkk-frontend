@@ -5,10 +5,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useOptimisticPostStore } from '@/features/posts/stores/optimisticPostStore';
 import { useAuthStore } from '@/features/auth/stores/authStore';
-import { uploadMultipleFiles } from '@/shared/lib/upload/concurrentUpload';
+import { uploadMultipleFiles } from '@/lib/upload/concurrentUpload';
 import postService from '@/features/posts/services/post.service';
 import { postKeys } from './usePosts';
-import { FORM_LIMITS } from '@/shared/config';
+import { FORM_LIMITS } from '@/config';
 
 /**
  * Hook สำหรับจัดการ Optimistic Post Upload

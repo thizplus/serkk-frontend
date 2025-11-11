@@ -1,4 +1,4 @@
-import type { Conversation } from '@/shared/types/models';
+import type { Conversation } from '@/types/models';
 
 /**
  * Sort conversations by last message date (descending)

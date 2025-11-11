@@ -12,8 +12,8 @@ import type {
   CreateCommentRequest,
   UpdateCommentRequest,
   GetCommentsParams
-} from '@/shared/types/request';
-import { TOAST_MESSAGES } from '@/shared/config';
+} from '@/types/request';
+import { TOAST_MESSAGES } from '@/config';
 
 // ============================================================================
 // QUERY KEYS

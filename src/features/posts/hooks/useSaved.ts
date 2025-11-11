@@ -8,8 +8,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import savedService from '../services/saved.service';
-import type { GetSavedPostsParams } from '@/shared/types/request';
-import { TOAST_MESSAGES } from '@/shared/config';
+import type { GetSavedPostsParams } from '@/types/request';
+import { TOAST_MESSAGES } from '@/config';
 
 // ============================================================================
 // QUERY KEYS

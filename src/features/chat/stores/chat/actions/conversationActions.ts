@@ -1,9 +1,9 @@
 import type { StoreApi } from 'zustand';
 import type { ChatStoreState, ConversationActions } from '../chatTypes';
-import type { Conversation } from '@/shared/types/models';
+import type { Conversation } from '@/types/models';
 import chatService from '../../../services/chat.service';
 import { toast } from 'sonner';
-import { PAGINATION } from '@/shared/config';
+import { PAGINATION } from '@/config';
 import { calculateTotalUnreadCount, mergeConversationOnlineStatus } from '../helpers/conversationHelpers';
 
 /**

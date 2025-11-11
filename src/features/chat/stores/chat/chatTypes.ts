@@ -1,4 +1,4 @@
-import type { Conversation, ChatMessage } from '@/shared/types/models';
+import type { Conversation, ChatMessage } from '@/types/models';
 
 // ============================================================================
 // TYPES

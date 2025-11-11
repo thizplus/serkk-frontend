@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import followService from '../services/follow.service';
-import type { PaginationParams } from '@/shared/types/common';
+import type { PaginationParams } from '@/types/common';
 
 // ============================================================================
 // QUERY KEYS

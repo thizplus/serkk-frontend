@@ -1,11 +1,11 @@
 "use client";
 
-import { FileText, Download, FileArchive, FileSpreadsheet, FileCode, AlertCircle } from "@/shared/config/icons";
+import { FileText, Download, FileArchive, FileSpreadsheet, FileCode, AlertCircle } from "@/config/icons";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import type { MessageMedia } from "@/shared/lib/data/mockChats";
-import type { ChatMessageMedia } from "@/shared/types/models";
+import type { MessageMedia } from "@/lib/data/mockChats";
+import type { ChatMessageMedia } from "@/types/models";
 
 interface ChatMessageFileProps {
   media: MessageMedia[] | ChatMessageMedia[];

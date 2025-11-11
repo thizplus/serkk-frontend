@@ -37,4 +37,4 @@ export type {
   User,
   UserWithFollowStatus,
   UpdateProfileRequest
-} from '@/shared/types';
+} from '@/types';

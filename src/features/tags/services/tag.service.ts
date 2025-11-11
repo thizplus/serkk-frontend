@@ -3,19 +3,19 @@
 // จัดการการเรียก API ที่เกี่ยวกับ Tags (แท็ก)
 // ============================================================================
 
-import apiService from '@/shared/lib/api/http-client';
-import { API } from '@/shared/lib/constants/api';
+import apiService from '@/lib/api/http-client';
+import { API } from '@/lib/constants/api';
 import type {
   GetTagsParams,
   GetPopularTagsParams,
   SearchTagsParams,
-} from '@/shared/types/request';
+} from '@/types/request';
 import type {
   GetTagResponse,
   ListTagsResponse,
   GetPopularTagsResponse,
   SearchTagsResponse,
-} from '@/shared/types/response';
+} from '@/types/response';
 
 /**
  * Tag Service

@@ -2,9 +2,9 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import mediaService from '@/shared/lib/api/media.service';
+import mediaService from '@/lib/api/media.service';
 import { toast } from 'sonner';
-import { TOAST_MESSAGES } from '@/shared/config';
+import { TOAST_MESSAGES } from '@/config';
 
 /**
  * Hook สำหรับ upload รูปภาพ

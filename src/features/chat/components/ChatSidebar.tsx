@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search } from "@/shared/config/icons";
+import { Search } from "@/config/icons";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,9 @@ import {
   SidebarMenu,
 } from "@/components/ui/sidebar";
 import { useAuthStore } from '@/features/auth';
-import { mockCurrentUser } from "@/shared/lib/data/mockChats";
-import type { ChatUser } from "@/shared/lib/data/mockChats";
-import type { User, Conversation, ChatUser as RealChatUser } from "@/shared/types/models";
+import { mockCurrentUser } from "@/lib/data/mockChats";
+import type { ChatUser } from "@/lib/data/mockChats";
+import type { User, Conversation, ChatUser as RealChatUser } from "@/types/models";
 
 interface ChatSidebarProps {
   conversations: Conversation[];

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell } from "@/shared/config/icons";
-import { Switch } from "@/shared/components/ui/switch";
-import { Label } from "@/shared/components/ui/label";
+import { Bell } from "@/config/icons";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useAuthStore } from '@/features/auth';
 import { pushService } from "../services/push.service";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Ban, User as UserIcon } from "@/shared/config/icons";
+import { Ban, User as UserIcon } from "@/config/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { OnlineStatus } from "./OnlineStatus";
-import { formatLastSeen } from "@/shared/lib/data/mockChats";
-import { useHydration } from "@/shared/hooks/useHydration";
-import type { ChatUser } from "@/shared/lib/data/mockChats";
-import type { ChatUser as RealChatUser } from "@/shared/types/models";
+import { formatLastSeen } from "@/lib/data/mockChats";
+import { useHydration } from "@/hooks/useHydration";
+import type { ChatUser } from "@/lib/data/mockChats";
+import type { ChatUser as RealChatUser } from "@/types/models";
 
 interface ChatProfileSheetProps {
   user: ChatUser | RealChatUser;

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { RefreshCw, Sparkles, Rocket, X } from "@/shared/config/icons";
-import { Button } from "@/shared/components/ui/button";
+import { RefreshCw, Sparkles, Rocket, X } from "@/config/icons";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**

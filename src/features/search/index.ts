@@ -11,4 +11,4 @@ export {
 // Types (re-export shared types for convenience)
 export type {
   SearchParams
-} from '@/shared/types';
+} from '@/types';

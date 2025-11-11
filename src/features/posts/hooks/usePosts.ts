@@ -3,10 +3,10 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import postService from '../services/post.service';
-import type { GetPostsParams, CreatePostRequest, UpdatePostRequest, CreateCrosspostRequest } from '@/shared/types/request';
-import type { Post } from '@/shared/types/models';
+import type { GetPostsParams, CreatePostRequest, UpdatePostRequest, CreateCrosspostRequest } from '@/types/request';
+import type { Post } from '@/types/models';
 import { toast } from 'sonner';
-import { TOAST_MESSAGES } from '@/shared/config';
+import { TOAST_MESSAGES } from '@/config';
 
 /**
  * Query Keys - ใช้สำหรับ identify queries

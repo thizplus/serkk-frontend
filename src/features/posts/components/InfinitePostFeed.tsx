@@ -3,9 +3,9 @@
 import { useEffect, useRef, useMemo } from "react";
 import { PostCard } from "./PostCard";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "@/shared/config/icons";
+import { Loader2 } from "@/config/icons";
 import { EmptyPosts } from "@/components/common";
-import type { Post } from "@/shared/types/models";
+import type { Post } from "@/types/models";
 import { useOptimisticPostStore } from "@/features/posts/stores/optimisticPostStore";
 
 interface InfinitePostFeedProps {

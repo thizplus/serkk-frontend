@@ -3,17 +3,17 @@
 // จัดการการเรียก API ที่เกี่ยวกับ User Profile Management
 // ============================================================================
 
-import apiService from '@/shared/lib/api/http-client';
-import { API } from '@/shared/lib/constants/api';
-import type { UpdateProfileRequest } from '@/shared/types/request';
+import apiService from '@/lib/api/http-client';
+import { API } from '@/lib/constants/api';
+import type { UpdateProfileRequest } from '@/types/request';
 import type {
   GetProfileResponse,
   GetUserProfileResponse,
   UpdateProfileResponse,
   DeleteUserResponse,
   ListUsersResponse,
-} from '@/shared/types/response';
-import type { PaginationParams } from '@/shared/types';
+} from '@/types/response';
+import type { PaginationParams } from '@/types';
 
 /**
  * User Service

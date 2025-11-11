@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Share2, Link2, Facebook, MessageCircle, Repeat2 } from "@/shared/config/icons";
+import { Share2, Link2, Facebook, MessageCircle, Repeat2 } from "@/config/icons";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TOAST_MESSAGES } from "@/shared/config";
+import { TOAST_MESSAGES } from "@/config";
 
 interface ShareDropdownProps {
   postId: string;

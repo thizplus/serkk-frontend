@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RefreshCw, X, Sparkles, Rocket } from "@/shared/config/icons";
-import { Button } from "@/shared/components/ui/button";
+import { RefreshCw, X, Sparkles, Rocket } from "@/config/icons";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**

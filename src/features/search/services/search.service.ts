@@ -3,20 +3,20 @@
 // จัดการการเรียก API ที่เกี่ยวกับ Search (การค้นหา)
 // ============================================================================
 
-import apiService from '@/shared/lib/api/http-client';
-import { API } from '@/shared/lib/constants/api';
+import apiService from '@/lib/api/http-client';
+import { API } from '@/lib/constants/api';
 import type {
   SearchParams,
   GetPopularSearchesParams,
   GetSearchHistoryParams,
-} from '@/shared/types/request';
+} from '@/types/request';
 import type {
   SearchResponse,
   GetPopularSearchesResponse,
   GetSearchHistoryResponse,
   ClearSearchHistoryResponse,
   DeleteSearchHistoryItemResponse,
-} from '@/shared/types/response';
+} from '@/types/response';
 
 /**
  * Search Service

@@ -27,4 +27,4 @@ export {
 } from './stores/chat';
 
 // Types (re-export shared types for convenience)
-export type { Conversation } from '@/shared/types';
+export type { Conversation } from '@/types';

@@ -28,4 +28,4 @@ export { useSavedPosts, useSavePost, useUnsavePost } from './hooks/useSaved';
 export { useUploadMultipleMedia as useUploadMedia, useUploadImage, useUploadVideo, useDeleteMedia, useUploadMultipleMedia } from './hooks/useMedia';
 
 // Types (re-export shared types for convenience)
-export type { Post } from '@/shared/types';
+export type { Post } from '@/types';

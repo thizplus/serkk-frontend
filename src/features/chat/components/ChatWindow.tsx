@@ -5,11 +5,11 @@ import { ChatHeader } from "./ChatHeader";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Loader2 } from "@/shared/config/icons";
+import { MessageSquare, Loader2 } from "@/config/icons";
 import { useChatStore } from "../stores/chat";
 import ScrollToBottom from "react-scroll-to-bottom";
-import type { ChatUser, ChatMessage as ChatMessageType } from "@/shared/lib/data/mockChats";
-import type { ChatUser as RealChatUser, ChatMessage as RealChatMessage } from "@/shared/types/models";
+import type { ChatUser, ChatMessage as ChatMessageType } from "@/lib/data/mockChats";
+import type { ChatUser as RealChatUser, ChatMessage as RealChatMessage } from "@/types/models";
 
 interface SelectedFile {
   file: File;

@@ -11,5 +11,5 @@ export { useLogin, useRegister, useLogout, useGoogleOAuthUrl, useGoogleOAuthCall
 export { useAuthStore, useUser, useHasHydrated } from './stores/authStore';
 
 // Types (re-export shared types for convenience)
-export type { LoginRequest, RegisterRequest } from '@/shared/types/request';
-export type { User } from '@/shared/types/models';
+export type { LoginRequest, RegisterRequest } from '@/types/request';
+export type { User } from '@/types/models';

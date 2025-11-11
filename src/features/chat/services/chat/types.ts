@@ -2,7 +2,7 @@
  * WebSocket Type Definitions
  */
 
-import type { ChatMessage } from '@/shared/types/models';
+import type { ChatMessage } from '@/types/models';
 
 // Base WebSocket message structure
 export interface WebSocketMessage {

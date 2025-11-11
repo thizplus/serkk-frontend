@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowBigUp, ArrowBigDown } from "@/shared/config/icons";
+import { ArrowBigUp, ArrowBigDown } from "@/config/icons";
 import { cn } from "@/lib/utils";
-import type { UserVote } from "@/shared/types/common";
+import type { UserVote } from "@/types/common";
 
 interface VoteButtonsProps {
   votes: number;

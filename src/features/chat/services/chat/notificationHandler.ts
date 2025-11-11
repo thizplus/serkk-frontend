@@ -3,7 +3,7 @@
  * Handles showing browser notifications for new messages
  */
 
-import type { ChatMessage } from '@/shared/types/models';
+import type { ChatMessage } from '@/types/models';
 
 /**
  * Show browser notification for new message

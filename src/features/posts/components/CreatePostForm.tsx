@@ -1,20 +1,20 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, ImageIcon, Upload, Video, Loader2 } from "@/shared/config/icons";
+import { X, ImageIcon, Upload, Video, Loader2 } from "@/config/icons";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { FORM_LIMITS } from "@/shared/config";
+import { FORM_LIMITS } from "@/config";
 import { toast } from "sonner";
-import mediaService from "@/shared/lib/api/media.service";
-import type { Post, Media } from "@/shared/types/models";
+import mediaService from "@/lib/api/media.service";
+import type { Post, Media } from "@/types/models";
 import { useOptimisticPost } from "@/features/posts/hooks/useOptimisticPost";
-import { MediaGrid } from "@/shared/components/media/MediaGrid";
-import { uploadMultipleFiles } from "@/shared/lib/upload/concurrentUpload";
-import type { UploadProgress } from "@/shared/lib/upload/types";
+import { MediaGrid } from "@/components/media/MediaGrid";
+import { uploadMultipleFiles } from "@/lib/upload/concurrentUpload";
+import type { UploadProgress } from "@/lib/upload/types";
 
 interface UploadedMedia {
   id: string;
