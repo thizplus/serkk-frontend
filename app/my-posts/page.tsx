@@ -2,12 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
-import { PostFeed } from "@/components/post/PostFeed";
+import { PostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Plus, Loader2 } from "lucide-react";
-import { useUser, useHasHydrated } from "@/lib/stores/authStore";
-import { useUserPosts } from "@/lib/hooks/queries/usePosts";
+import { FileText, Plus, Loader2 } from "@/shared/config/icons";
+import { useUser, useHasHydrated } from "@/features/auth";
+import { useUserPosts } from "@/features/posts";
+import { LoadingState, EmptyState } from "@/components/common";
+import { LOADING_MESSAGES, PAGINATION } from "@/shared/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +25,7 @@ export default function MyPostsPage() {
       enabled: !!currentUser?.id, // เรียก API เฉพาะเมื่อมี user ID
       params: {
         sortBy: 'new', // เรียงตามใหม่ล่าสุด
-        limit: 50,
+        limit: PAGINATION.MESSAGE_LIMIT,
       }
     }
   );
@@ -37,12 +39,7 @@ export default function MyPostsPage() {
           { label: "โพสต์ของฉัน" },
         ]}
       >
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลด...</p>
-          </CardContent>
-        </Card>
+        <LoadingState message={LOADING_MESSAGES.POST.LOADING} />
       </AppLayout>
     );
   }
@@ -105,9 +102,8 @@ export default function MyPostsPage() {
         {/* Loading State */}
         {isLoading && (
           <Card>
-            <CardContent className="py-16 text-center">
-              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">กำลังโหลดโพสต์ของคุณ...</p>
+            <CardContent>
+              <LoadingState message={LOADING_MESSAGES.POST.LOADING} />
             </CardContent>
           </Card>
         )}
@@ -133,21 +129,17 @@ export default function MyPostsPage() {
         {!isLoading && !error && (
           <>
             {myPosts.length > 0 ? (
-              <PostFeed posts={myPosts} />
+              <PostFeed posts={myPosts} enableOptimisticUI={true} />
             ) : (
-              <Card>
-                <CardContent className="text-center py-16">
-                  <FileText className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-                  <h2 className="text-xl font-semibold mb-2">ยังไม่มีโพสต์</h2>
-                  <p className="text-muted-foreground mb-6">
-                    คุณยังไม่ได้สร้างโพสต์ เริ่มสร้างโพสต์แรกของคุณเลย!
-                  </p>
-                  <Button onClick={() => router.push("/create-post")}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    สร้างโพสต์
-                  </Button>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon="FileText"
+                title="ยังไม่มีโพสต์"
+                description="คุณยังไม่ได้สร้างโพสต์ เริ่มสร้างโพสต์แรกของคุณเลย!"
+                action={{
+                  label: "สร้างโพสต์",
+                  onClick: () => router.push("/create-post"),
+                }}
+              />
             )}
           </>
         )}

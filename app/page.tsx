@@ -3,10 +3,11 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
-import { InfinitePostFeed } from "@/components/post/InfinitePostFeed";
+import { InfinitePostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useInfinitePosts } from "@/lib/hooks/queries/usePosts";
+import { Plus } from "@/shared/config/icons";
+import { PAGINATION } from "@/shared/config";
+import { useInfinitePosts } from "@/features/posts";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export default function Home() {
     isFetchingNextPage,
   } = useInfinitePosts({
     sortBy: 'hot',
-    limit: 20,
+    limit: PAGINATION.DEFAULT_LIMIT,
   });
 
   // Flatten posts from all pages
@@ -41,9 +42,9 @@ export default function Home() {
         {/* Header with Create Post Button */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">ฟีดโพสต์</h1>
+            <h1 className="text-3xl font-bold">เรื่องชาวบ้าน</h1>
             <p className="text-muted-foreground mt-1">
-              ค้นพบและแบ่งปันเรื่องราวจากชุมชน
+              เรื่องที่ใครๆก็อยากใส่ใจ
             </p>
           </div>
           <Button onClick={() => router.push("/create-post")}>
@@ -60,6 +61,7 @@ export default function Home() {
           fetchNextPage={fetchNextPage}
           isLoading={isLoading}
           error={error || null}
+          enableOptimisticUI={true}
         />
       </div>
     </AppLayout>

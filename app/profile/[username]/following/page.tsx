@@ -1,16 +1,15 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, UserPlus, Loader2 } from "lucide-react";
+import { ArrowLeft, UserPlus, Loader2 } from "@/shared/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useFollowing } from "@/lib/hooks/queries/useFollows";
-import { useUserProfile } from "@/lib/hooks/queries/useUsers";
-import { useUser, useHasHydrated } from "@/lib/stores/authStore";
-import { UserCard } from "@/components/user/UserCard";
+import { useFollowing } from "@/features/profile";
+import { useUserProfile } from "@/features/profile";
+import { useUser, useHasHydrated } from '@/features/auth';
+import { UserCard } from "@/features/profile";
+import { PAGINATION } from "@/shared/config";
 
 export default function FollowingPage() {
   const params = useParams();
@@ -38,7 +37,7 @@ export default function FollowingPage() {
     data: followingData,
     isLoading: isLoadingFollowing,
     error: followingError,
-  } = useFollowing(userId || '', { limit: 50 }, {
+  } = useFollowing(userId || '', { limit: PAGINATION.MESSAGE_LIMIT }, {
     enabled: !!userId,
   });
 

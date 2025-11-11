@@ -10,13 +10,13 @@ export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   const manifest = {
-    name: 'VOOBIZE - โซเชียลไทยแท้',
-    short_name: 'VOOBIZE',
-    description: 'แพลตฟอร์มโซเชียลมีเดียไทยแท้',
-    start_url: '/?v=2',
+    name: 'SUEKK - ใครไม่เสือก ไทยเสือก',
+    short_name: 'SUEKK',
+    description: 'ใครไม่เสือก ไทยเสือก',
+    start_url: '/?v=1',
     display: 'standalone',
     background_color: '#ffffff',
-    theme_color: '#3b82f6',
+    theme_color: '#000000',
     icons: [
       {
         src: '/logo.png',

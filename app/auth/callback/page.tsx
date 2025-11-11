@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useGoogleOAuthCallback } from '@/lib/hooks/mutations/useAuth';
-import { useAuthStore } from '@/lib/stores/authStore';
-import userService from '@/lib/services/api/user.service';
+import { useGoogleOAuthCallback, useAuthStore } from '@/features/auth';
+import userService from '@/features/profile/services/user.service';
 
 export const dynamic = 'force-dynamic';
 

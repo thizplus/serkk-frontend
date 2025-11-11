@@ -1,5 +1,5 @@
 /**
- * Service Worker for VOOBIZE PWA
+ * Service Worker for SUEKK PWA
  * - Handles PWA installation and caching
  * - Manages push notifications
  * - Provides offline support
@@ -7,13 +7,13 @@
  */
 
 // 🔥 IMPORTANT: เปลี่ยน version นี้ทุกครั้งที่ deploy!
-// Format: voobize-YYYYMMDD-HHmm (ตัวอย่าง: voobize-20250106-1430)
-const CACHE_VERSION = 'voobize-20251106-1749';
+// Format: suekk-YYYYMMDD-HHmm (ตัวอย่าง: suekk-20250106-1430)
+const CACHE_VERSION = 'suekk-20251106-1749';
 const CACHE_NAME = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 // Enhanced console logging with emojis
-console.log('%c🚀 VOOBIZE Service Worker', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
+console.log('%c🚀 SUEKK Service Worker', 'font-size: 16px; font-weight: bold; color: #3b82f6;');
 console.log('%c📦 Version: ' + CACHE_VERSION, 'font-size: 14px; color: #10b981;');
 console.log('%c💾 Static Cache: ' + CACHE_NAME, 'font-size: 12px; color: #8b5cf6;');
 console.log('%c⚡ Runtime Cache: ' + RUNTIME_CACHE, 'font-size: 12px; color: #f59e0b;');
@@ -166,7 +166,7 @@ self.addEventListener('push', (event) => {
 
   try {
     const data = event.data.json();
-    const title = data.title || 'VOOBIZE';
+    const title = data.title || 'SUEKK';
     const options = {
       body: data.body || 'คุณมีการแจ้งเตือนใหม่',
       icon: data.icon || '/logo.png',

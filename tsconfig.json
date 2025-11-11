@@ -19,6 +19,26 @@
       }
     ],
     "paths": {
+      // Feature-based paths (NEW)
+      "@/features/*": ["./src/features/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/providers/*": ["./src/providers/*"],
+      "@/docs/*": ["./src/docs/*"],
+
+      // Convenience aliases (point to shared)
+      "@/types": ["./src/shared/types"],
+      "@/types/*": ["./src/shared/types/*"],
+      "@/hooks": ["./src/shared/hooks"],
+      "@/hooks/*": ["./src/shared/hooks/*"],
+      "@/components": ["./src/shared/components"],
+      "@/components/*": ["./src/shared/components/*"],
+      "@/lib": ["./src/shared/lib"],
+      "@/lib/*": ["./src/shared/lib/*"],
+      "@/config": ["./src/shared/config"],
+      "@/config/*": ["./src/shared/config/*"],
+      "@/utils": ["./src/shared/lib/utils"],
+
+      // Keep old path as fallback (for old code)
       "@/*": ["./*"]
     }
   },

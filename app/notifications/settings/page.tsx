@@ -7,12 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Loader2, ArrowLeft, Bell, MessageSquare, Heart, UserPlus, Mail } from "lucide-react";
+import { Loader2, ArrowLeft, Bell, MessageSquare, Heart, UserPlus, Mail } from "@/shared/config/icons";
 import {
   useNotificationSettings,
   useUpdateNotificationSettings
-} from "@/lib/hooks/queries/useNotifications";
-import { PushNotification } from "@/components/pwa/PushNotification";
+} from "@/features/notifications";
+import { PushNotification } from "@/features/pwa";
 
 export const dynamic = 'force-dynamic';
 

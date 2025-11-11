@@ -37,7 +37,7 @@ const subscription = {
 const payload = JSON.stringify({
   title: '🧪 Test Notification',
   body: 'นี่คือการทดสอบ push notification!',
-  icon: '/logo.png',
+  icon: '/icon-white.svg',
   url: '/notifications',
   tag: 'test-notification',
   data: {

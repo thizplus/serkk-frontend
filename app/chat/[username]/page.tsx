@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChatSidebar } from "@/components/chat/ChatSidebar";
-import { ChatWindow } from "@/components/chat/ChatWindow";
-import { useChatStore, useConversationMessages } from "@/lib/stores/chatStore";
-import { useAuthStore } from "@/lib/stores/authStore";
+import { ChatSidebar } from "@/features/chat";
+import { ChatWindow } from "@/features/chat";
+import { useChatStore, useConversationMessages } from "@/features/chat";
+import { useAuthStore } from "@/features/auth";
 import ChatLayout from "@/components/layouts/ChatLayout";
 import { toast } from "sonner";
+import { TOAST_MESSAGES } from "@/shared/config";
 
 interface SelectedFile {
   file: File;
@@ -77,7 +78,7 @@ export default function ChatConversationPage() {
       } catch (error) {
         console.error("❌ Failed to load conversation:", error);
         if (!isMounted) return;
-        toast.error("ไม่สามารถโหลดการสนทนาได้");
+        toast.error(TOAST_MESSAGES.CHAT.LOAD_CONVERSATION_ERROR);
       } finally {
         if (isMounted) {
           setConversationLoading(false);
@@ -138,7 +139,7 @@ export default function ChatConversationPage() {
   // Handle send message
   const handleSendMessage = useCallback(async (content: string, files?: SelectedFile[]) => {
     if (!conversation || !currentUser) {
-      toast.error("กรุณาเข้าสู่ระบบก่อนส่งข้อความ");
+      toast.error(TOAST_MESSAGES.CHAT.LOGIN_REQUIRED);
       return;
     }
 
@@ -154,12 +155,12 @@ export default function ChatConversationPage() {
 
       // Check if has files
       if (files && files.length > 0) {
-        // Media message - send as multipart/form-data with actual files
         const firstFileType = files[0].type;
-        const formData = new FormData();
 
-        formData.append("type", firstFileType);
-        formData.append("content", content || ""); // ✅ ส่ง empty string ถ้าไม่มี caption
+        // ✅ 1-STEP MULTIPART UPLOAD (Atomic operation for all media types)
+        const formData = new FormData();
+        formData.append("type", firstFileType); // "video", "image", or "file"
+        formData.append("content", content || ""); // Caption (optional)
 
         // Attach actual files (not URLs)
         for (const selectedFile of files) {
@@ -167,17 +168,19 @@ export default function ChatConversationPage() {
         }
 
         // Send message via chat store with preview files
+        // Backend auto-tracks video with polymorphic pattern (sourceType: "message", sourceId: message_uuid)
         await sendMessage(conversation.id, formData, undefined, files);
 
-        // ❌ ลบ toast - ไม่จำเป็นในแชท
-        // const messageTypeText =
-        //   firstFileType === "image" ? "รูปภาพ" :
-        //   firstFileType === "video" ? "วิดีโอ" : "ไฟล์";
-        // toast.success(`ส่ง${messageTypeText}แล้ว`);
+        // Show toast for video upload (encoding happens in background)
+        if (firstFileType === "video") {
+          toast.success("ส่งข้อความแล้ว! วิดีโอกำลังประมวลผล...");
+          console.log("✅ Video upload started - encoding in background");
+          // Note: WebSocket will handle encoding status updates via message:video:updated event
+        }
       } else {
         // Text message - send as JSON
         if (!content || content.trim() === "") {
-          toast.error("กรุณาพิมพ์ข้อความ");
+          toast.error(TOAST_MESSAGES.CHAT.EMPTY_MESSAGE);
           return;
         }
 
@@ -193,7 +196,7 @@ export default function ChatConversationPage() {
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      toast.error("ไม่สามารถส่งข้อความได้");
+      toast.error(TOAST_MESSAGES.CHAT.SEND_ERROR);
     } finally {
       setSendingMessage(false);
     }
@@ -202,7 +205,7 @@ export default function ChatConversationPage() {
   // Handle block user
   const handleBlock = useCallback(() => {
     if (!conversation) return;
-    toast.warning(`บล็อก ${conversation.otherUser.displayName} แล้ว`);
+    toast.success(TOAST_MESSAGES.CHAT.BLOCK_SUCCESS);
     // TODO: Implement block functionality
     console.log("Block user:", username);
   }, [conversation, username]);

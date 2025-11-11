@@ -3,14 +3,16 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
-import { PostFeed } from "@/components/post/PostFeed";
+import { PostFeed } from "@/features/posts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, FileText, User, Loader2 } from "lucide-react";
-import { useSearch } from "@/lib/hooks/queries/useSearch";
-import type { User as UserType } from "@/lib/types/models";
+import { Search, FileText, User, Loader2 } from "@/shared/config/icons";
+import { useSearch } from "@/features/search";
+import type { User as UserType } from "@/shared/types/models";
+import { LoadingState, EmptyState } from "@/components/common";
+import { LOADING_MESSAGES, PAGINATION } from "@/shared/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +37,7 @@ function SearchPageContent() {
     {
       q: searchQuery,
       type: 'all',
-      limit: 50,
+      limit: PAGINATION.MESSAGE_LIMIT,
     },
     {
       enabled: searchQuery.trim().length > 0, // เรียก API เฉพาะเมื่อมีคำค้นหา
@@ -95,9 +97,8 @@ function SearchPageContent() {
         {/* Loading State */}
         {isLoading && searchQuery.trim() && (
           <Card>
-            <CardContent className="py-16 text-center">
-              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">กำลังค้นหา...</p>
+            <CardContent>
+              <LoadingState message={LOADING_MESSAGES.SEARCH.LOADING} />
             </CardContent>
           </Card>
         )}
@@ -137,15 +138,11 @@ function SearchPageContent() {
               {filteredPosts.length > 0 ? (
                 <PostFeed posts={filteredPosts} />
               ) : (
-                <Card>
-                  <CardContent className="py-16 text-center">
-                    <Search className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">ไม่พบโพสต์</h3>
-                    <p className="text-muted-foreground">
-                      ลองค้นหาด้วยคำอื่นหรือเปลี่ยนตัวกรอง
-                    </p>
-                  </CardContent>
-                </Card>
+                <EmptyState
+                  icon="Search"
+                  title="ไม่พบโพสต์"
+                  description="ลองค้นหาด้วยคำอื่นหรือเปลี่ยนตัวกรอง"
+                />
               )}
             </TabsContent>
 
@@ -180,15 +177,11 @@ function SearchPageContent() {
                 ))}
               </div>
             ) : (
-              <Card>
-                <CardContent className="py-16 text-center">
-                  <User className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">ไม่พบผู้ใช้</h3>
-                  <p className="text-muted-foreground">
-                    ลองค้นหาด้วยชื่ออื่น
-                  </p>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon="User"
+                title="ไม่พบผู้ใช้"
+                description="ลองค้นหาด้วยชื่ออื่น"
+              />
             )}
           </TabsContent>
         </Tabs>
@@ -221,12 +214,7 @@ export default function SearchPage() {
           { label: "ค้นหา" },
         ]}
       >
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลด...</p>
-          </CardContent>
-        </Card>
+        <LoadingState message={LOADING_MESSAGES.SEARCH.LOADING} />
       </AppLayout>
     }>
       <SearchPageContent />

@@ -1,15 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { QueryProvider } from "@/lib/providers/query-provider";
-import { ChatProvider } from "@/components/providers/ChatProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { ChatProvider } from "@/providers/ChatProvider";
+import { NotificationProvider } from "@/providers/NotificationProvider";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/GoogleTagManager";
-import { PWAInstaller } from "@/components/pwa/PWAInstaller";
-
-export const dynamic = 'force-dynamic';
+import { PWAInstaller } from "@/features/pwa";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,44 +22,44 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "VOOBIZE - โซเชียลไทยแท้",
-    template: "%s | VOOBIZE",
+    default: "SUEKK - ใครไม่เสือก ไทยเสือก",
+    template: "%s | SUEKK",
   },
   description: "แพลตฟอร์มโซเชียลมีเดียไทยแท้ แบ่งปันเรื่องราว ความคิด และเชื่อมต่อกับคนไทย",
   keywords: ["โซเชียล", "ไทย", "social media", "community", "thailand"],
-  authors: [{ name: "VOOBIZE Team" }],
-  creator: "VOOBIZE",
+  authors: [{ name: "SUEKK Team" }],
+  creator: "SUEKK",
   icons: {
     icon: [
-      { url: "/logo.png", sizes: "any" },
+      { url: "/icon-white.svg", sizes: "any" },
     ],
     apple: [
-      { url: "/logo.png", sizes: "180x180", type: "image/png" },
+      { url: "/icon-white.svg", sizes: "180x180" },
     ],
-    shortcut: "/logo.png",
+    shortcut: "/icon-white.svg",
   },
   openGraph: {
     type: "website",
     locale: "th_TH",
     url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    siteName: "VOOBIZE",
-    title: "VOOBIZE - โซเชียลไทยแท้",
+    siteName: "SUEKK",
+    title: "SUEKK - ใครไม่เสือก ไทยเสือก",
     description: "แพลตฟอร์มโซเชียลมีเดียไทยแท้ แบ่งปันเรื่องราว ความคิด และเชื่อมต่อกับคนไทย",
     images: [
       {
-        url: "/logo.png",
+        url: "/icon-white.svg",
         width: 1200,
         height: 630,
-        alt: "VOOBIZE Logo",
+        alt: "SUEKK Logo",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "VOOBIZE - โซเชียลไทยแท้",
+    title: "SUEKK - ใครไม่เสือก ไทยเสือก",
     description: "แพลตฟอร์มโซเชียลมีเดียไทยแท้ แบ่งปันเรื่องราว ความคิด และเชื่อมต่อกับคนไทย",
-    images: ["/logo.png"],
-    creator: "@voobize",
+    images: ["/icon-white.svg"],
+    creator: "@suekk",
   },
   robots: {
     index: true,
@@ -79,14 +77,14 @@ export const metadata: Metadata = {
       'application/rss+xml': [
         {
           url: `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8080'}/rss.xml`,
-          title: 'VOOBIZE RSS Feed',
+          title: 'SUEKK RSS Feed',
         },
       ],
     },
   },
   manifest: "/manifest.json",
   appleWebApp: {
-    title: "VOOBIZE",
+    title: "SUEKK",
     capable: true,
     statusBarStyle: "default",
   },
@@ -103,14 +101,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Force dynamic rendering by using headers()
-  await headers();
-
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   return (
@@ -129,8 +124,10 @@ export default async function RootLayout({
         >
           <QueryProvider>
             <ChatProvider>
-              {children}
-              <Toaster />
+              <NotificationProvider>
+                {children}
+                <Toaster />
+              </NotificationProvider>
             </ChatProvider>
           </QueryProvider>
         </ThemeProvider>

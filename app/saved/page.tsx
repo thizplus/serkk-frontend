@@ -2,12 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
-import { PostFeed } from "@/components/post/PostFeed";
+import { PostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Bookmark, Plus, Loader2 } from "lucide-react";
-import { useUser, useHasHydrated } from "@/lib/stores/authStore";
-import { useSavedPosts } from "@/lib/hooks/mutations/useSaved";
+import { Bookmark, Plus, Loader2 } from "@/shared/config/icons";
+import { useUser, useHasHydrated } from "@/features/auth";
+import { useSavedPosts } from "@/features/posts";
+import { LoadingState, EmptyState } from "@/components/common";
+import { LOADING_MESSAGES, PAGINATION } from "@/shared/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +20,7 @@ export default function SavedPage() {
 
   // ดึงโพสต์ที่บันทึกไว้
   const { data: savedPosts = [], isLoading, error } = useSavedPosts({
-    limit: 50,
+    limit: PAGINATION.MESSAGE_LIMIT,
   });
 
 
@@ -31,12 +33,7 @@ export default function SavedPage() {
           { label: "โพสต์ที่บันทึก" },
         ]}
       >
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลด...</p>
-          </CardContent>
-        </Card>
+        <LoadingState message={LOADING_MESSAGES.SAVED.LOADING} />
       </AppLayout>
     );
   }
@@ -99,9 +96,8 @@ export default function SavedPage() {
         {/* Loading State */}
         {isLoading && (
           <Card>
-            <CardContent className="py-16 text-center">
-              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">กำลังโหลดโพสต์ที่บันทึกไว้...</p>
+            <CardContent>
+              <LoadingState message={LOADING_MESSAGES.SAVED.LOADING} />
             </CardContent>
           </Card>
         )}
@@ -129,18 +125,15 @@ export default function SavedPage() {
             {savedPosts.length > 0 ? (
               <PostFeed posts={savedPosts} />
             ) : (
-              <Card>
-                <CardContent className="text-center py-16">
-                  <Bookmark className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-                  <h2 className="text-xl font-semibold mb-2">ยังไม่มีโพสต์ที่บันทึก</h2>
-                  <p className="text-muted-foreground mb-6">
-                    เมื่อคุณบันทึกโพสต์ โพสต์จะปรากฏที่นี่
-                  </p>
-                  <Button onClick={() => router.push("/")}>
-                    ไปหาโพสต์น่าสนใจ
-                  </Button>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon="Bookmark"
+                title="ยังไม่มีโพสต์ที่บันทึก"
+                description="เมื่อคุณบันทึกโพสต์ โพสต์จะปรากฏที่นี่"
+                action={{
+                  label: "ไปหาโพสต์น่าสนใจ",
+                  onClick: () => router.push("/"),
+                }}
+              />
             )}
           </>
         )}

@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { HLSVideoPlayer } from "@/components/common/HLSVideoPlayer";
-import { X, Loader2, ArrowLeft } from "lucide-react";
+import { X, Loader2, ArrowLeft } from "@/shared/config/icons";
 import Image from "next/image";
 import { toast } from "sonner";
-import { usePost, useUpdatePost } from "@/lib/hooks/queries/usePosts";
-import { useUser } from "@/lib/stores/authStore";
+import { usePost, useUpdatePost } from "@/features/posts";
+import { useUser } from '@/features/auth';
+import { FORM_LIMITS } from "@/shared/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -185,10 +185,10 @@ export default function EditPostPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
-                  maxLength={300}
+                  maxLength={FORM_LIMITS.POST.TITLE_MAX}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {title.length}/300 ตัวอักษร
+                  {title.length}/{FORM_LIMITS.POST.TITLE_MAX} ตัวอักษร
                 </p>
               </Field>
 
@@ -247,12 +247,9 @@ export default function EditPostPage() {
                   <FieldLabel>สื่อ (ไม่สามารถแก้ไขได้)</FieldLabel>
                   <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
                     {post.media[0].type === "video" ? (
-                      <HLSVideoPlayer
-                        hlsUrl={post.media[0].hlsUrl}
-                        fallbackUrl={post.media[0].url}
-                        thumbnail={post.media[0].thumbnail || undefined}
-                        encodingStatus={post.media[0].encodingStatus}
-                        encodingProgress={post.media[0].encodingProgress}
+                      <video
+                        src={post.media[0].url}
+                        poster={post.media[0].thumbnail || undefined}
                         controls={true}
                         className="w-full h-full object-cover"
                       />

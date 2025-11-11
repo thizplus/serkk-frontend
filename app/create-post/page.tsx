@@ -3,11 +3,9 @@
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
-import { CreatePostForm } from "@/components/post/CreatePostForm";
-import { useCreatePost, useCreateCrosspost, usePost } from "@/lib/hooks/queries/usePosts";
-import { useUploadMultipleMedia } from "@/lib/hooks/mutations/useMedia";
+import { CreatePostForm, useCreatePost, useCreateCrosspost, usePost } from "@/features/posts";
 import { Card, CardContent } from "@/components/ui/card";
-import type { CreatePostRequest, CreateCrosspostRequest } from "@/lib/types/request";
+import type { CreatePostRequest, CreateCrosspostRequest } from "@/shared/types/request";
 
 export const dynamic = 'force-dynamic';
 
@@ -25,13 +23,12 @@ function CreatePostContent() {
   // Hooks for creating posts
   const createPost = useCreatePost();
   const createCrosspost = useCreateCrosspost();
-  const { uploadMultiple, isUploading, overallProgress } = useUploadMultipleMedia();
 
   const handleSubmit = async (data: {
     title: string;
     content: string;
     tags?: string[];
-    media?: File[];
+    mediaIds?: string[];  // From auto-upload (R2)
   }) => {
     try {
       // If this is a crosspost, use different endpoint
@@ -50,20 +47,12 @@ function CreatePostContent() {
         return;
       }
 
-      // Regular post: upload media first (if any)
-      let mediaIds: string[] = [];
-      if (data.media && data.media.length > 0) {
-        console.log('📤 Uploading media files...');
-        mediaIds = await uploadMultiple(data.media);
-        console.log('✅ Media uploaded, IDs:', mediaIds);
-      }
-
-      // Create post with mediaIds
+      // Regular post: mediaIds already uploaded by CreatePostForm (R2 auto-upload)
       const postData: CreatePostRequest = {
         title: data.title,
         content: data.content,
         tags: data.tags,
-        mediaIds: mediaIds.length > 0 ? mediaIds : undefined,
+        mediaIds: data.mediaIds && data.mediaIds.length > 0 ? data.mediaIds : undefined,
       };
 
       await createPost.mutateAsync(postData);
@@ -115,7 +104,7 @@ function CreatePostContent() {
     );
   }
 
-  const isSubmitting = createPost.isPending || createCrosspost.isPending || isUploading;
+  const isSubmitting = createPost.isPending || createCrosspost.isPending;
 
   return (
     <AppLayout
@@ -142,8 +131,8 @@ function CreatePostContent() {
           onCancel={handleCancel}
           sourcePost={sourcePost}
           isSubmitting={isSubmitting}
-          uploadProgress={overallProgress}
           initialTags={tagParam ? [tagParam] : undefined}
+          enableOptimisticUI={true}
         />
       </div>
     </AppLayout>

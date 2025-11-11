@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Cloudflare R2 (New)
+      {
+        protocol: 'https',
+        hostname: 'pub-8bc881ced04b42bab801e0bed862958c.r2.dev',
+        port: '',
+        pathname: '/**',
+      },
+      // Bunny CDN (Legacy - for old images)
       {
         protocol: 'https',
         hostname: 'voobizethailand.b-cdn.net',

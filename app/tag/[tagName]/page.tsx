@@ -1,17 +1,16 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Hash, Plus } from "lucide-react";
+import { ArrowLeft, Hash, Plus } from "@/shared/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { InfinitePostFeed } from "@/components/post/InfinitePostFeed";
-import { useInfinitePostsByTagId } from "@/lib/hooks/queries/usePosts";
-import { useSearchTags } from "@/lib/hooks/queries/useTags";
+import { InfinitePostFeed } from "@/features/posts";
+import { useInfinitePostsByTagId } from "@/features/posts";
+import { useSearchTags } from "@/features/tags";
+import { PAGINATION } from "@/shared/config";
 
 type SortBy = 'hot' | 'new' | 'top';
 
@@ -43,7 +42,7 @@ export default function TagPage() {
     isFetchingNextPage,
   } = useInfinitePostsByTagId(tagData?.id || '', {
     sortBy,
-    limit: 20,
+    limit: PAGINATION.DEFAULT_LIMIT,
   }, {
     enabled: !!tagData?.id, // ดึงโพสต์ก็ต่อเมื่อได้ tag ID แล้ว
   });

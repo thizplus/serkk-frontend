@@ -7,7 +7,9 @@ import AppLayout from "@/components/layouts/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Bell, MessageSquare, ThumbsUp, AtSign, UserPlus, Check, Trash2, Loader2, Settings } from "lucide-react";
+import { Bell, MessageSquare, ThumbsUp, AtSign, UserPlus, Check, Trash2, Loader2, Settings } from "@/shared/config/icons";
+import { PAGINATION } from "@/shared/config";
+import { EmptyState } from "@/components/common";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import Link from "next/link";
@@ -16,11 +18,13 @@ import {
   useMarkAsRead,
   useMarkAllAsRead,
   useDeleteNotification,
-} from "@/lib/hooks/queries/useNotifications";
-import type { NotificationType } from "@/lib/types/common";
-import type { Notification } from "@/lib/types/models";
-import { TestPushButton } from "@/components/pwa/TestPushButton";
-import { PushDebugPanel } from "@/components/pwa/PushDebugPanel";
+} from "@/features/notifications";
+import type { NotificationType } from "@/shared/types/common";
+import type { Notification } from "@/shared/types/models";
+import { TestPushButton } from "@/features/pwa";
+import { PushDebugPanel } from "@/features/pwa";
+import { LoadingState } from "@/components/common/LoadingState";
+import { LOADING_MESSAGES } from "@/shared/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +33,7 @@ export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState("all");
 
   // Fetch notifications from API
-  const { data, isLoading, error } = useNotifications({ limit: 50 });
+  const { data, isLoading, error } = useNotifications({ limit: PAGINATION.MESSAGE_LIMIT });
 
   // Handle both response formats (with meta or total)
   const notifications = data?.notifications || [];
@@ -133,11 +137,10 @@ export default function NotificationsPage() {
   // Loading state
   if (isLoading) {
     return (
-      <AppLayout breadcrumbs={[{ label: "กำลังโหลด..." }]}>
+      <AppLayout breadcrumbs={[{ label: "การแจ้งเตือน" }]}>
         <Card>
-          <CardContent className="py-12 sm:py-16 text-center">
-            <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-sm sm:text-base text-muted-foreground">กำลังโหลดการแจ้งเตือน...</p>
+          <CardContent>
+            <LoadingState message={LOADING_MESSAGES.NOTIFICATION.LOADING} />
           </CardContent>
         </Card>
       </AppLayout>
@@ -286,7 +289,7 @@ export default function NotificationsPage() {
                               {/* Support 'sender', 'actor', and 'user' fields */}
                               {(notification.sender || notification.actor || notification.user) && (
                                 <Image
-                                  src={(notification.sender?.avatar || notification.actor?.avatar || notification.user?.avatar) || "/logo.png"}
+                                  src={(notification.sender?.avatar || notification.actor?.avatar || notification.user?.avatar) || "/icon-white.svg"}
                                   alt={(notification.sender?.displayName || notification.actor?.displayName || notification.user?.displayName) || "User"}
                                   width={40}
                                   height={40}
@@ -365,20 +368,15 @@ export default function NotificationsPage() {
                 })}
               </div>
             ) : (
-              <Card>
-                <CardContent className="py-16 text-center">
-                  <Bell className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">
-                    {activeTab === "unread" ? "ไม่มีการแจ้งเตือนใหม่" : "ไม่มีการแจ้งเตือน"}
-                  </h3>
-                  <p className="text-muted-foreground">
-                    {activeTab === "unread"
-                      ? "คุณได้อ่านการแจ้งเตือนทั้งหมดแล้ว"
-                      : "เมื่อมีคนโต้ตอบกับคุณ คุณจะเห็นการแจ้งเตือนที่นี่"
-                    }
-                  </p>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon="Bell"
+                title={activeTab === "unread" ? "ไม่มีการแจ้งเตือนใหม่" : "ไม่มีการแจ้งเตือน"}
+                description={
+                  activeTab === "unread"
+                    ? "คุณได้อ่านการแจ้งเตือนทั้งหมดแล้ว"
+                    : "เมื่อมีคนโต้ตอบกับคุณ คุณจะเห็นการแจ้งเตือนที่นี่"
+                }
+              />
             )}
           </TabsContent>
         </Tabs>

@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Camera, X, Loader2 } from "lucide-react";
+import { Camera, X, Loader2 } from "@/shared/config/icons";
 import { toast } from "sonner";
-import { useUser, useHasHydrated } from "@/lib/stores/authStore";
-import { useProfile } from "@/lib/hooks/queries/useUsers";
-import { useUpdateProfile } from "@/lib/hooks/mutations/useUsers";
-import { useUploadImage } from "@/lib/hooks/mutations/useMedia";
+import { useUser, useHasHydrated } from '@/features/auth';
+import { TOAST_MESSAGES } from "@/shared/config";
+import { useProfile } from "@/features/profile";
+import { useUpdateProfile } from "@/features/profile";
+import { useUploadImage } from "@/features/posts";
 
 export const dynamic = 'force-dynamic';
 
@@ -58,7 +59,7 @@ export default function EditProfilePage() {
 
     // ตรวจสอบว่าเป็นไฟล์รูปภาพ
     if (!file.type.startsWith('image/')) {
-      toast.error('กรุณาเลือกไฟล์รูปภาพ');
+      toast.error(TOAST_MESSAGES.MEDIA.INVALID_FORMAT);
       return;
     }
 
@@ -81,7 +82,7 @@ export default function EditProfilePage() {
       console.log('✅ Image uploaded, URL:', result.url);
       setAvatar(result.url);
 
-      toast.success('อัปโหลดรูปภาพสำเร็จ!');
+      toast.success(TOAST_MESSAGES.PROFILE.AVATAR_UPLOAD_SUCCESS);
     } catch (error) {
       console.error('❌ Error uploading image:', error);
       // Error handling จะถูกจัดการโดย mutation's onError
@@ -107,28 +108,28 @@ export default function EditProfilePage() {
 
     // ⭐ Validation
     if (!displayName.trim()) {
-      toast.error('กรุณากรอกชื่อที่แสดง');
+      toast.error(TOAST_MESSAGES.PROFILE.DISPLAYNAME_REQUIRED);
       return;
     }
 
     if (displayName.trim().length > 50) {
-      toast.error('ชื่อที่แสดงต้องไม่เกิน 50 ตัวอักษร');
+      toast.error(TOAST_MESSAGES.PROFILE.DISPLAYNAME_TOO_LONG);
       return;
     }
 
     if (bio.trim().length > 200) {
-      toast.error('แนะนำตัวต้องไม่เกิน 200 ตัวอักษร');
+      toast.error(TOAST_MESSAGES.PROFILE.BIO_TOO_LONG);
       return;
     }
 
     if (location.trim().length > 100) {
-      toast.error('ที่อยู่ต้องไม่เกิน 100 ตัวอักษร');
+      toast.error(TOAST_MESSAGES.PROFILE.LOCATION_TOO_LONG);
       return;
     }
 
     // ตรวจสอบ URL format สำหรับ website
     if (website.trim() && !isValidUrl(website.trim())) {
-      toast.error('กรุณากรอก URL ที่ถูกต้อง เช่น https://example.com');
+      toast.error(TOAST_MESSAGES.PROFILE.INVALID_WEBSITE_URL);
       return;
     }
 

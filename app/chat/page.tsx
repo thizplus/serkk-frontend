@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { ChatSidebar } from "@/components/chat/ChatSidebar";
-import { ChatWindowEmpty } from "@/components/chat/ChatWindow";
-import { ChatListItem } from "@/components/chat/ChatListItem";
-import { UserSearchDialog } from "@/components/chat/UserSearchDialog";
+import { ChatSidebar } from "@/features/chat";
+// import { ChatWindow } from "@/features/chat";
+import { ChatListItem } from "@/features/chat";
+import { UserSearchDialog } from "@/features/chat";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useChatStore } from "@/lib/stores/chatStore";
+import { useChatStore } from "@/features/chat";
 import ChatLayout from "@/components/layouts/ChatLayout";
 
 export default function ChatPage() {
@@ -20,8 +20,10 @@ export default function ChatPage() {
   return (
     <ChatLayout sidebar={<ChatSidebar conversations={conversations} isLoading={conversationsLoading} />}>
       {/* Desktop: Empty State */}
-      <div className="hidden md:flex md:flex-col md:flex-1 md:h-full">
-        <ChatWindowEmpty />
+      <div className="hidden md:flex md:flex-col md:flex-1 md:h-full md:items-center md:justify-center">
+        <div className="text-center text-muted-foreground">
+          <p className="text-lg">เลือกการสนทนาเพื่อเริ่มแชท</p>
+        </div>
       </div>
 
       {/* Mobile: Show Chat List */}

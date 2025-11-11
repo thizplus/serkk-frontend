@@ -1,7 +1,14 @@
 import Image from "next/image"
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from "@/features/auth"
+import type { Metadata } from "next"
 
-export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'เข้าสู่ระบบ',
+  description: 'เข้าสู่ระบบเพื่อใช้งาน SUEKK - แพลตฟอร์มโซเชียลมีเดียไทยแท้',
+}
+
+// Static Site Generation - page เหมือนกันทุกคน, revalidate ทุก 1 วัน
+export const revalidate = 86400; // 1 day
 
 export default function LoginPage() {
   return (
@@ -10,7 +17,7 @@ export default function LoginPage() {
         <a href="#" className="flex items-center gap-2 self-center font-medium">
           
             <Image
-                                src="/logo.png"
+                                src="/icon-white.svg"
                                 alt="Logo"
                                 width={30}
                                 height={30}

@@ -1,22 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "@/shared/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
-import { PostCard } from "@/components/post/PostCard";
-import { CommentTree } from "@/components/comment/CommentTree";
-import { CommentForm } from "@/components/comment/CommentForm";
+import { PostCard } from "@/features/posts";
+import { CommentTree } from "@/features/comments";
+import { CommentForm } from "@/features/comments";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { usePost } from "@/lib/hooks/queries/usePosts";
+import { usePost } from "@/features/posts";
 import {
   useCommentTree,
   useCreateComment,
   useUpdateComment,
   useDeleteComment
-} from "@/lib/hooks/queries/useComments";
-import { useToggleVote } from "@/lib/hooks/mutations/useVotes";
-import type { CommentWithReplies } from "@/lib/types/models";
+} from "@/features/comments";
+import { useToggleVote } from "@/features/posts";
+import type { CommentWithReplies } from "@/shared/types/models";
 
 interface PostDetailContentProps {
   postId: string;

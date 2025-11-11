@@ -1,7 +1,8 @@
 import { Metadata } from "next";
 import { PostDetailContent } from "./PostDetailContent";
 
-export const dynamic = 'force-dynamic';
+// Incremental Static Regeneration - cache 5 นาที แล้ว regenerate background
+export const revalidate = 300; // 5 minutes
 
 interface PageProps {
   params: Promise<{
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Fetch post data using native fetch (no auth required for public posts)
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
     const response = await fetch(`${apiUrl}/posts/${id}`, {
-      cache: 'no-store',
+      next: { revalidate: 300 }, // ISR cache - sync กับ page revalidate
     });
 
     if (!response.ok) {
@@ -46,12 +47,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Create description from content (max 160 chars)
     const description = post.content
       ? post.content.substring(0, 160) + (post.content.length > 160 ? "..." : "")
-      : "อ่านโพสต์เพิ่มเติมใน VOOBIZE";
+      : "อ่านโพสต์เพิ่มเติมใน SUEKK";
 
     // Get first image for OG image
     const ogImage = post.media && post.media.length > 0 && post.media[0].type === 'image'
       ? post.media[0].url
-      : "/logo.png";
+      : "/icon-white.svg";
 
     // Get tags for keywords
     const keywords = post.tags?.map((tag: { id: string; name: string }) => tag.name) || [];
@@ -59,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title: post.title,
       description,
-      keywords: [...keywords, "VOOBIZE", "โซเชียลไทย"],
+      keywords: [...keywords, "SUEKK", "โซเชียลไทย"],
       authors: [{ name: post.author.displayName }],
       openGraph: {
         title: post.title,
@@ -90,7 +91,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     console.error("Error generating metadata:", error);
     return {
       title: "โพสต์",
-      description: "อ่านโพสต์ใน VOOBIZE",
+      description: "อ่านโพสต์ใน SUEKK",
     };
   }
 }
