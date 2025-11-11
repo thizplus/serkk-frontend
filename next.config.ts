@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
       // Cloudflare R2 (New)
       {
         protocol: 'https',
-        hostname: 'pub-8bc881ced04b42bab801e0bed862958c.r2.dev',
+        hostname: 'pub-a058b390b77f486aaf97a1d1f073c6c8.r2.dev',
         port: '',
         pathname: '/**',
       }
