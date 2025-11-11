@@ -87,6 +87,33 @@ export const FEATURES = {
   ENABLE_TAGS: true,
 } as const;
 
+// Media Display Configuration
+export const MEDIA_DISPLAY = {
+  // Max heights for different display modes
+  MAX_HEIGHT: {
+    FEED: 600, // pixels - for feed mode
+    DETAIL: 800, // pixels - for detail mode
+  },
+  // Grid settings
+  GRID: {
+    GAP: 2, // Tailwind gap-2
+    PREVIEW_MAX_DISPLAY: 5, // Show max 5 items in grid
+  },
+  // Lightbox settings
+  LIGHTBOX: {
+    MAX_ZOOM: 3, // 3x zoom for images
+    ANIMATION_DURATION: 250, // ms
+    ENABLE_INFINITE_LOOP: false,
+  },
+  // Video player settings
+  VIDEO: {
+    PRELOAD: 'metadata' as const, // 'none' | 'metadata' | 'auto'
+    CONTROLS: true,
+    MUTED_IN_GRID: true, // Mute videos in grid preview
+    AUTO_PLAY: false,
+  },
+} as const;
+
 // Routes
 export const ROUTES = {
   HOME: '/',

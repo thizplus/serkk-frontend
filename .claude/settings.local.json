@@ -53,7 +53,8 @@
       "WebSearch",
       "Bash(git checkout:*)",
       "Bash(powershell.exe:*)",
-      "Bash(node refactor-temp.js:*)"
+      "Bash(node refactor-temp.js:*)",
+      "Bash(node refactor-all.js:*)"
     ],
     "deny": [],
     "ask": []

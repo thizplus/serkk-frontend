@@ -17,7 +17,7 @@ import { useToggleSave } from "../hooks/useSaved";
 import { useDeletePost } from "../hooks/usePosts";
 import { useUser } from '@/features/auth';
 import { LinkifiedContent } from "@/components/common";
-import { MediaGrid } from "@/components/media/MediaGrid";
+import { MediaDisplay } from "@/components/media";
 
 interface PostCardProps {
   post: Post;
@@ -235,7 +235,7 @@ export function PostCard({
         {/* Media */}
         {post.media && post.media.length > 0 && (
           <div className="mb-3 relative">
-            <MediaGrid
+            <MediaDisplay
               media={post.media.map((m) => {
                 // ✅ Fallback: เช็คจาก URL extension ถ้า backend type อาจผิด
                 const urlLower = m.url.toLowerCase();
