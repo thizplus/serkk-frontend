@@ -100,13 +100,13 @@ export function MediaGrid({
       <div
         key={item.id || `media-${index}`}
         className={cn(
-          "relative rounded-lg overflow-hidden group shadow-sm hover:shadow-md transition-all",
+          "relative overflow-hidden group shadow-sm hover:shadow-md transition-all",
           spanClass,
           rowSpanClass,
-          // Single item: แสดงแบบ natural (ไม่ crop, ไม่มี fixed aspect)
+          // Single item: แสดงแบบ natural (ไม่ crop, ไม่มี fixed aspect, ไม่มี rounded)
           totalCount === 1 && "w-full bg-black flex items-center justify-center",
-          // Multiple items: ใช้ aspect-square + bg-muted
-          totalCount >= 2 && "bg-muted aspect-square",
+          // Multiple items: ใช้ aspect-square + bg-muted + rounded
+          totalCount >= 2 && "bg-muted aspect-square rounded-lg",
           // Cursor: ถ้า single video detail mode ไม่ต้อง cursor pointer
           !editable && !isSingleVideoDetailMode && "cursor-pointer hover:scale-[1.02] transition-transform"
         )}
@@ -130,8 +130,7 @@ export function MediaGrid({
                 src={item.url}
                 poster={item.thumbnail}
                 className={cn(
-                  "rounded-lg",
-                  variant === 'detail' ? "max-h-[800px]" : "max-h-[600px]",
+                  variant === 'detail' ? "max-h-[1200px]" : "max-h-[800px]",
                   "max-w-full h-auto"
                 )}
                 controls={isSingleVideoDetailMode}
@@ -184,8 +183,7 @@ export function MediaGrid({
               src={item.url}
               alt={`Media ${index + 1}`}
               className={cn(
-                "rounded-lg",
-                variant === 'detail' ? "max-h-[800px]" : "max-h-[600px]",
+                variant === 'detail' ? "max-h-[1200px]" : "max-h-[800px]",
                 "max-w-full h-auto object-contain"
               )}
             />
@@ -294,7 +292,7 @@ export function MediaGrid({
   if (displayMedia.length === 1) {
     return (
       <>
-        <div className={cn("w-full overflow-hidden rounded-lg", className)}>
+        <div className={cn("w-full overflow-hidden", className)}>
           {renderMediaItem(displayMedia[0], 0)}
         </div>
         {shouldUseLightbox && (

@@ -58,9 +58,11 @@ export function ShareDropdown({ postId, postTitle }: ShareDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 bg-muted/30 hover:bg-muted/50 px-3 py-1.5 rounded-full transition-colors text-muted-foreground hover:text-foreground">
+        <button
+          className="inline-flex items-center justify-center bg-muted/30 hover:bg-muted/50 p-2 rounded-full transition-colors text-muted-foreground hover:text-foreground"
+          title="แชร์"
+        >
           <Share2 size={16} />
-          <span className="font-medium">แชร์</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

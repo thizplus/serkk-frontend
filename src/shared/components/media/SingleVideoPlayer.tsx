@@ -43,7 +43,7 @@ export function SingleVideoPlayer({
 
   return (
     <div className={cn(
-      "w-full bg-black rounded-lg overflow-hidden flex items-center justify-center",
+      "w-full bg-black overflow-hidden flex items-center justify-center",
       className
     )}>
       <video
@@ -52,7 +52,7 @@ export function SingleVideoPlayer({
         controls={MEDIA_DISPLAY.VIDEO.CONTROLS}
         preload={MEDIA_DISPLAY.VIDEO.PRELOAD}
         className={cn(
-          "rounded-lg max-w-full h-auto",
+          "max-w-full h-auto",
           `max-h-[${maxHeight}px]`
         )}
         style={{ maxHeight: `${maxHeight}px` }}

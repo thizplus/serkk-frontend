@@ -48,7 +48,7 @@ export function SingleImageViewer({
     <>
       <div
         className={cn(
-          "w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-95 transition-opacity",
+          "w-full overflow-hidden cursor-pointer hover:opacity-95 transition-opacity",
           className
         )}
         onClick={() => setLightboxOpen(true)}
@@ -57,7 +57,7 @@ export function SingleImageViewer({
           src={media.url}
           alt="Post image"
           className={cn(
-            "rounded-lg max-w-full h-auto object-contain",
+            "max-w-full h-auto object-contain",
             `max-h-[${maxHeight}px]`
           )}
           style={{ maxHeight: `${maxHeight}px` }}

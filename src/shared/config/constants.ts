@@ -91,8 +91,8 @@ export const FEATURES = {
 export const MEDIA_DISPLAY = {
   // Max heights for different display modes
   MAX_HEIGHT: {
-    FEED: 600, // pixels - for feed mode
-    DETAIL: 800, // pixels - for detail mode
+    FEED: 800, // pixels - for feed mode (เพิ่มจาก 600px)
+    DETAIL: 1200, // pixels - for detail mode (เพิ่มจาก 800px)
   },
   // Grid settings
   GRID: {

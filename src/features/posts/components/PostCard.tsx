@@ -85,9 +85,9 @@ export function PostCard({
 
   return (
     <div className={cn(
-      "bg-card border rounded-lg overflow-hidden hover:border-accent transition-colors p-4"
+      "bg-card border overflow-hidden hover:border-accent transition-colors"
     )}>
-      <div className="w-full">
+      <div className="w-full p-4 pb-0">
         {/* ✅ Upload Status Badge & Progress */}
         {isUploading && optimisticData && (
           <div className="mb-3">
@@ -178,7 +178,7 @@ export function PostCard({
 
         {/* Crosspost - Source Post */}
         {post.sourcePost && (
-          <div className="mb-3 border-l-4 border-primary/50">
+          <div className="mb-0 border-l-4 border-primary/50">
             <div className="ml-3 p-3 bg-muted/30 rounded-r-lg">
               {/* Crosspost Indicator */}
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
@@ -231,10 +231,11 @@ export function PostCard({
             </div>
           </div>
         )}
+      </div>
 
-        {/* Media */}
-        {post.media && post.media.length > 0 && (
-          <div className="mb-3 relative">
+      {/* Media Section - Edge-to-Edge (No Padding) */}
+      {post.media && post.media.length > 0 && (
+        <div className="w-full relative">
             <MediaDisplay
               media={post.media.map((m) => {
                 // ✅ Fallback: เช็คจาก URL extension ถ้า backend type อาจผิด
@@ -261,7 +262,7 @@ export function PostCard({
                 };
               })}
               variant={disableNavigation ? 'detail' : 'feed'}
-              className={cn(isUploading && "opacity-60")}
+              className={cn("rounded-none", isUploading && "opacity-60")}
             />
 
             {/* ✅ Loading Overlay - แสดงตอนกำลังอัปโหลด */}
@@ -276,9 +277,11 @@ export function PostCard({
                 </p>
               </div>
             )}
-          </div>
-        )}
+        </div>
+      )}
 
+      {/* Tags & Actions Section (With Padding) */}
+      <div className="p-4 pt-3">
         {/* Tags - ซ่อนถ้าเป็น optimistic post (tags ยังไม่ได้บันทึกจริง) */}
         {!isOptimistic && post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
@@ -299,7 +302,7 @@ export function PostCard({
 
         {/* Action Buttons - ซ่อนถ้ากำลัง upload */}
         {!isOptimistic && (
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-1 text-sm">
             {/* Vote Buttons - Badge Style */}
             <VoteButtons
               votes={post.votes}
@@ -325,14 +328,14 @@ export function PostCard({
             <button
               onClick={handleSaveClick}
               className={cn(
-                "inline-flex items-center gap-1.5 bg-muted/30 hover:bg-muted/50 px-3 py-1.5 rounded-full transition-colors",
+                "inline-flex items-center justify-center bg-muted/30 hover:bg-muted/50 p-2 rounded-full transition-colors",
                 post.isSaved
                   ? "text-primary hover:text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
+              title={post.isSaved ? "บันทึกแล้ว" : "บันทึก"}
             >
               <Bookmark size={16} className={cn(post.isSaved && "fill-current")} />
-              <span className="font-medium">{post.isSaved ? "บันทึกแล้ว" : "บันทึก"}</span>
             </button>
           </div>
         )}
