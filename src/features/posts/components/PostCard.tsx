@@ -20,6 +20,7 @@ import { LinkifiedContent } from "@/components/common";
 import { MediaDisplay } from "@/components/media";
 import { useIsMobile } from "@/shared/hooks/useDeviceType";
 import { useDrawer } from "@/shared/contexts/DrawerContext";
+import { useAuthGuard } from "@/shared/hooks/useAuthGuard";
 
 interface PostCardProps {
   post: Post;
@@ -47,6 +48,7 @@ export function PostCard({
   const currentUser = useUser();
   const isMobile = useIsMobile();
   const { openDrawer } = useDrawer();
+  const { requireAuth } = useAuthGuard();
 
   // Hooks for mutations
   const { handleVote } = useToggleVote();
@@ -96,6 +98,8 @@ export function PostCard({
   };
 
   const handleSaveClick = () => {
+    // ✅ Require auth before saving
+    if (!requireAuth('บันทึกโพสต์')) return;
     handleToggleSave(post.id, post.isSaved);
   };
 
@@ -181,10 +185,10 @@ export function PostCard({
             <Image
               src={post.author.avatar || "/icon-white.svg"}
               alt={post.author.displayName}
-              width={30}
-              height={30}
+              width={32}
+              height={32}
               className={cn(
-                "rounded-full max-h-[30px] object-cover",
+                "rounded-full h-8 w-8 object-cover",
                 !isOptimistic && "cursor-pointer"
               )}
               onClick={!isOptimistic ? () => router.push(`/profile/${post.author.username}`) : undefined}
@@ -300,7 +304,7 @@ export function PostCard({
         <div
           className={cn(
             "w-full relative",
-            !isOptimistic && isMobile && "cursor-pointer"
+            !isOptimistic && "cursor-pointer"
           )}
           onClick={handleMediaClick}
         >
@@ -331,7 +335,7 @@ export function PostCard({
               })}
               variant={disableNavigation ? 'detail' : 'feed'}
               className={cn("rounded-none", isUploading && "opacity-60")}
-              disableLightbox={isMobile}
+              disableLightbox={true}
             />
 
             {/* ✅ Loading Overlay - แสดงตอนกำลังอัปโหลด */}
@@ -393,19 +397,21 @@ export function PostCard({
             {/* Share */}
             <ShareDropdown postId={post.id} postTitle={post.title} />
 
-            {/* Save */}
-            <button
-              onClick={handleSaveClick}
-              className={cn(
-                "inline-flex items-center justify-center bg-muted/30 hover:bg-muted/50 p-2 rounded-full transition-colors",
-                post.isSaved
-                  ? "text-primary hover:text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              title={post.isSaved ? "บันทึกแล้ว" : "บันทึก"}
-            >
-              <Bookmark size={16} className={cn(post.isSaved && "fill-current")} />
-            </button>
+            {/* Save - Hide for public users */}
+            {currentUser && (
+              <button
+                onClick={handleSaveClick}
+                className={cn(
+                  "inline-flex items-center justify-center bg-muted/30 hover:bg-muted/50 p-2 rounded-full transition-colors",
+                  post.isSaved
+                    ? "text-primary hover:text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+                title={post.isSaved ? "บันทึกแล้ว" : "บันทึก"}
+              >
+                <Bookmark size={16} className={cn(post.isSaved && "fill-current")} />
+              </button>
+            )}
           </div>
         )}
       </div>

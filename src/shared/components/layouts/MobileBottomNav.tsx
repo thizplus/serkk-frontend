@@ -34,38 +34,57 @@ export function MobileBottomNav() {
   const { user, isAuthenticated } = useAuthStore();
   const { unreadCount } = useChatStore();
 
-  const navItems: NavItem[] = [
-    {
-      label: "หน้าหลัก",
-      href: "/",
-      icon: Home,
-    },
-    {
-      label: "ค้นหา",
-      href: "/search",
-      icon: Search,
-    },
-    {
-      label: "สร้างโพสต์",
-      href: "/create-post",
-      icon: PlusCircle,
-      requireAuth: true,
-    },
-    {
-      label: "ข้อความ",
-      href: "/chat",
-      icon: MessageCircle,
-      requireAuth: true,
-    },
-    {
-      label: "โปรไฟล์",
-      href: isAuthenticated && user?.username
-        ? `/profile/${user.username}`
-        : "/login",
-      icon: User,
-      isProfile: true,
-    },
-  ];
+  // ✅ Define navigation items based on authentication status
+  const navItems: NavItem[] = isAuthenticated
+    ? [
+        // Authenticated users - Full menu
+        {
+          label: "หน้าหลัก",
+          href: "/",
+          icon: Home,
+        },
+        {
+          label: "ค้นหา",
+          href: "/search",
+          icon: Search,
+        },
+        {
+          label: "สร้างโพสต์",
+          href: "/create-post",
+          icon: PlusCircle,
+          requireAuth: true,
+        },
+        {
+          label: "ข้อความ",
+          href: "/chat",
+          icon: MessageCircle,
+          requireAuth: true,
+        },
+        {
+          label: "โปรไฟล์",
+          href: `/profile/${user?.username}`,
+          icon: User,
+          isProfile: true,
+        },
+      ]
+    : [
+        // Public users - Limited menu
+        {
+          label: "หน้าหลัก",
+          href: "/",
+          icon: Home,
+        },
+        {
+          label: "ค้นหา",
+          href: "/search",
+          icon: Search,
+        },
+        {
+          label: "ล็อกอิน",
+          href: "/login",
+          icon: User,
+        },
+      ];
 
   const isActive = (href: string) => {
     if (href === "/") {

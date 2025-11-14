@@ -10,6 +10,28 @@ interface PageProps {
   }>;
 }
 
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    username: string;
+    displayName: string;
+    avatar?: string;
+  };
+  media?: Array<{
+    id: string;
+    url: string;
+    type: string;
+  }>;
+  tags?: Array<{
+    id: string;
+    name: string;
+  }>;
+}
+
 /**
  * Generate dynamic metadata for post detail page
  * - Auto-generates title, description from post data
@@ -98,5 +120,57 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PostDetailPage({ params }: PageProps) {
   const { id } = await params;
-  return <PostDetailContent postId={id} />;
+
+  // Fetch post data for JSON-LD
+  let jsonLd = null;
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const response = await fetch(`${apiUrl}/posts/${id}`, {
+      next: { revalidate: 300 },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.data) {
+        const post: Post = data.data;
+
+        // Generate JSON-LD structured data
+        jsonLd = {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.content?.substring(0, 160) || '',
+          image: post.media && post.media.length > 0 && post.media[0].type === 'image'
+            ? post.media[0].url
+            : `${appUrl}/icon-white.svg`,
+          datePublished: post.createdAt,
+          dateModified: post.updatedAt,
+          author: {
+            '@type': 'Person',
+            name: post.author.displayName,
+            url: `${appUrl}/profile/${post.author.username}`,
+            image: post.author.avatar,
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'SUEKK',
+            logo: {
+              '@type': 'ImageObject',
+              url: `${appUrl}/icon-white.svg`,
+            },
+          },
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `${appUrl}/post/${post.id}`,
+          },
+          keywords: post.tags?.map(tag => tag.name).join(', ') || '',
+        };
+      }
+    }
+  } catch (error) {
+    console.error('Error generating JSON-LD:', error);
+  }
+
+  return <PostDetailContent postId={id} jsonLd={jsonLd} />;
 }

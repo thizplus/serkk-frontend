@@ -55,7 +55,18 @@
       "Bash(powershell.exe:*)",
       "Bash(node refactor-temp.js:*)",
       "Bash(node refactor-all.js:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(mkdir:*)",
+      "Bash(del \"D:\\Admin\\Desktop\\MY PROJECT\\__serkk\\nextjs-frontend\\.next\\dev\\lock\")",
+      "Bash(del \"D:\\Admin\\Desktop\\MY PROJECT\\__serkk\\nextjs-frontend\\.next\\dev\\lock\" 2)",
+      "Bash(powershell \"Get-Process -Name node -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-Table\")",
+      "Bash(powershell \"Remove-Item -Path ''.next'' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host ''.next folder removed''\")",
+      "Bash(powershell \"Remove-Item -Path ''.next'' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host ''Cleaned .next folder''\")",
+      "Bash(powershell:*)",
+      "Bash(npx next build:*)",
+      "Bash(git reset:*)",
+      "Bash(del nul 2)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

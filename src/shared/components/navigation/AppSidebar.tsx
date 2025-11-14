@@ -19,6 +19,7 @@ import { NavSecondary } from "@/components/navigation/NavSecondary"
 import { NavUser } from "@/components/navigation/NavUser"
 import { AppLogo } from "@/components/common/AppLogo"
 import { useChatStore } from "@/features/chat"
+import { useUser } from "@/features/auth"
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +32,63 @@ import {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { unreadCount } = useChatStore();
+  const currentUser = useUser();
+
+  // ✅ Public navigation items (available for all users)
+  const publicNavItems = [
+    {
+      title: "หน้าหลัก",
+      url: "/",
+      icon: Home,
+      isActive: pathname === "/",
+    },
+    {
+      title: "ค้นหา",
+      url: "/search",
+      icon: Search,
+      isActive: pathname === "/search",
+    },
+  ];
+
+  // ✅ Authenticated navigation items (only for logged-in users)
+  const authNavItems = [
+    {
+      title: "การแจ้งเตือน",
+      url: "/notifications",
+      icon: Bell,
+      isActive: pathname === "/notifications",
+    },
+    {
+      title: "ข้อความ",
+      url: "/chat",
+      icon: MessageCircle,
+      isActive: pathname.startsWith("/chat"),
+      badge: unreadCount > 0 ? unreadCount : undefined,
+    },
+    {
+      title: "สร้างโพสต์",
+      url: "/create-post",
+      icon: PlusCircle,
+      isActive: pathname === "/create-post",
+    },
+    {
+      title: "โพสต์ของฉัน",
+      url: "/my-posts",
+      icon: FileText,
+      isActive: pathname === "/my-posts",
+    },
+    {
+      title: "โพสต์ที่บันทึก",
+      url: "/saved",
+      icon: Bookmark,
+      isActive: pathname === "/saved",
+    },
+  ];
+
+  // ✅ Combine navigation items based on authentication status
+  const navMain = currentUser
+    ? [...publicNavItems, ...authNavItems]
+    : publicNavItems;
 
   const data = {
     user: {
@@ -38,51 +96,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       email: "thepthai@example.com",
       avatar: "/avatars/shadcn.jpg",
     },
-    navMain: [
-      {
-        title: "หน้าหลัก",
-        url: "/",
-        icon: Home,
-        isActive: pathname === "/",
-      },
-      {
-        title: "ค้นหา",
-        url: "/search",
-        icon: Search,
-        isActive: pathname === "/search",
-      },
-      {
-        title: "การแจ้งเตือน",
-        url: "/notifications",
-        icon: Bell,
-        isActive: pathname === "/notifications",
-      },
-      {
-        title: "ข้อความ",
-        url: "/chat",
-        icon: MessageCircle,
-        isActive: pathname.startsWith("/chat"),
-        badge: unreadCount > 0 ? unreadCount : undefined,
-      },
-      {
-        title: "สร้างโพสต์",
-        url: "/create-post",
-        icon: PlusCircle,
-        isActive: pathname === "/create-post",
-      },
-      {
-        title: "โพสต์ของฉัน",
-        url: "/my-posts",
-        icon: FileText,
-        isActive: pathname === "/my-posts",
-      },
-      {
-        title: "โพสต์ที่บันทึก",
-        url: "/saved",
-        icon: Bookmark,
-        isActive: pathname === "/saved",
-      },
-    ],
+    navMain,
+    /*
     navSecondary: [
       {
         title: "ช่วยเหลือ",
@@ -95,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Send,
       },
     ],
-
+*/
   }
   return (
     <Sidebar variant="inset" {...props}>
@@ -109,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
       
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {/*<NavSecondary items={data.navSecondary} className="mt-auto" />*/}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

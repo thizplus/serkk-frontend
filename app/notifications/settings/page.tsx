@@ -12,6 +12,7 @@ import {
   useNotificationSettings,
   useUpdateNotificationSettings
 } from "@/features/notifications";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 
 export const dynamic = 'force-dynamic';
 
@@ -109,6 +110,7 @@ export default function NotificationSettingsPage() {
         { label: "การตั้งค่า" },
       ]}
     >
+      <PageWrap>
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Back Button */}
         <Button size={'sm'}
@@ -253,6 +255,7 @@ export default function NotificationSettingsPage() {
           </CardContent>
         </Card>
       </div>
+      </PageWrap>
     </AppLayout>
   );
 }

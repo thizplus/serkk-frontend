@@ -7,6 +7,8 @@ import {
   ChevronsUpDown,
   LogOut,
   User,
+  LogIn,
+  UserPlus,
 } from '@/config/icons';
 
 import {
@@ -14,6 +16,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,8 +77,33 @@ export function NavUser() {
     );
   }
 
+  // ✅ Show Login/Register buttons for public users
   if (!user) {
-    return null;
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex flex-col gap-2 p-2">
+            <Button
+              onClick={() => router.push('/login')}
+              className="w-full"
+              size="sm"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              ล็อกอิน
+            </Button>
+            <Button
+              onClick={() => router.push('/register')}
+              variant="outline"
+              className="w-full"
+              size="sm"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              สมัครสมาชิก
+            </Button>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
   }
 
   return (

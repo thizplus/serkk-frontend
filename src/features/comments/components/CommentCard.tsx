@@ -137,7 +137,7 @@ export function CommentCard({
               alt={comment.author.displayName}
               width={24}
               height={24}
-              className="rounded-full max-h-6 object-cover cursor-pointer"
+              className="rounded-full h-6 w-6 object-cover cursor-pointer"
               onClick={() => router.push(`/profile/${comment.author.username}`)}
             />
             <span

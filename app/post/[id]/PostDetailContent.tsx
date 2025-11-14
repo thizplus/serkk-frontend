@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import { ArrowLeft, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { PageWrap } from "@/shared/components/layouts/PageWrap";
@@ -21,9 +22,10 @@ import type { CommentWithReplies } from "@/types/models";
 
 interface PostDetailContentProps {
   postId: string;
+  jsonLd?: any;
 }
 
-export function PostDetailContent({ postId }: PostDetailContentProps) {
+export function PostDetailContent({ postId, jsonLd }: PostDetailContentProps) {
   const router = useRouter();
 
   // Fetch post from API
@@ -145,12 +147,21 @@ export function PostDetailContent({ postId }: PostDetailContentProps) {
   };
 
   return (
-    <AppLayout
-      breadcrumbs={[
-        { label: "หน้าหลัก", href: "/" },
-        { label: post.title },
-      ]}
-    >
+    <>
+      {jsonLd && (
+        <Script
+          id="post-jsonld"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <AppLayout
+        breadcrumbs={[
+          { label: "หน้าหลัก", href: "/" },
+          { label: post.title },
+        ]}
+      >
       {/* Back Button - wrapped with PageWrap */}
       <PageWrap>
         <Button
@@ -166,8 +177,8 @@ export function PostDetailContent({ postId }: PostDetailContentProps) {
       <PostCard post={post} disableNavigation />
 
       {/* Comments Section - wrapped with PageWrap */}
-      <PageWrap>
-        <div className="bg-card border rounded-lg p-6">
+     
+        <div className="bg-card border my-2 p-6">
           <h2 className="text-xl font-semibold mb-4">
             ความคิดเห็น ({isLoadingComments ? '...' : totalCommentCount})
           </h2>
@@ -201,7 +212,8 @@ export function PostDetailContent({ postId }: PostDetailContentProps) {
             />
           )}
         </div>
-      </PageWrap>
-    </AppLayout>
+
+      </AppLayout>
+    </>
   );
 }

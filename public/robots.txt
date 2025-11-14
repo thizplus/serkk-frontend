@@ -1,0 +1,10 @@
+# Robots.txt for SUEKK
+
+User-agent: *
+Allow: /
+
+# Disallow POC/Testing pages
+Disallow: /poc-media-viewer
+
+# Sitemap
+Sitemap: https://suekk.com/sitemap.xml

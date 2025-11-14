@@ -5,6 +5,7 @@
 // React Query hooks สำหรับ Notifications และ Settings
 // ============================================================================
 
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import notificationService from '../services/notification.service';
@@ -86,6 +87,26 @@ export function useUpdateNotificationSettings() {
  * Hook สำหรับดึงจำนวน notifications ที่ยังไม่อ่าน
  */
 export function useUnreadNotificationCount() {
+  // ✅ Check if user has token (same logic as useProfile)
+  const [hasToken, setHasToken] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !!(localStorage.getItem('auth_token') || document.cookie.includes('auth_token='));
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const checkToken = () => {
+      const tokenExists = !!(localStorage.getItem('auth_token') || document.cookie.includes('auth_token='));
+      setHasToken(tokenExists);
+    };
+
+    checkToken();
+    const interval = setInterval(checkToken, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return useQuery({
     queryKey: notificationKeys.unreadCount(),
     queryFn: async () => {
@@ -95,7 +116,8 @@ export function useUnreadNotificationCount() {
       }
       return response.data.count;
     },
-    refetchInterval: 30000, // Refetch ทุก 30 วินาที
+    enabled: hasToken, // ✅ Only fetch if user is logged in
+    refetchInterval: hasToken ? 30000 : false, // Refetch ทุก 30 วินาที (only if logged in)
     retry: 1, // Retry เพียง 1 ครั้ง
     staleTime: 10000, // ข้อมูลใหม่ทุก 10 วินาที
   });

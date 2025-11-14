@@ -30,6 +30,7 @@ import { useToggleFollow } from "../hooks/useFollowMutations";
 import { ProfileCommentCard } from "@/features/comments";
 import { LinkifiedContent } from "@/components/common";
 import { LoadingState, EmptyState } from "@/components/common";
+import { useAuthGuard } from "@/shared/hooks/useAuthGuard";
 import { LOADING_MESSAGES, TOAST_MESSAGES, PAGINATION } from "@/config";
 
 interface ProfileContentProps {
@@ -47,6 +48,7 @@ export function ProfileContent({ params }: ProfileContentProps) {
   const queryClient = useQueryClient();
   const currentUser = useUser();
   const hasHydrated = useHasHydrated();
+  const { requireAuth } = useAuthGuard();
 
   // อ่าน tab จาก URL query params (?tab=posts หรือ ?tab=comments)
   const tabFromUrl = searchParams.get('tab') || 'posts';
@@ -187,11 +189,8 @@ export function ProfileContent({ params }: ProfileContentProps) {
   }
 
   const handleFollow = () => {
-    if (!currentUser) {
-      toast.error(TOAST_MESSAGES.AUTH.UNAUTHORIZED);
-      router.push('/login');
-      return;
-    }
+    // ✅ Require auth before following
+    if (!requireAuth('ติดตาม')) return;
 
     if (profileUser && 'isFollowing' in profileUser) {
       const isFollowing = profileUser.isFollowing === true;

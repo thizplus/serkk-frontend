@@ -46,18 +46,22 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
   const setUser = useAuthStore((state) => state.setUser);
+  const currentUser = useAuthStore((state) => state.user);
   const isMounted = useHydration();
 
-  // Connect WebSocket for real-time notifications
+  // Connect WebSocket for real-time notifications (only if authenticated)
+  // Note: useNotificationWebSocket internally checks for auth
   useNotificationWebSocket();
 
   // Fetch unread notification count
+  // Note: This hook already uses `enabled: hasToken` internally
   const { data: unreadCount = 0, error, isLoading } = useUnreadNotificationCount();
 
   // Get chat unread count
   const chatUnreadCount = useChatStore((state) => state.unreadCount);
 
   // Fetch profile และ sync ไปยัง Zustand store
+  // Note: useProfile already uses `enabled: hasToken` internally (line 79 in useUsers.ts)
   const { data: profileData } = useProfile();
 
   // Sync profile data ไปยัง Zustand เมื่อได้ข้อมูลใหม่

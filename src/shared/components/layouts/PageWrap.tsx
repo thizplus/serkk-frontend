@@ -23,7 +23,7 @@ interface PageWrapProps {
  */
 export function PageWrap({ children, className }: PageWrapProps) {
   return (
-    <div className={cn("p-4 md:p-0", className)}>
+    <div className={cn("p-4 md:px-0", className)}>
       {children}
     </div>
   );

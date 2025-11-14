@@ -119,6 +119,24 @@ apiClient.interceptors.response.use(
 
     // ถ้าเป็น error 401 (Unauthorized)
     if (error.response?.status === 401) {
+      const requestUrl = error.config?.url || '';
+
+      // Public pages ที่ไม่ต้อง redirect (ปล่อยให้ component จัดการเอง)
+      const publicPages = ['/', '/post', '/tag', '/profile', '/search'];
+      const isPublicPage = typeof window !== 'undefined' && publicPages.some(page =>
+        window.location.pathname === page || window.location.pathname.startsWith(page + '/')
+      );
+
+      // Public endpoints ที่ไม่ควรมีการ redirect (optional calls)
+      const publicEndpoints = ['/users/profile', '/notifications/unread-count'];
+      const isPublicEndpoint = publicEndpoints.some(endpoint => requestUrl.includes(endpoint));
+
+      // ถ้าเป็น public page หรือ public endpoint → ไม่ต้อง redirect (ปล่อยให้ fail เงียบๆ)
+      if (isPublicPage || isPublicEndpoint) {
+        console.log('⚠️ 401 on public page/endpoint - not redirecting to login');
+        return Promise.reject(error);
+      }
+
       // ล้างข้อมูล auth
       clearToken();
 
@@ -127,7 +145,7 @@ apiClient.interceptors.response.use(
         document.cookie = 'auth_token=; path=/; max-age=0';
       }
 
-      // redirect ไปหน้า login เฉพาะเมื่อไม่ได้อยู่หน้า auth อยู่แล้ว
+      // redirect ไปหน้า login เฉพาะเมื่อไม่ได้อยู่หน้า auth และไม่ใช่ public page
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname;
         const isAuthPage = ['/login', '/register', '/auth/callback'].includes(currentPath);

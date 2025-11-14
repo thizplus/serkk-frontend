@@ -77,7 +77,7 @@ export default function SavedPage() {
     >
       {/* Header - wrapped with PageWrap */}
       <PageWrap>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
               <Bookmark className="h-6 w-6 text-primary" />

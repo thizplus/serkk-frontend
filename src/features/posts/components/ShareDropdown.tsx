@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Share2, Link2, Facebook, MessageCircle, Repeat2 } from "@/config/icons";
 import { toast } from "sonner";
+import { useAuthGuard } from "@/shared/hooks/useAuthGuard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ interface ShareDropdownProps {
 
 export function ShareDropdown({ postId, postTitle }: ShareDropdownProps) {
   const router = useRouter();
+  const { requireAuth } = useAuthGuard();
   const url = typeof window !== 'undefined'
     ? `${window.location.origin}/post/${postId}`
     : '';
@@ -52,6 +54,8 @@ export function ShareDropdown({ postId, postTitle }: ShareDropdownProps) {
   };
 
   const handleCrosspost = () => {
+    // ✅ Require auth before crossposting
+    if (!requireAuth('โพสต์ข้าม')) return;
     router.push(`/create-post?source_id=${postId}`);
   };
 

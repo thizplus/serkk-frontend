@@ -2,6 +2,7 @@
 
 import { ArrowBigUp, ArrowBigDown } from "@/config/icons";
 import { cn } from "@/lib/utils";
+import { useAuthGuard } from "@/shared/hooks/useAuthGuard";
 import type { UserVote } from "@/types/common";
 
 interface VoteButtonsProps {
@@ -19,8 +20,12 @@ export function VoteButtons({
   size = 'md',
   orientation = 'vertical'
 }: VoteButtonsProps) {
+  const { requireAuth } = useAuthGuard();
+
   // ไม่ต้องใช้ local state - ให้ React Query จัดการ optimistic update
   const handleVote = (voteType: 'up' | 'down') => {
+    // ✅ Require auth before voting
+    if (!requireAuth('โหวต')) return;
     onVote(voteType);
   };
 

@@ -130,10 +130,37 @@ export function InfinitePostFeed({
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="py-8">
-              <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-muted rounded w-1/2"></div>
+          <Card key={i} className="animate-pulse overflow-hidden">
+            <CardContent className="p-4">
+              {/* Header: Author + Time */}
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-8 w-8 bg-muted rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-3 bg-muted w-32 mb-2"></div>
+                  <div className="h-2 bg-muted w-20"></div>
+                </div>
+              </div>
+
+              {/* Title */}
+              <div className="h-5 bg-muted w-4/5 mb-3"></div>
+
+              {/* Content */}
+              <div className="space-y-2 mb-3">
+                <div className="h-3 bg-muted w-full"></div>
+                <div className="h-3 bg-muted w-5/6"></div>
+              </div>
+            </CardContent>
+
+            {/* Media Placeholder - Edge-to-Edge */}
+            <div className="w-full h-80 bg-muted"></div>
+
+            {/* Actions */}
+            <CardContent className="p-4">
+              <div className="flex gap-2">
+                <div className="h-8 bg-muted w-20"></div>
+                <div className="h-8 bg-muted w-16"></div>
+                <div className="h-8 bg-muted w-16"></div>
+              </div>
             </CardContent>
           </Card>
         ))}

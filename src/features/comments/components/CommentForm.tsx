@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Send, X } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Send, X, LogIn } from "lucide-react";
 import { useUser } from '@/features/auth';
 
 interface CommentFormProps {
@@ -25,6 +27,7 @@ export function CommentForm({
   placeholder = "แสดงความคิดเห็น...",
   autoFocus = false,
 }: CommentFormProps) {
+  const router = useRouter();
   const currentUser = useUser();
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,6 +60,41 @@ export function CommentForm({
     setContent("");
     onCancel?.();
   };
+
+  // ✅ If not logged in, show login prompt
+  if (!currentUser) {
+    return (
+      <Card className="p-6 text-center border-dashed">
+        <div className="flex flex-col items-center gap-3">
+          <div className="p-3 bg-primary/10 rounded-full">
+            <LogIn className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold mb-1">ล็อกอินเพื่อแสดงความคิดเห็น</h3>
+            <p className="text-sm text-muted-foreground">
+              คุณต้องเข้าสู่ระบบก่อนใช้งานฟีเจอร์นี้
+            </p>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <Button
+              onClick={() => router.push('/login')}
+              size="sm"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              ล็อกอิน
+            </Button>
+            <Button
+              onClick={() => router.push('/register')}
+              variant="outline"
+              size="sm"
+            >
+              สมัครสมาชิก
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">

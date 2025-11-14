@@ -411,7 +411,7 @@ export function CreatePostForm({
                         alt={sourcePost.author.displayName}
                         width={24}
                         height={24}
-                        className="rounded-full"
+                        className="rounded-full h-6 w-6 object-cover"
                       />
                     )}
                     <span className="text-sm font-medium">
