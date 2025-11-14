@@ -55,6 +55,7 @@ export function MediaDisplay({
   editable = false,
   onRemove,
   className,
+  disableLightbox = false,
 }: MediaDisplayProps) {
   // Calculate media composition
   const mediaStats = useMemo(() => ({
@@ -89,6 +90,7 @@ export function MediaDisplay({
         media={media[0]}
         variant={variant}
         className={className}
+        disableLightbox={disableLightbox}
       />
     );
   }
@@ -101,6 +103,7 @@ export function MediaDisplay({
       editable={editable}
       onRemove={onRemove}
       className={className}
+      disableLightbox={disableLightbox}
     />
   );
 }

@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Users, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useFollowers } from "@/features/profile";
@@ -48,12 +49,14 @@ export default function FollowersPage() {
   if (!hasHydrated || isLoadingProfile) {
     return (
       <AppLayout breadcrumbs={[{ label: "กำลังโหลด..." }]}>
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลด...</p>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">กำลังโหลด...</p>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -62,18 +65,20 @@ export default function FollowersPage() {
   if (profileError || !profileUser) {
     return (
       <AppLayout breadcrumbs={[{ label: "ไม่พบโปรไฟล์" }]}>
-        <Card>
-          <CardContent className="text-center py-16">
-            <h1 className="text-2xl font-bold mb-4">ไม่พบโปรไฟล์</h1>
-            <p className="text-muted-foreground mb-6">
-              {profileError instanceof Error ? profileError.message : 'ไม่พบผู้ใช้ที่ต้องการ'}
-            </p>
-            <Button size={'sm'} onClick={() => router.push("/")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              กลับหน้าหลัก
-            </Button>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="text-center py-16">
+              <h1 className="text-2xl font-bold mb-4">ไม่พบโปรไฟล์</h1>
+              <p className="text-muted-foreground mb-6">
+                {profileError instanceof Error ? profileError.message : 'ไม่พบผู้ใช้ที่ต้องการ'}
+              </p>
+              <Button size={'sm'} onClick={() => router.push("/")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                กลับหน้าหลัก
+              </Button>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -86,7 +91,8 @@ export default function FollowersPage() {
         { label: "ผู้ติดตาม" },
       ]}
     >
-      <div className="space-y-6">
+      <PageWrap>
+        <div className="space-y-6">
         {/* Back Button */}
         <Button
           size="sm"
@@ -151,6 +157,7 @@ export default function FollowersPage() {
           </Card>
         )}
       </div>
+      </PageWrap>
     </AppLayout>
   );
 }

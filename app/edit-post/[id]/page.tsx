@@ -3,6 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -52,12 +53,14 @@ export default function EditPostPage() {
   if (isLoadingPost) {
     return (
       <AppLayout breadcrumbs={[{ label: "กำลังโหลด..." }]}>
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลดโพสต์...</p>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">กำลังโหลดโพสต์...</p>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -71,23 +74,25 @@ export default function EditPostPage() {
           { label: "แก้ไขโพสต์" },
         ]}
       >
-        <Card>
-          <CardContent className="text-center py-16">
-            <h2 className="text-2xl font-bold mb-2">ไม่พบโพสต์</h2>
-            <p className="text-muted-foreground mb-6">
-              {postError
-                ? postError instanceof Error
-                  ? postError.message
-                  : 'เกิดข้อผิดพลาด'
-                : 'ไม่พบโพสต์ที่ต้องการแก้ไข'
-              }
-            </p>
-            <Button size={'sm'} onClick={() => router.push("/")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              กลับหน้าหลัก
-            </Button>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="text-center py-16">
+              <h2 className="text-2xl font-bold mb-2">ไม่พบโพสต์</h2>
+              <p className="text-muted-foreground mb-6">
+                {postError
+                  ? postError instanceof Error
+                    ? postError.message
+                    : 'เกิดข้อผิดพลาด'
+                  : 'ไม่พบโพสต์ที่ต้องการแก้ไข'
+                }
+              </p>
+              <Button size={'sm'} onClick={() => router.push("/")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                กลับหน้าหลัก
+              </Button>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -102,18 +107,20 @@ export default function EditPostPage() {
           { label: "แก้ไข" },
         ]}
       >
-        <Card>
-          <CardContent className="text-center py-16">
-            <h2 className="text-2xl font-bold mb-2">ไม่มีสิทธิ์</h2>
-            <p className="text-muted-foreground mb-6">
-              คุณไม่มีสิทธิ์แก้ไขโพสต์นี้ เฉพาะเจ้าของโพสต์เท่านั้นที่สามารถแก้ไขได้
-            </p>
-            <Button size={'sm'} onClick={() => router.push(`/post/${postId}`)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              กลับไปที่โพสต์
-            </Button>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="text-center py-16">
+              <h2 className="text-2xl font-bold mb-2">ไม่มีสิทธิ์</h2>
+              <p className="text-muted-foreground mb-6">
+                คุณไม่มีสิทธิ์แก้ไขโพสต์นี้ เฉพาะเจ้าของโพสต์เท่านั้นที่สามารถแก้ไขได้
+              </p>
+              <Button size={'sm'} onClick={() => router.push(`/post/${postId}`)}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                กลับไปที่โพสต์
+              </Button>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -165,15 +172,16 @@ export default function EditPostPage() {
         { label: "แก้ไข" },
       ]}
     >
-      <div className="max-w-3xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>แก้ไขโพสต์</CardTitle>
-            <CardDescription>
-              แก้ไขหัวข้อ เนื้อหา และแท็กของโพสต์
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      <PageWrap>
+        <div className="max-w-3xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle>แก้ไขโพสต์</CardTitle>
+              <CardDescription>
+                แก้ไขหัวข้อ เนื้อหา และแท็กของโพสต์
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Title */}
               <Field>
@@ -316,6 +324,7 @@ export default function EditPostPage() {
           </CardContent>
         </Card>
       </div>
+      </PageWrap>
     </AppLayout>
   );
 }

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -170,9 +171,11 @@ export default function EditProfilePage() {
           { label: "แก้ไขโปรไฟล์" },
         ]}
       >
-        <div className="flex min-h-[400px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <PageWrap>
+          <div className="flex min-h-[400px] items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -186,15 +189,17 @@ export default function EditProfilePage() {
           { label: "แก้ไขโปรไฟล์" },
         ]}
       >
-        <div className="flex min-h-[400px] flex-col items-center justify-center">
-          <h2 className="text-2xl font-bold mb-2">กรุณาเข้าสู่ระบบ</h2>
-          <p className="text-muted-foreground mb-4">
-            คุณต้องเข้าสู่ระบบก่อนแก้ไขโปรไฟล์
-          </p>
-          <Button onClick={() => router.push("/login")}>
-            เข้าสู่ระบบ
-          </Button>
-        </div>
+        <PageWrap>
+          <div className="flex min-h-[400px] flex-col items-center justify-center">
+            <h2 className="text-2xl font-bold mb-2">กรุณาเข้าสู่ระบบ</h2>
+            <p className="text-muted-foreground mb-4">
+              คุณต้องเข้าสู่ระบบก่อนแก้ไขโปรไฟล์
+            </p>
+            <Button onClick={() => router.push("/login")}>
+              เข้าสู่ระบบ
+            </Button>
+          </div>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -207,8 +212,9 @@ export default function EditProfilePage() {
         { label: "แก้ไขโปรไฟล์" },
       ]}
     >
-      <div className="max-w-3xl mx-auto">
-        <Card>
+      <PageWrap>
+        <div className="max-w-3xl mx-auto">
+          <Card>
           <CardHeader>
             <CardTitle>แก้ไขโปรไฟล์</CardTitle>
             <CardDescription>
@@ -406,6 +412,7 @@ export default function EditProfilePage() {
           </CardContent>
         </Card>
       </div>
+      </PageWrap>
     </AppLayout>
   );
 }

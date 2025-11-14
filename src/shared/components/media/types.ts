@@ -37,4 +37,5 @@ export interface MediaDisplayProps extends BaseMediaProps {
   media: MediaItem[];
   editable?: boolean;
   onRemove?: (index: number) => void;
+  disableLightbox?: boolean; // Disable lightbox (e.g., for mobile with drawer)
 }

@@ -18,6 +18,8 @@ import { useDeletePost } from "../hooks/usePosts";
 import { useUser } from '@/features/auth';
 import { LinkifiedContent } from "@/components/common";
 import { MediaDisplay } from "@/components/media";
+import { useIsMobile } from "@/shared/hooks/useDeviceType";
+import { useDrawer } from "@/shared/contexts/DrawerContext";
 
 interface PostCardProps {
   post: Post;
@@ -30,6 +32,7 @@ interface PostCardProps {
     uploadProgress: number;
     error?: string;
   };
+  onCommentClick?: () => void; // Optional override for comment click
 }
 
 export function PostCard({
@@ -37,10 +40,13 @@ export function PostCard({
   compact = false,
   disableNavigation = false,
   isOptimistic = false,
-  optimisticData
+  optimisticData,
+  onCommentClick
 }: PostCardProps) {
   const router = useRouter();
   const currentUser = useUser();
+  const isMobile = useIsMobile();
+  const { openDrawer } = useDrawer();
 
   // Hooks for mutations
   const { handleVote } = useToggleVote();
@@ -61,6 +67,19 @@ export function PostCard({
   };
 
   const handleCommentClick = () => {
+    // Priority 1: Use override callback if provided (e.g., from POC page)
+    if (onCommentClick) {
+      onCommentClick();
+      return;
+    }
+
+    // Priority 2: Mobile - open comment drawer
+    if (isMobile) {
+      openDrawer('comment-only', { post });
+      return;
+    }
+
+    // Priority 3: Desktop - navigate to post page
     router.push(`/post/${post.id}`);
   };
 
@@ -78,6 +97,49 @@ export function PostCard({
 
   const handleSaveClick = () => {
     handleToggleSave(post.id, post.isSaved);
+  };
+
+  const handleMediaClick = (e: React.MouseEvent) => {
+    // Don't trigger on optimistic posts
+    if (isOptimistic || disableNavigation) return;
+
+    // Mobile: Open media viewer drawer
+    if (isMobile && post.media && post.media.length > 0) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const mediaItems = post.media.map((m) => {
+        const urlLower = m.url.toLowerCase();
+        const isVideoByUrl = /\.(mp4|webm|mov|avi)$/i.test(urlLower);
+        const isImageByUrl = /\.(jpg|jpeg|png|gif|webp)$/i.test(urlLower);
+
+        let type: 'image' | 'video' = 'image';
+        if (isVideoByUrl) {
+          type = 'video';
+        } else if (isImageByUrl) {
+          type = 'image';
+        } else {
+          type = m.type === 'video' ? 'video' : 'image';
+        }
+
+        return {
+          id: m.id,
+          url: m.url,
+          type,
+          thumbnail: m.thumbnail || undefined,
+        };
+      });
+
+      openDrawer('media-viewer', {
+        post,
+        media: mediaItems,
+        initialIndex: 0,
+      });
+    }
+    // Desktop: Navigate to post page (default behavior)
+    else if (!isMobile) {
+      router.push(`/post/${post.id}`);
+    }
   };
 
   const isUploading = isOptimistic && optimisticData?.uploadStatus === 'uploading';
@@ -235,7 +297,13 @@ export function PostCard({
 
       {/* Media Section - Edge-to-Edge (No Padding) */}
       {post.media && post.media.length > 0 && (
-        <div className="w-full relative">
+        <div
+          className={cn(
+            "w-full relative",
+            !isOptimistic && isMobile && "cursor-pointer"
+          )}
+          onClick={handleMediaClick}
+        >
             <MediaDisplay
               media={post.media.map((m) => {
                 // ✅ Fallback: เช็คจาก URL extension ถ้า backend type อาจผิด
@@ -263,6 +331,7 @@ export function PostCard({
               })}
               variant={disableNavigation ? 'detail' : 'feed'}
               className={cn("rounded-none", isUploading && "opacity-60")}
+              disableLightbox={isMobile}
             />
 
             {/* ✅ Loading Overlay - แสดงตอนกำลังอัปโหลด */}

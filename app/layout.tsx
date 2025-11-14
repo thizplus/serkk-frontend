@@ -8,6 +8,8 @@ import { ChatProvider } from "@/providers/ChatProvider";
 import { NotificationProvider } from "@/providers/NotificationProvider";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/GoogleTagManager";
 import { PWAInstaller } from "@/features/pwa";
+import { DrawerProvider } from "@/shared/contexts/DrawerContext";
+import { DrawerManager } from "@/shared/components/drawers/DrawerManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -123,12 +125,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <ChatProvider>
-              <NotificationProvider>
-                {children}
-                <Toaster />
-              </NotificationProvider>
-            </ChatProvider>
+            <DrawerProvider>
+              <ChatProvider>
+                <NotificationProvider>
+                  {children}
+                  <DrawerManager />
+                  <Toaster />
+                </NotificationProvider>
+              </ChatProvider>
+            </DrawerProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

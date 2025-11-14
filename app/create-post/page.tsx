@@ -6,6 +6,7 @@ import AppLayout from "@/components/layouts/AppLayout";
 import { CreatePostForm, useCreatePost, useCreateCrosspost, usePost } from "@/features/posts";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CreatePostRequest, CreateCrosspostRequest } from "@/types/request";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 
 export const dynamic = 'force-dynamic';
 
@@ -113,28 +114,30 @@ function CreatePostContent() {
         { label: sourcePost ? "โพสต์ข้าม" : "สร้างโพสต์" },
       ]}
     >
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">
-            {sourcePost ? "โพสต์ข้าม" : "สร้างโพสต์ใหม่"}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {sourcePost
-              ? "แชร์โพสต์นี้พร้อมเพิ่มความคิดเห็นของคุณเอง"
-              : "แบ่งปันเรื่องราวหรือความคิดของคุณกับชุมชน"
-            }
-          </p>
-        </div>
+      <PageWrap>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">
+              {sourcePost ? "โพสต์ข้าม" : "สร้างโพสต์ใหม่"}
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {sourcePost
+                ? "แชร์โพสต์นี้พร้อมเพิ่มความคิดเห็นของคุณเอง"
+                : "แบ่งปันเรื่องราวหรือความคิดของคุณกับชุมชน"
+              }
+            </p>
+          </div>
 
-        <CreatePostForm
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          sourcePost={sourcePost}
-          isSubmitting={isSubmitting}
-          initialTags={tagParam ? [tagParam] : undefined}
-          enableOptimisticUI={true}
-        />
-      </div>
+          <CreatePostForm
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            sourcePost={sourcePost}
+            isSubmitting={isSubmitting}
+            initialTags={tagParam ? [tagParam] : undefined}
+            enableOptimisticUI={true}
+          />
+        </div>
+      </PageWrap>
     </AppLayout>
   );
 }
@@ -143,12 +146,14 @@ export default function CreatePostPage() {
   return (
     <Suspense fallback={
       <AppLayout breadcrumbs={[{ label: "กำลังโหลด..." }]}>
-        <Card>
-          <CardContent className="py-16 text-center">
-            <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 mb-4"></div>
-            <p className="text-muted-foreground">กำลังโหลด...</p>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 mb-4"></div>
+              <p className="text-muted-foreground">กำลังโหลด...</p>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     }>
       <CreatePostContent />

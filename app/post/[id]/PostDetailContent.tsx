@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { PostCard } from "@/features/posts";
 import { CommentTree } from "@/features/comments";
 import { CommentForm } from "@/features/comments";
@@ -45,12 +46,14 @@ export function PostDetailContent({ postId }: PostDetailContentProps) {
   if (isLoadingPost) {
     return (
       <AppLayout breadcrumbs={[{ label: "กำลังโหลด..." }]}>
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">กำลังโหลดโพสต์...</p>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">กำลังโหลดโพสต์...</p>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -59,20 +62,22 @@ export function PostDetailContent({ postId }: PostDetailContentProps) {
   if (postError || !post) {
     return (
       <AppLayout breadcrumbs={[{ label: "เกิดข้อผิดพลาด" }]}>
-        <Card>
-          <CardContent className="py-16 text-center">
-            <h2 className="text-xl font-bold mb-2">ไม่พบโพสต์</h2>
-            <p className="text-muted-foreground mb-6">
-              {postError instanceof Error
-                ? postError.message
-                : 'ไม่สามารถโหลดโพสต์ได้'}
-            </p>
-            <Button size={'sm'} onClick={() => router.push("/")}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              กลับหน้าหลัก
-            </Button>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <h2 className="text-xl font-bold mb-2">ไม่พบโพสต์</h2>
+              <p className="text-muted-foreground mb-6">
+                {postError instanceof Error
+                  ? postError.message
+                  : 'ไม่สามารถโหลดโพสต์ได้'}
+              </p>
+              <Button size={'sm'} onClick={() => router.push("/")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                กลับหน้าหลัก
+              </Button>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -146,21 +151,22 @@ export function PostDetailContent({ postId }: PostDetailContentProps) {
         { label: post.title },
       ]}
     >
-      <div className="space-y-6">
-        {/* Back Button */}
+      {/* Back Button - wrapped with PageWrap */}
+      <PageWrap>
         <Button
           size="sm"
- 
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           กลับ
         </Button>
+      </PageWrap>
 
-        {/* Post Card */}
-        <PostCard post={post} disableNavigation />
+      {/* Post Card - NO WRAP (edge-to-edge) */}
+      <PostCard post={post} disableNavigation />
 
-        {/* Comments Section */}
+      {/* Comments Section - wrapped with PageWrap */}
+      <PageWrap>
         <div className="bg-card border rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">
             ความคิดเห็น ({isLoadingComments ? '...' : totalCommentCount})
@@ -195,7 +201,7 @@ export function PostDetailContent({ postId }: PostDetailContentProps) {
             />
           )}
         </div>
-      </div>
+      </PageWrap>
     </AppLayout>
   );
 }

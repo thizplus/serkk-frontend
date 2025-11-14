@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { InfinitePostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Plus } from "@/config/icons";
@@ -38,8 +39,8 @@ export default function Home() {
         { label: "หน้าหลัก" },
       ]}
     >
-      <div className="space-y-6">
-        {/* Header with Create Post Button */}
+      {/* Header with Create Post Button - wrapped with PageWrap */}
+      <PageWrap>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">เรื่องชาวบ้าน</h1>
@@ -52,18 +53,18 @@ export default function Home() {
             สร้างโพสต์
           </Button>
         </div>
+      </PageWrap>
 
-        {/* Infinite Scroll Post Feed */}
-        <InfinitePostFeed
-          posts={posts}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          fetchNextPage={fetchNextPage}
-          isLoading={isLoading}
-          error={error || null}
-          enableOptimisticUI={true}
-        />
-      </div>
+      {/* Infinite Scroll Post Feed - NO WRAP (edge-to-edge) */}
+      <InfinitePostFeed
+        posts={posts}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage}
+        isLoading={isLoading}
+        error={error || null}
+        enableOptimisticUI={true}
+      />
     </AppLayout>
   );
 }

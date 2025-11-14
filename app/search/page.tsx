@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { PostFeed } from "@/features/posts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -67,86 +68,88 @@ function SearchPageContent() {
         { label: "ค้นหา" },
       ]}
     >
-      <div className="space-y-6">
-        {/* Search Header */}
-        <div>
-          <h1 className="text-3xl font-bold">ค้นหา</h1>
-          <p className="text-muted-foreground mt-1">
-            ค้นหาโพสต์และผู้ใช้ในชุมชน
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
-            <Input
-              type="text"
-              placeholder="ค้นหาโพสต์, ผู้ใช้, หรือแท็ก..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+      {/* Search Header + Search Bar + Tabs - wrapped with PageWrap */}
+      <PageWrap>
+        <div className="space-y-6">
+          {/* Search Header */}
+          <div>
+            <h1 className="text-3xl font-bold">ค้นหา</h1>
+            <p className="text-muted-foreground mt-1">
+              ค้นหาโพสต์และผู้ใช้ในชุมชน
+            </p>
           </div>
-          <Button type="submit">
-            <Search className="mr-2 h-4 w-4" />
-            ค้นหา
-          </Button>
-        </form>
 
-        {/* Loading State */}
-        {isLoading && searchQuery.trim() && (
-          <Card>
-            <CardContent>
-              <LoadingState message={LOADING_MESSAGES.SEARCH.LOADING} />
-            </CardContent>
-          </Card>
-        )}
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
+              <Input
+                type="text"
+                placeholder="ค้นหาโพสต์, ผู้ใช้, หรือแท็ก..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button type="submit">
+              <Search className="mr-2 h-4 w-4" />
+              ค้นหา
+            </Button>
+          </form>
 
-        {/* Error State */}
-        {error && (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <p className="text-lg text-destructive mb-2">
-                ไม่สามารถค้นหาได้
-              </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
-              </p>
-              <Button onClick={() => window.location.reload()}>
-                ลองใหม่อีกครั้ง
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+          {/* Loading State */}
+          {isLoading && searchQuery.trim() && (
+            <Card>
+              <CardContent>
+                <LoadingState message={LOADING_MESSAGES.SEARCH.LOADING} />
+              </CardContent>
+            </Card>
+          )}
 
-        {/* Results */}
-        {!isLoading && !error && searchQuery.trim() && (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="posts" className="gap-2">
-                <FileText size={16} />
-                โพสต์ ({filteredPosts.length})
-              </TabsTrigger>
-              <TabsTrigger value="users" className="gap-2">
-                <User size={16} />
-                ผู้ใช้ ({filteredUsers.length})
-              </TabsTrigger>
-            </TabsList>
+          {/* Error State */}
+          {error && (
+            <Card>
+              <CardContent className="py-16 text-center">
+                <p className="text-lg text-destructive mb-2">
+                  ไม่สามารถค้นหาได้
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
+                </p>
+                <Button onClick={() => window.location.reload()}>
+                  ลองใหม่อีกครั้ง
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
-            <TabsContent value="posts" className="mt-6">
-              {filteredPosts.length > 0 ? (
-                <PostFeed posts={filteredPosts} />
-              ) : (
-                <EmptyState
-                  icon="Search"
-                  title="ไม่พบโพสต์"
-                  description="ลองค้นหาด้วยคำอื่นหรือเปลี่ยนตัวกรอง"
-                />
-              )}
-            </TabsContent>
+          {/* Results with Tabs */}
+          {!isLoading && !error && searchQuery.trim() && (
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="posts" className="gap-2">
+                  <FileText size={16} />
+                  โพสต์ ({filteredPosts.length})
+                </TabsTrigger>
+                <TabsTrigger value="users" className="gap-2">
+                  <User size={16} />
+                  ผู้ใช้ ({filteredUsers.length})
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="users" className="mt-6">
+              <TabsContent value="posts" className="mt-6">
+                {filteredPosts.length > 0 ? (
+                  <div />
+                ) : (
+                  <EmptyState
+                    icon="Search"
+                    title="ไม่พบโพสต์"
+                    description="ลองค้นหาด้วยคำอื่นหรือเปลี่ยนตัวกรอง"
+                  />
+                )}
+              </TabsContent>
+
+            <TabsContent value="users" className="mt-6">
             {filteredUsers.length > 0 ? (
               <div className="space-y-4">
                 {filteredUsers.map((user: UserType) => (
@@ -183,23 +186,29 @@ function SearchPageContent() {
                 description="ลองค้นหาด้วยชื่ออื่น"
               />
             )}
-          </TabsContent>
-        </Tabs>
-        )}
+            </TabsContent>
+          </Tabs>
+          )}
 
-        {/* Initial State - ยังไม่ได้ค้นหา */}
-        {!searchQuery.trim() && (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <Search className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">เริ่มค้นหา</h3>
-              <p className="text-muted-foreground">
-                พิมพ์คำค้นหาในช่องด้านบนเพื่อค้นหาโพสต์และผู้ใช้
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+          {/* Initial State - ยังไม่ได้ค้นหา */}
+          {!searchQuery.trim() && (
+            <Card>
+              <CardContent className="py-16 text-center">
+                <Search className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
+                <h3 className="text-lg font-semibold mb-2">เริ่มค้นหา</h3>
+                <p className="text-muted-foreground">
+                  พิมพ์คำค้นหาในช่องด้านบนเพื่อค้นหาโพสต์และผู้ใช้
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </PageWrap>
+
+      {/* Post Feed - NO WRAP (edge-to-edge) */}
+      {!isLoading && !error && searchQuery.trim() && activeTab === "posts" && filteredPosts.length > 0 && (
+        <PostFeed posts={filteredPosts} />
+      )}
     </AppLayout>
   );
 }
@@ -214,7 +223,9 @@ export default function SearchPage() {
           { label: "ค้นหา" },
         ]}
       >
-        <LoadingState message={LOADING_MESSAGES.SEARCH.LOADING} />
+        <PageWrap>
+          <LoadingState message={LOADING_MESSAGES.SEARCH.LOADING} />
+        </PageWrap>
       </AppLayout>
     }>
       <SearchPageContent />

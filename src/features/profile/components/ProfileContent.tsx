@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { toast } from "sonner";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InfinitePostFeed } from "@/features/posts";
@@ -130,7 +131,9 @@ export function ProfileContent({ params }: ProfileContentProps) {
           { label: "โปรไฟล์", href: `/profile/${username}` },
         ]}
       >
-        <LoadingState message={LOADING_MESSAGES.PROFILE.LOADING} />
+        <PageWrap>
+          <LoadingState message={LOADING_MESSAGES.PROFILE.LOADING} />
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -144,15 +147,17 @@ export function ProfileContent({ params }: ProfileContentProps) {
           { label: "โปรไฟล์", href: `/profile/${username}` },
         ]}
       >
-        <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-2">ไม่พบโปรไฟล์</h2>
-          <p className="text-muted-foreground mb-6">
-            {errorOtherProfile instanceof Error ? errorOtherProfile.message : 'ไม่พบผู้ใช้ที่ต้องการ'}
-          </p>
-          <Button onClick={() => router.push("/")}>
-            กลับหน้าหลัก
-          </Button>
-        </div>
+        <PageWrap>
+          <div className="text-center py-16">
+            <h2 className="text-2xl font-bold mb-2">ไม่พบโปรไฟล์</h2>
+            <p className="text-muted-foreground mb-6">
+              {errorOtherProfile instanceof Error ? errorOtherProfile.message : 'ไม่พบผู้ใช้ที่ต้องการ'}
+            </p>
+            <Button onClick={() => router.push("/")}>
+              กลับหน้าหลัก
+            </Button>
+          </div>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -166,15 +171,17 @@ export function ProfileContent({ params }: ProfileContentProps) {
           { label: "โปรไฟล์", href: `/profile/${username}` },
         ]}
       >
-        <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-2">ไม่พบโปรไฟล์</h2>
-          <p className="text-muted-foreground mb-6">
-            ไม่พบข้อมูลผู้ใช้
-          </p>
-          <Button onClick={() => router.push("/")}>
-            กลับหน้าหลัก
-          </Button>
-        </div>
+        <PageWrap>
+          <div className="text-center py-16">
+            <h2 className="text-2xl font-bold mb-2">ไม่พบโปรไฟล์</h2>
+            <p className="text-muted-foreground mb-6">
+              ไม่พบข้อมูลผู้ใช้
+            </p>
+            <Button onClick={() => router.push("/")}>
+              กลับหน้าหลัก
+            </Button>
+          </div>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -199,9 +206,10 @@ export function ProfileContent({ params }: ProfileContentProps) {
         { label: `@${username}` },
       ]}
     >
-      <div className="space-y-6">
+      {/* Profile Header + Tabs Header - wrapped with PageWrap */}
+      <PageWrap>
         {/* Profile Header */}
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-start">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-start mb-6">
           {/* Avatar */}
           <div className="relative">
             <div className="w-20 h-20 rounded-full bg-muted overflow-hidden">
@@ -223,120 +231,123 @@ export function ProfileContent({ params }: ProfileContentProps) {
 
           {/* User Info */}
           <div className="flex-1">
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-                <div>
-                  <h1 className="text-2xl font-bold">{profileUser.displayName}</h1>
-                  <p className="text-sm text-muted-foreground">@{profileUser.username}</p>
-                </div>
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-bold">{profileUser.displayName}</h1>
+                <p className="text-sm text-muted-foreground">@{profileUser.username}</p>
+              </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  {isOwnProfile ? (
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {isOwnProfile ? (
+                  <Button
+                    onClick={() => router.push("/profile/edit")}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    แก้ไขโปรไฟล์
+                  </Button>
+                ) : (
+                  <>
                     <Button
-                      onClick={() => router.push("/profile/edit")}
-                      variant="outline"
+                      onClick={() => {
+                        if (!currentUser) {
+                          toast.error(TOAST_MESSAGES.AUTH.UNAUTHORIZED);
+                          router.push('/login');
+                          return;
+                        }
+                        router.push(`/chat/${profileUser.username}`);
+                      }}
                       size="sm"
+                      variant="outline"
                     >
-                      <Edit className="mr-2 h-4 w-4" />
-                      แก้ไขโปรไฟล์
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      แชท
                     </Button>
-                  ) : (
-                    <>
-                      <Button
-                        onClick={() => {
-                          if (!currentUser) {
-                            toast.error(TOAST_MESSAGES.AUTH.UNAUTHORIZED);
-                            router.push('/login');
-                            return;
-                          }
-                          router.push(`/chat/${profileUser.username}`);
-                        }}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        แชท
-                      </Button>
-                      <Button
-                        onClick={handleFollow}
-                        size="sm"
-                        variant={'isFollowing' in profileUser && profileUser.isFollowing ? "outline" : "default"}
-                        disabled={isFollowLoading}
-                      >
-                        {'isFollowing' in profileUser && profileUser.isFollowing ? (
-                          <>
-                            <UserMinus className="mr-2 h-4 w-4" />
-                            เลิกติดตาม
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            ติดตาม
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Bio */}
-              {profileUser.bio && (
-                <div className="mt-2 text-sm text-foreground/90 line-clamp-2">
-                  <LinkifiedContent>{profileUser.bio}</LinkifiedContent>
-                </div>
-              )}
-
-              {/* Meta Info */}
-              <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                {profileUser.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    <span>{profileUser.location}</span>
-                  </div>
-                )}
-                {profileUser.website && (
-                  <div className="flex items-center gap-1">
-                    <Globe size={14} />
-                    <a
-                      href={profileUser.website}
-                      target="_blank"
-                      rel="nofollow noopener noreferrer"
-                      className="text-primary hover:underline truncate max-w-[200px]"
+                    <Button
+                      onClick={handleFollow}
+                      size="sm"
+                      variant={'isFollowing' in profileUser && profileUser.isFollowing ? "outline" : "default"}
+                      disabled={isFollowLoading}
                     >
-                      {profileUser.website.replace(/^https?:\/\//, '')}
-                    </a>
-                  </div>
+                      {'isFollowing' in profileUser && profileUser.isFollowing ? (
+                        <>
+                          <UserMinus className="mr-2 h-4 w-4" />
+                          เลิกติดตาม
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          ติดตาม
+                        </>
+                      )}
+                    </Button>
+                  </>
                 )}
-              </div>
-
-              {/* Stats */}
-              <div className="mt-2 flex gap-4 text-xs">
-                <div className="flex items-center gap-1">
-                  <TrendingUp size={14} className="text-primary" />
-                  <span className="font-bold">{profileUser.karma?.toLocaleString() || 0}</span>
-                  <span className="text-muted-foreground">Karma</span>
-                </div>
-                <button
-                  className="flex items-center gap-1 hover:underline"
-                  onClick={() => router.push(`/profile/${profileUser.username}/followers`)}
-                >
-                  <span className="font-bold">{profileUser.followersCount?.toLocaleString() || 0}</span>
-                  <span className="text-muted-foreground">ผู้ติดตาม</span>
-                </button>
-                <button
-                  className="flex items-center gap-1 hover:underline"
-                  onClick={() => router.push(`/profile/${profileUser.username}/following`)}
-                >
-                  <span className="font-bold">{profileUser.followingCount?.toLocaleString() || 0}</span>
-                  <span className="text-muted-foreground">ติดตาม</span>
-                </button>
               </div>
             </div>
-          </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            {/* Bio */}
+            {profileUser.bio && (
+              <div className="mt-2 text-sm text-foreground/90 line-clamp-2">
+                <LinkifiedContent>{profileUser.bio}</LinkifiedContent>
+              </div>
+            )}
+
+            {/* Meta Info */}
+            <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+              {profileUser.location && (
+                <div className="flex items-center gap-1">
+                  <MapPin size={14} />
+                  <span>{profileUser.location}</span>
+                </div>
+              )}
+              {profileUser.website && (
+                <div className="flex items-center gap-1">
+                  <Globe size={14} />
+                  <a
+                    href={profileUser.website}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    className="text-primary hover:underline truncate max-w-[200px]"
+                  >
+                    {profileUser.website.replace(/^https?:\/\//, '')}
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Stats */}
+            <div className="mt-2 flex gap-4 text-xs">
+              <div className="flex items-center gap-1">
+                <TrendingUp size={14} className="text-primary" />
+                <span className="font-bold">{profileUser.karma?.toLocaleString() || 0}</span>
+                <span className="text-muted-foreground">Karma</span>
+              </div>
+              <button
+                className="flex items-center gap-1 hover:underline"
+                onClick={() => router.push(`/profile/${profileUser.username}/followers`)}
+              >
+                <span className="font-bold">{profileUser.followersCount?.toLocaleString() || 0}</span>
+                <span className="text-muted-foreground">ผู้ติดตาม</span>
+              </button>
+              <button
+                className="flex items-center gap-1 hover:underline"
+                onClick={() => router.push(`/profile/${profileUser.username}/following`)}
+              >
+                <span className="font-bold">{profileUser.followingCount?.toLocaleString() || 0}</span>
+                <span className="text-muted-foreground">ติดตาม</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </PageWrap>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        {/* Tabs Header - wrapped with PageWrap */}
+        <PageWrap>
           <TabsList className="w-full justify-start">
             <TabsTrigger value="posts" className="gap-2">
               <FileText size={16} />
@@ -347,19 +358,23 @@ export function ProfileContent({ params }: ProfileContentProps) {
               คอมเมนต์ ({userComments.length})
             </TabsTrigger>
           </TabsList>
+        </PageWrap>
 
-          <TabsContent value="posts" className="mt-6">
-            <InfinitePostFeed
-              posts={userPosts}
-              hasNextPage={hasNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-              fetchNextPage={fetchNextPage}
-              isLoading={isLoadingPosts}
-              error={error || null}
-            />
-          </TabsContent>
+        {/* Posts Tab - NO WRAP (edge-to-edge) */}
+        <TabsContent value="posts" className="mt-6">
+          <InfinitePostFeed
+            posts={userPosts}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            isLoading={isLoadingPosts}
+            error={error || null}
+          />
+        </TabsContent>
 
-          <TabsContent value="comments" className="mt-6">
+        {/* Comments Tab - wrapped with PageWrap */}
+        <TabsContent value="comments" className="mt-6">
+          <PageWrap>
             {isLoadingComments ? (
               <Card>
                 <CardContent>
@@ -387,9 +402,9 @@ export function ProfileContent({ params }: ProfileContentProps) {
                 description="คอมเมนต์ที่โพสต์จะแสดงที่นี่"
               />
             )}
-          </TabsContent>
-        </Tabs>
-      </div>
+          </PageWrap>
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 }

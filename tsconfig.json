@@ -24,6 +24,7 @@
       "@/shared/*": ["./src/shared/*"],
       "@/providers/*": ["./src/providers/*"],
       "@/docs/*": ["./src/docs/*"],
+      "@/poc/*": ["./src/poc/*"],
 
       // Convenience aliases (point to shared)
       "@/types": ["./src/shared/types"],

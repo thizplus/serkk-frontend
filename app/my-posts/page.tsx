@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { PostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,7 +40,9 @@ export default function MyPostsPage() {
           { label: "โพสต์ของฉัน" },
         ]}
       >
-        <LoadingState message={LOADING_MESSAGES.POST.LOADING} />
+        <PageWrap>
+          <LoadingState message={LOADING_MESSAGES.POST.LOADING} />
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -53,18 +56,20 @@ export default function MyPostsPage() {
           { label: "โพสต์ของฉัน" },
         ]}
       >
-        <Card>
-          <CardContent className="py-16 text-center">
-            <FileText className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">กรุณาล็อกอินก่อน</h2>
-            <p className="text-muted-foreground mb-6">
-              คุณต้องล็อกอินเพื่อดูโพสต์ของคุณ
-            </p>
-            <Button onClick={() => router.push("/login")}>
-              ล็อกอิน
-            </Button>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <FileText className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
+              <h2 className="text-xl font-semibold mb-2">กรุณาล็อกอินก่อน</h2>
+              <p className="text-muted-foreground mb-6">
+                คุณต้องล็อกอินเพื่อดูโพสต์ของคุณ
+              </p>
+              <Button onClick={() => router.push("/login")}>
+                ล็อกอิน
+              </Button>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -76,8 +81,8 @@ export default function MyPostsPage() {
         { label: "โพสต์ของฉัน" },
       ]}
     >
-      <div className="space-y-6">
-        {/* Header */}
+      {/* Header - wrapped with PageWrap */}
+      <PageWrap>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -125,25 +130,24 @@ export default function MyPostsPage() {
           </Card>
         )}
 
-        {/* My Posts Feed */}
-        {!isLoading && !error && (
-          <>
-            {myPosts.length > 0 ? (
-              <PostFeed posts={myPosts} enableOptimisticUI={true} />
-            ) : (
-              <EmptyState
-                icon="FileText"
-                title="ยังไม่มีโพสต์"
-                description="คุณยังไม่ได้สร้างโพสต์ เริ่มสร้างโพสต์แรกของคุณเลย!"
-                action={{
-                  label: "สร้างโพสต์",
-                  onClick: () => router.push("/create-post"),
-                }}
-              />
-            )}
-          </>
+        {/* Empty State */}
+        {!isLoading && !error && myPosts.length === 0 && (
+          <EmptyState
+            icon="FileText"
+            title="ยังไม่มีโพสต์"
+            description="คุณยังไม่ได้สร้างโพสต์ เริ่มสร้างโพสต์แรกของคุณเลย!"
+            action={{
+              label: "สร้างโพสต์",
+              onClick: () => router.push("/create-post"),
+            }}
+          />
         )}
-      </div>
+      </PageWrap>
+
+      {/* My Posts Feed - NO WRAP (edge-to-edge) */}
+      {!isLoading && !error && myPosts.length > 0 && (
+        <PostFeed posts={myPosts} enableOptimisticUI={true} />
+      )}
     </AppLayout>
   );
 }

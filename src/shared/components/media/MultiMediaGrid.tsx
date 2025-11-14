@@ -40,13 +40,14 @@ export function MultiMediaGrid({
   editable = false,
   onRemove,
   className,
+  disableLightbox = false,
 }: MediaDisplayProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Handle media click - open lightbox
+  // Handle media click - open lightbox (only if not disabled)
   const handleMediaClick = (index: number) => {
-    if (!editable) {
+    if (!editable && !disableLightbox) {
       setLightboxIndex(index);
       setLightboxOpen(true);
     }
@@ -78,8 +79,8 @@ export function MultiMediaGrid({
         className={className}
       />
 
-      {/* Single Lightbox Instance (only in non-editable mode) */}
-      {!editable && (
+      {/* Single Lightbox Instance (only in non-editable mode and lightbox not disabled) */}
+      {!editable && !disableLightbox && (
         <MediaLightbox
           media={media}
           open={lightboxOpen}

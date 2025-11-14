@@ -145,7 +145,7 @@ export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
               </Link>
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-4 pb-20 md:pb-4">
+          <div className="flex flex-1 flex-col p-0 pb-20 md:gap-4 md:pb-4 md:p-4">
             {/* pb-20 (80px) บน mobile เพื่อไม่ให้ content ถูกบังโดย bottom nav */}
             <div className="w-full max-w-xl mx-auto px-0">
               {children}

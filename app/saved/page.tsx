@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { PostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,7 +34,9 @@ export default function SavedPage() {
           { label: "โพสต์ที่บันทึก" },
         ]}
       >
-        <LoadingState message={LOADING_MESSAGES.SAVED.LOADING} />
+        <PageWrap>
+          <LoadingState message={LOADING_MESSAGES.SAVED.LOADING} />
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -47,18 +50,20 @@ export default function SavedPage() {
           { label: "โพสต์ที่บันทึก" },
         ]}
       >
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Bookmark className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">กรุณาล็อกอินก่อน</h2>
-            <p className="text-muted-foreground mb-6">
-              คุณต้องล็อกอินเพื่อดูโพสต์ที่บันทึกไว้
-            </p>
-            <Button onClick={() => router.push("/login")}>
-              ล็อกอิน
-            </Button>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="py-16 text-center">
+              <Bookmark className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
+              <h2 className="text-xl font-semibold mb-2">กรุณาล็อกอินก่อน</h2>
+              <p className="text-muted-foreground mb-6">
+                คุณต้องล็อกอินเพื่อดูโพสต์ที่บันทึกไว้
+              </p>
+              <Button onClick={() => router.push("/login")}>
+                ล็อกอิน
+              </Button>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -70,8 +75,8 @@ export default function SavedPage() {
         { label: "โพสต์ที่บันทึก" },
       ]}
     >
-      <div className="space-y-6">
-        {/* Header */}
+      {/* Header - wrapped with PageWrap */}
+      <PageWrap>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -119,25 +124,24 @@ export default function SavedPage() {
           </Card>
         )}
 
-        {/* Saved Posts Feed */}
-        {!isLoading && !error && (
-          <>
-            {savedPosts.length > 0 ? (
-              <PostFeed posts={savedPosts} />
-            ) : (
-              <EmptyState
-                icon="Bookmark"
-                title="ยังไม่มีโพสต์ที่บันทึก"
-                description="เมื่อคุณบันทึกโพสต์ โพสต์จะปรากฏที่นี่"
-                action={{
-                  label: "ไปหาโพสต์น่าสนใจ",
-                  onClick: () => router.push("/"),
-                }}
-              />
-            )}
-          </>
+        {/* Empty State */}
+        {!isLoading && !error && savedPosts.length === 0 && (
+          <EmptyState
+            icon="Bookmark"
+            title="ยังไม่มีโพสต์ที่บันทึก"
+            description="เมื่อคุณบันทึกโพสต์ โพสต์จะปรากฏที่นี่"
+            action={{
+              label: "ไปหาโพสต์น่าสนใจ",
+              onClick: () => router.push("/"),
+            }}
+          />
         )}
-      </div>
+      </PageWrap>
+
+      {/* Saved Posts Feed - NO WRAP (edge-to-edge) */}
+      {!isLoading && !error && savedPosts.length > 0 && (
+        <PostFeed posts={savedPosts} />
+      )}
     </AppLayout>
   );
 }

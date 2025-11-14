@@ -8,6 +8,7 @@ import type { MediaItem, BaseMediaProps } from "./types";
 
 interface SingleImageViewerProps extends BaseMediaProps {
   media: MediaItem;
+  disableLightbox?: boolean;
 }
 
 /**
@@ -37,6 +38,7 @@ export function SingleImageViewer({
   media,
   variant = 'feed',
   className,
+  disableLightbox = false,
 }: SingleImageViewerProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -44,14 +46,21 @@ export function SingleImageViewer({
     ? MEDIA_DISPLAY.MAX_HEIGHT.DETAIL
     : MEDIA_DISPLAY.MAX_HEIGHT.FEED;
 
+  const handleClick = () => {
+    if (!disableLightbox) {
+      setLightboxOpen(true);
+    }
+  };
+
   return (
     <>
       <div
         className={cn(
-          "w-full overflow-hidden cursor-pointer hover:opacity-95 transition-opacity",
+          "w-full overflow-hidden",
+          !disableLightbox && "cursor-pointer hover:opacity-95 transition-opacity",
           className
         )}
-        onClick={() => setLightboxOpen(true)}
+        onClick={handleClick}
       >
         <img
           src={media.url}
@@ -64,13 +73,15 @@ export function SingleImageViewer({
         />
       </div>
 
-      {/* Lightbox for zoom */}
-      <MediaLightbox
-        media={[media]}
-        open={lightboxOpen}
-        index={0}
-        onClose={() => setLightboxOpen(false)}
-      />
+      {/* Lightbox for zoom - only if not disabled */}
+      {!disableLightbox && (
+        <MediaLightbox
+          media={[media]}
+          open={lightboxOpen}
+          index={0}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </>
   );
 }

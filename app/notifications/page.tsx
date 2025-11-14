@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AppLayout from "@/components/layouts/AppLayout";
+import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -136,11 +137,13 @@ export default function NotificationsPage() {
   if (isLoading) {
     return (
       <AppLayout breadcrumbs={[{ label: "การแจ้งเตือน" }]}>
-        <Card>
-          <CardContent>
-            <LoadingState message={LOADING_MESSAGES.NOTIFICATION.LOADING} />
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent>
+              <LoadingState message={LOADING_MESSAGES.NOTIFICATION.LOADING} />
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -158,24 +161,26 @@ export default function NotificationsPage() {
           { label: "การแจ้งเตือน" },
         ]}
       >
-        <Card>
-          <CardContent className="text-center py-12 sm:py-16 px-4">
-            <Bell className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">เกิดข้อผิดพลาด</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto">
-              {errorMessage}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button onClick={() => window.location.reload()}>
-                <Loader2 className="mr-2 h-4 w-4" />
-                ลองอีกครั้ง
-              </Button>
-              <Button variant="outline" onClick={() => router.push('/')}>
-                กลับหน้าหลัก
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <PageWrap>
+          <Card>
+            <CardContent className="text-center py-12 sm:py-16 px-4">
+              <Bell className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-4" />
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">เกิดข้อผิดพลาด</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto">
+                {errorMessage}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <Button onClick={() => window.location.reload()}>
+                  <Loader2 className="mr-2 h-4 w-4" />
+                  ลองอีกครั้ง
+                </Button>
+                <Button variant="outline" onClick={() => router.push('/')}>
+                  กลับหน้าหลัก
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </PageWrap>
       </AppLayout>
     );
   }
@@ -187,7 +192,8 @@ export default function NotificationsPage() {
         { label: "การแจ้งเตือน" },
       ]}
     >
-      <div className="space-y-6">
+      <PageWrap>
+        <div className="space-y-6">
         {/* Header Section */}
         <div className="space-y-4">
           {/* Title */}
@@ -370,6 +376,7 @@ export default function NotificationsPage() {
           </TabsContent>
         </Tabs>
       </div>
+      </PageWrap>
     </AppLayout>
   );
 }

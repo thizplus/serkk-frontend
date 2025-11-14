@@ -217,7 +217,7 @@ export function MediaGrid({
 
         {/* Overlay for remaining items */}
         {showOverlay && (
-          <div className="absolute rounded-lg overflow-hidden inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-black/80 transition-colors">
+          <div className="absolute overflow-hidden inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-black/80 transition-colors">
             <div className="text-center">
               <span className="text-white text-5xl font-bold">+{remainingCount}</span>
               <p className="text-white/90 text-sm mt-2">รูปภาพเพิ่มเติม</p>
