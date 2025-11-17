@@ -25,11 +25,15 @@ export {
 
   // Social Actions
   Heart,
+  HeartCrack,
   MessageSquare,
   MessageSquarePlus,
   MessageCircle,
+  MessageCircleHeart,
+  MessageCircleX,
   Share2,
   Bookmark,
+  CircleStar,
   ThumbsUp,
   ThumbsDown,
   Send,
@@ -122,6 +126,7 @@ export {
   Sun,
   Rocket,
   Bug,
+  Skull,
 
   // UI Icons (with Icon suffix)
   XIcon,
@@ -158,9 +163,14 @@ export type IconName =
   | "ArrowBigUp"
   | "ArrowBigDown"
   | "Heart"
+  | "HeartCrack"
+  | "Star"
+  | "CircleStar"
   | "MessageSquare"
   | "MessageSquarePlus"
   | "MessageCircle"
+  | "MessageCircleHeart"
+  | "MessageCircleX"
   | "Share2"
   | "Bookmark"
   | "ThumbsUp"
@@ -241,6 +251,7 @@ export type IconName =
   | "Sun"
   | "Rocket"
   | "Bug"
+  | "Skull"
   | "XIcon"
   | "CircleCheckIcon"
   | "InfoIcon"

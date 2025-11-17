@@ -35,10 +35,10 @@ export const FORM_LIMITS = {
     MESSAGE_MAX: 2000,
   },
   MEDIA: {
-    MAX_FILES: 200, // Maximum files per post
+    MAX_FILES: 20, // ✅ Phase 1: ลดจาก 200 → 20 (realistic limit)
     MAX_SIZE_MB: 100, // 100 MB per file
     MAX_SIZE_BYTES: 100 * 1024 * 1024,
-    CONCURRENT_UPLOADS: 5, // Upload 5 files at a time
+    CONCURRENT_UPLOADS: 8, // ✅ เพิ่มจาก 5 → 8 (upload 8 files at a time for better speed)
     PREVIEW_MAX_DISPLAY: 5, // Show 5 files in grid (Facebook-style)
   },
 } as const;
@@ -69,6 +69,24 @@ export const UI = {
   },
 } as const;
 
+// Vote Button Colors
+export const VOTE_COLORS = {
+  upvote: {
+    text: "text-red-500",
+    fill: "fill-red-500",
+  },
+  downvote: {
+    text: "text-gray-500",
+    fill: "fill-gray-500",
+  },
+} as const;
+
+// Save Button Color
+export const SAVE_COLOR = {
+  text: "text-yellow-500",
+  fill: "fill-yellow-500",
+} as const;
+
 // Time Constants
 export const TIME = {
   SECOND: 1000,
@@ -93,11 +111,23 @@ export const MEDIA_DISPLAY = {
   MAX_HEIGHT: {
     FEED: 800, // pixels - for feed mode (เพิ่มจาก 600px)
     DETAIL: 1200, // pixels - for detail mode (เพิ่มจาก 800px)
+    CROSSPOST: 320, // pixels - max height for crosspost preview
+    CROSSPOST_MEDIA: 192, // pixels - max height for media inside crosspost (48 * 4 = 192px)
   },
   // Grid settings
   GRID: {
-    GAP: 2, // Tailwind gap-2
+    GAP: 2, // Tailwind gap-2 (default)
+    GAP_COMPACT: 1, // Tailwind gap-1 (for fixed-height galleries)
+    HEIGHT_FIXED: 320, // pixels - fixed height for all gallery layouts (virtual scroll optimization)
     PREVIEW_MAX_DISPLAY: 5, // Show max 5 items in grid
+  },
+  // Aspect ratio settings (for virtual scroll stability)
+  // ⚠️ เก็บเป็น class name เต็มเพื่อให้ Tailwind JIT detect ได้
+  ASPECT_RATIO: {
+    SINGLE_IMAGE_MOBILE: 'aspect-[4/5]', // Instagram-style for mobile
+    SINGLE_IMAGE_DESKTOP: 'aspect-[16/9]', // Landscape for desktop
+    VIDEO: 'aspect-video', // 16:9 aspect ratio (Tailwind built-in)
+    SQUARE: 'aspect-square', // 1:1 aspect ratio (Tailwind built-in)
   },
   // Lightbox settings
   LIGHTBOX: {

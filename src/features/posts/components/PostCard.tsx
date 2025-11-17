@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { MessageSquare, Bookmark, Repeat2, FileText, Loader2 } from "@/config/icons";
+import { MessageSquare, Star, Repeat2, FileText, Loader2 } from "@/config/icons";
 import { VoteButtons } from "./VoteButtons";
 import { ShareDropdown } from "./ShareDropdown";
 import { PostActions } from "./PostActions";
@@ -21,6 +21,7 @@ import { MediaDisplay } from "@/components/media";
 import { useIsMobile } from "@/shared/hooks/useDeviceType";
 import { useDrawer } from "@/shared/contexts/DrawerContext";
 import { useAuthGuard } from "@/shared/hooks/useAuthGuard";
+import { MEDIA_DISPLAY, SAVE_COLOR } from "@/config/constants";
 
 interface PostCardProps {
   post: Post;
@@ -154,14 +155,13 @@ export function PostCard({
       "bg-card border overflow-hidden hover:border-accent transition-colors"
     )}>
       <div className="w-full p-4 pb-0">
-        {/* ✅ Upload Status Badge & Progress */}
+        {/* ✅ Upload Status Indicator (Simple - No Progress Bar) */}
         {isUploading && optimisticData && (
           <div className="mb-3">
-            <Badge variant="secondary" className="mb-2">
-              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-              กำลังอัปโหลด... {optimisticData.uploadProgress}%
+            <Badge variant="secondary" className="text-xs">
+              <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+              กำลังอัปโหลด...
             </Badge>
-            <Progress value={optimisticData.uploadProgress} className="h-1" />
           </div>
         )}
 
@@ -218,7 +218,7 @@ export function PostCard({
 
 
         {/* Title */}
-        <h1
+        <h2
           onClick={!isOptimistic ? handlePostClick : undefined}
           className={cn(
             "font-semibold mb-2",
@@ -227,7 +227,7 @@ export function PostCard({
           )}
         >
           {post.title}
-        </h1>
+        </h2>
 
         {/* Content */}
         {!compact && post.content && (
@@ -243,23 +243,23 @@ export function PostCard({
         )}
 
         {/* Crosspost - Source Post */}
+        {/* ✅ Expert Recommendation: max-height + gradient overlay to limit crosspost height */}
         {post.sourcePost && (
-          <div className="mb-0 border-l-4 border-primary/50">
-            <div className="ml-3 p-3 bg-muted/30 rounded-r-lg">
-              {/* Crosspost Indicator */}
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-                <Repeat2 size={14} />
-                <span>โพสต์ข้ามจาก</span>
-                <span className="font-medium text-foreground">
-                  @{post.sourcePost.author.username}
-                </span>
-              </div>
+          <div className="border-l-2 border-primary/60 pl-3 mt-2">
+            <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
+              <Repeat2 size={14} />
+              <span>โพสต์จาก @{post.sourcePost.author.username}</span>
+            </div>
 
-              {/* Source Post Content */}
+            {/* Source Post Preview - Limited Height */}
+            <div
+              className="relative overflow-hidden rounded-md bg-muted/40"
+              style={{ maxHeight: `${MEDIA_DISPLAY.MAX_HEIGHT.CROSSPOST}px` }}
+            >
               <div
                 onClick={!isOptimistic ? () => router.push(`/post/${post.sourcePost!.id}`) : undefined}
                 className={cn(
-                  "rounded-lg p-2 -m-2",
+                  "p-3",
                   !isOptimistic && "cursor-pointer hover:bg-muted/50 transition-colors"
                 )}
               >
@@ -269,30 +269,45 @@ export function PostCard({
                 )}>
                   {post.sourcePost.title}
                 </h3>
-                <div className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                <div className="text-xs text-muted-foreground line-clamp-3 mb-2">
                   <LinkifiedContent>{post.sourcePost.content}</LinkifiedContent>
                 </div>
 
-                {/* Source Post Media */}
+                {/* Source Post Media - Preview Only */}
                 {post.sourcePost.media && post.sourcePost.media.length > 0 && (
-                  <div className="rounded-md overflow-hidden bg-muted max-h-80">
+                  <div className="rounded-md overflow-hidden bg-muted">
                     {post.sourcePost.media[0].type === "video" ? (
                       <video
                         src={post.sourcePost.media[0].url}
                         poster={post.sourcePost.media[0].thumbnail || undefined}
-                        className="w-full h-auto max-h-80 object-contain"
+                        className="w-full h-auto object-contain"
+                        style={{ maxHeight: `${MEDIA_DISPLAY.MAX_HEIGHT.CROSSPOST_MEDIA}px` }}
                       />
                     ) : (
                       <Image
                         src={post.sourcePost.media[0].url}
                         alt="Source post media"
                         width={600}
-                        height={400}
-                        className="w-full h-auto max-h-80 object-contain"
+                        height={MEDIA_DISPLAY.MAX_HEIGHT.CROSSPOST_MEDIA}
+                        className="w-full h-auto object-contain"
+                        style={{ maxHeight: `${MEDIA_DISPLAY.MAX_HEIGHT.CROSSPOST_MEDIA}px` }}
                       />
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Gradient Overlay + "View Original Post" Button */}
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background via-background/80 to-transparent flex items-end justify-center pointer-events-none">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isOptimistic) router.push(`/post/${post.sourcePost!.id}`);
+                  }}
+                  className="mb-2 text-xs px-3 py-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-accent hover:border-accent-foreground transition-colors pointer-events-auto font-medium"
+                >
+                  ดูโพสต์ต้นฉบับ
+                </button>
               </div>
             </div>
           </div>
@@ -338,15 +353,12 @@ export function PostCard({
               disableLightbox={true}
             />
 
-            {/* ✅ Loading Overlay - แสดงตอนกำลังอัปโหลด */}
+            {/* ✅ Loading Overlay - Simple (No Progress) */}
             {isUploading && optimisticData && (
               <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center rounded-lg">
                 <Loader2 className="h-12 w-12 animate-spin text-white mb-3" />
                 <p className="text-white text-base font-medium">
                   กำลังอัปโหลดวิดีโอ...
-                </p>
-                <p className="text-white/80 text-sm mt-1">
-                  {optimisticData.uploadProgress}%
                 </p>
               </div>
             )}
@@ -404,12 +416,12 @@ export function PostCard({
                 className={cn(
                   "inline-flex items-center justify-center bg-muted/30 hover:bg-muted/50 p-2 rounded-full transition-colors",
                   post.isSaved
-                    ? "text-primary hover:text-primary"
+                    ? SAVE_COLOR.text
                     : "text-muted-foreground hover:text-foreground"
                 )}
                 title={post.isSaved ? "บันทึกแล้ว" : "บันทึก"}
               >
-                <Bookmark size={16} className={cn(post.isSaved && "fill-current")} />
+                <Star size={16} className={cn(post.isSaved && SAVE_COLOR.fill)} />
               </button>
             )}
           </div>

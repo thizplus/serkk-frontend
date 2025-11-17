@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowBigUp, ArrowBigDown } from "@/config/icons";
+import { Heart, Skull } from "@/config/icons";
 import { cn } from "@/lib/utils";
 import { useAuthGuard } from "@/shared/hooks/useAuthGuard";
+import { VOTE_COLORS } from "@/shared/config/constants";
 import type { UserVote } from "@/types/common";
 
 interface VoteButtonsProps {
@@ -56,14 +57,14 @@ export function VoteButtons({
           onClick={() => handleVote('up')}
           className={cn(
             "flex items-center justify-center p-0.5 rounded hover:bg-accent transition-colors",
-            userVote === 'up' && "text-orange-500"
+            userVote === 'up' && VOTE_COLORS.upvote.text
           )}
           aria-label="Upvote"
         >
-          <ArrowBigUp
+          <Heart
             size={iconSizes[size]}
             className={cn(
-              userVote === 'up' && "fill-orange-500"
+              userVote === 'up' && VOTE_COLORS.upvote.fill
             )}
           />
         </button>
@@ -72,8 +73,8 @@ export function VoteButtons({
         <span className={cn(
           "font-semibold px-1",
           textSizes[size],
-          userVote === 'up' && "text-orange-500",
-          userVote === 'down' && "text-blue-500"
+          userVote === 'up' && VOTE_COLORS.upvote.text,
+          userVote === 'down' && VOTE_COLORS.downvote.text
         )}>
           {votes >= 1000
             ? `${(votes / 1000).toFixed(1)}k`
@@ -86,15 +87,12 @@ export function VoteButtons({
           onClick={() => handleVote('down')}
           className={cn(
             "flex items-center justify-center p-0.5 rounded hover:bg-accent transition-colors",
-            userVote === 'down' && "text-blue-500"
+            userVote === 'down' && VOTE_COLORS.downvote.text
           )}
           aria-label="Downvote"
         >
-          <ArrowBigDown
+          <Skull
             size={iconSizes[size]}
-            className={cn(
-              userVote === 'down' && "fill-blue-500"
-            )}
           />
         </button>
       </div>
@@ -112,14 +110,14 @@ export function VoteButtons({
         onClick={() => handleVote('up')}
         className={cn(
           "flex items-center justify-center p-1 rounded hover:bg-accent transition-colors",
-          userVote === 'up' && "text-orange-500"
+          userVote === 'up' && VOTE_COLORS.upvote.text
         )}
         aria-label="Upvote"
       >
-        <ArrowBigUp
+        <Heart
           size={iconSizes[size]}
           className={cn(
-            userVote === 'up' && "fill-orange-500"
+            userVote === 'up' && VOTE_COLORS.upvote.fill
           )}
         />
       </button>
@@ -128,8 +126,8 @@ export function VoteButtons({
       <span className={cn(
         "font-semibold",
         textSizes[size],
-        userVote === 'up' && "text-orange-500",
-        userVote === 'down' && "text-blue-500"
+        userVote === 'up' && VOTE_COLORS.upvote.text,
+        userVote === 'down' && VOTE_COLORS.downvote.text
       )}>
         {votes >= 1000
           ? `${(votes / 1000).toFixed(1)}k`
@@ -142,15 +140,12 @@ export function VoteButtons({
         onClick={() => handleVote('down')}
         className={cn(
           "flex items-center justify-center p-1 rounded hover:bg-accent transition-colors",
-          userVote === 'down' && "text-blue-500"
+          userVote === 'down' && VOTE_COLORS.downvote.text
         )}
         aria-label="Downvote"
       >
-        <ArrowBigDown
+        <Skull
           size={iconSizes[size]}
-          className={cn(
-            userVote === 'down' && "fill-blue-500"
-          )}
         />
       </button>
     </div>
