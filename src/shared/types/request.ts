@@ -5,6 +5,7 @@
 
 import type {
   PaginationParams,
+  CursorPaginationParams,
   SortBy,
   VoteType,
   TargetType,
@@ -41,6 +42,11 @@ export interface UpdateProfileRequest {
  * Post Requests
  */
 export interface CreatePostRequest {
+  // ✅ Phase 1: Idempotency fields (required for Optimistic UI)
+  clientPostId?: string;      // Client-generated post ID for idempotency
+  idempotencyKey?: string;    // Idempotency key for duplicate request prevention
+
+  // Post content
   title: string;
   content: string;
   mediaIds?: string[];
@@ -61,8 +67,17 @@ export interface CreateCrosspostRequest {
   tags?: string[];
 }
 
+/**
+ * @deprecated Use GetPostsCursorParams instead
+ */
 export interface GetPostsParams extends PaginationParams {
   sortBy?: SortBy;
+}
+
+/** Cursor-based - NEW */
+export interface GetPostsCursorParams extends CursorPaginationParams {
+  sortBy?: SortBy;
+  tag?: string;
 }
 
 export interface SearchPostsParams extends PaginationParams {
@@ -82,7 +97,15 @@ export interface UpdateCommentRequest {
   content: string;
 }
 
+/**
+ * @deprecated Use GetCommentsCursorParams instead
+ */
 export interface GetCommentsParams extends PaginationParams {
+  sortBy?: SortBy;
+}
+
+/** Cursor-based - NEW */
+export interface GetCommentsCursorParams extends CursorPaginationParams {
   sortBy?: SortBy;
 }
 
@@ -105,21 +128,51 @@ export type GetUserVotesParams = PaginationParams;
 /**
  * Follow Requests
  */
+/**
+ * @deprecated Use GetFollowersCursorParams instead
+ */
 export type GetFollowersParams = PaginationParams;
 
+/** Cursor-based - NEW */
+export type GetFollowersCursorParams = CursorPaginationParams;
+
+/**
+ * @deprecated Use GetFollowingCursorParams instead
+ */
 export type GetFollowingParams = PaginationParams;
 
+/** Cursor-based - NEW */
+export type GetFollowingCursorParams = CursorPaginationParams;
+
+/**
+ * @deprecated Use GetMutualFollowsCursorParams instead
+ */
 export type GetMutualFollowsParams = PaginationParams;
+
+/** Cursor-based - NEW */
+export type GetMutualFollowsCursorParams = CursorPaginationParams;
 
 /**
  * Saved Post Requests
  */
+/**
+ * @deprecated Use GetSavedPostsCursorParams instead
+ */
 export type GetSavedPostsParams = PaginationParams;
+
+/** Cursor-based - NEW */
+export type GetSavedPostsCursorParams = CursorPaginationParams;
 
 /**
  * Notification Requests
  */
+/**
+ * @deprecated Use GetNotificationsCursorParams instead
+ */
 export type GetNotificationsParams = PaginationParams;
+
+/** Cursor-based - NEW */
+export type GetNotificationsCursorParams = CursorPaginationParams;
 
 export interface UpdateNotificationSettingsRequest {
   replies?: boolean;
@@ -149,6 +202,7 @@ export interface SearchTagsParams {
 export interface SearchParams {
   q: string;
   type?: SearchType;
+  cursor?: string;  // ✅ เพิ่ม cursor สำหรับ pagination
   limit?: number;
 }
 

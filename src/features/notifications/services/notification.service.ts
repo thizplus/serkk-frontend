@@ -7,11 +7,14 @@ import apiService from '@/lib/api/http-client';
 import { API } from '@/lib/constants/api';
 import type {
   GetNotificationsParams,
+  GetNotificationsCursorParams,
   UpdateNotificationSettingsRequest,
 } from '@/types/request';
 import type {
   GetNotificationsResponse,
+  GetNotificationsCursorResponse,
   GetUnreadNotificationsResponse,
+  GetUnreadNotificationsCursorResponse,
   GetNotificationUnreadCountResponse,
   GetNotificationResponse,
   MarkNotificationAsReadResponse,
@@ -28,23 +31,39 @@ import type {
  */
 const notificationService = {
   /**
-   * ดึงการแจ้งเตือนทั้งหมด
-   * @param params - พารามิเตอร์ (offset, limit, type)
-   * @returns Promise<GetNotificationsResponse>
+   * ดึงการแจ้งเตือนทั้งหมด (Cursor-based)
+   * @param params - พารามิเตอร์ (cursor, limit, type)
+   * @returns Promise<GetNotificationsCursorResponse>
    */
-  getAll: async (params?: GetNotificationsParams): Promise<GetNotificationsResponse> => {
-    return apiService.get<GetNotificationsResponse>(API.NOTIFICATION.LIST, params);
+  getAll: async (params?: GetNotificationsCursorParams): Promise<GetNotificationsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.type) queryParams.append('type', params.type);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.NOTIFICATION.LIST}?${queryString}` : API.NOTIFICATION.LIST;
+
+    return apiService.get<GetNotificationsCursorResponse>(url);
   },
 
   /**
-   * ดึงการแจ้งเตือนที่ยังไม่ได้อ่าน
-   * @param params - พารามิเตอร์ (offset, limit, type)
-   * @returns Promise<GetUnreadNotificationsResponse>
+   * ดึงการแจ้งเตือนที่ยังไม่ได้อ่าน (Cursor-based)
+   * @param params - พารามิเตอร์ (cursor, limit, type)
+   * @returns Promise<GetUnreadNotificationsCursorResponse>
    */
   getUnread: async (
-    params?: GetNotificationsParams
-  ): Promise<GetUnreadNotificationsResponse> => {
-    return apiService.get<GetUnreadNotificationsResponse>(API.NOTIFICATION.UNREAD, params);
+    params?: GetNotificationsCursorParams
+  ): Promise<GetUnreadNotificationsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.type) queryParams.append('type', params.type);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.NOTIFICATION.UNREAD}?${queryString}` : API.NOTIFICATION.UNREAD;
+
+    return apiService.get<GetUnreadNotificationsCursorResponse>(url);
   },
 
   /**

@@ -3,6 +3,7 @@
 // Hooks
 export {
   useSearch,
+  useInfiniteSearch,
   usePopularSearches,
   useSearchHistory,
   searchKeys

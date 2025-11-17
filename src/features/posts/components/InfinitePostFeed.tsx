@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
-import { PostCard } from "./PostCard";
+import { VirtualizedPostFeed } from './VirtualizedPostFeed';
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "@/config/icons";
 import { EmptyPosts } from "@/components/common";
 import type { Post } from "@/types/models";
 import { useOptimisticPostStore } from "@/features/posts/stores/optimisticPostStore";
@@ -15,16 +13,20 @@ interface InfinitePostFeedProps {
   fetchNextPage: () => void;
   isLoading?: boolean;
   error?: Error | null;
-  enableOptimisticUI?: boolean; // Enable merging with optimistic posts
+  enableOptimisticUI?: boolean;
 }
 
 /**
- * InfinitePostFeed Component
+ * InfinitePostFeed Component - Virtualized Version
  *
- * ใช้ IntersectionObserver สำหรับ infinite scroll ที่ smooth และ performant
- * - Load ahead strategy: เริ่ม load ก่อนถึงล่างสุด 500px
- * - Debouncing: ป้องกัน spam requests
- * - Skeleton loading: แสดง placeholder ขณะโหลด
+ * Wrapper around VirtualizedPostFeed to maintain backward compatibility
+ * - ✅ Same interface as before (drop-in replacement)
+ * - ✅ Uses react-virtuoso for performance
+ * - ✅ Handles loading/error/empty states
+ *
+ * Phase 1: Home Feed POC
+ * - เก็บ metrics Before/After (DOM, FPS, Memory)
+ * - ทดสอบ Optimistic Posts (upload/success/fail+retry)
  */
 export function InfinitePostFeed({
   posts,
@@ -35,95 +37,7 @@ export function InfinitePostFeed({
   error,
   enableOptimisticUI = false,
 }: InfinitePostFeedProps) {
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const optimisticPosts = useOptimisticPostStore((state) => state.optimisticPosts);
-
-  // ✅ Merge optimistic posts with real posts
-  const allPosts = useMemo(() => {
-    if (!enableOptimisticUI || optimisticPosts.length === 0) {
-      return posts;
-    }
-
-    // Convert optimistic posts to Post format
-    const optimisticAsPosts = optimisticPosts.map((opt) => ({
-      id: opt.tempId,
-      title: opt.title,
-      content: opt.content,
-      tags: (opt.tags || []).map((tagName, index) => ({
-        id: `temp-tag-${opt.tempId}-${index}`,
-        name: tagName,
-      })),
-      author: opt.author,
-      media: opt.media.map((m, mediaIndex) => ({
-        id: m.mediaId || `temp-media-${opt.tempId}-${mediaIndex}`,
-        url: m.url || m.preview,
-        type: 'video' as const,
-        thumbnailUrl: null,
-      })),
-      createdAt: opt.createdAt,
-      updatedAt: opt.createdAt,
-      commentCount: 0,
-      voteCount: 0,
-      userVote: null,
-      isSaved: false,
-      isAuthor: true,
-      // Metadata สำหรับแสดงสถานะ
-      _isOptimistic: true,
-      _optimisticData: {
-        tempId: opt.tempId,
-        uploadStatus: opt.status,
-        uploadProgress: opt.media[0]?.uploadProgress || 0,
-        error: opt.media[0]?.error,
-      },
-    })) as any[];
-
-    // Merge + Sort (optimistic posts ขึ้นก่อน)
-    return [...optimisticAsPosts, ...posts].sort((a, b) => {
-      if (a._isOptimistic && !b._isOptimistic) return -1;
-      if (!a._isOptimistic && b._isOptimistic) return 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  }, [optimisticPosts, posts, enableOptimisticUI]);
-
-  // Intersection Observer สำหรับ detect scroll
-  useEffect(() => {
-    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-
-        // เมื่อ scroll เข้าใกล้ load more trigger (load ahead strategy)
-        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          // Debounce: รอ 100ms ก่อน fetch (ป้องกัน spam)
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-          }
-
-          timeoutRef.current = setTimeout(() => {
-            fetchNextPage();
-          }, 100);
-        }
-      },
-      {
-        // Load ahead: เริ่ม load เมื่ออยู่ห่างจากล่างสุด 500px
-        rootMargin: '500px',
-        threshold: 0,
-      }
-    );
-
-    observer.observe(loadMoreRef.current);
-
-    return () => {
-      observer.disconnect();
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Loading state
   if (isLoading) {
@@ -182,34 +96,19 @@ export function InfinitePostFeed({
     );
   }
 
-  // Empty state
-  if (!allPosts || allPosts.length === 0) {
+  // Empty state (ไม่นับ optimistic posts)
+  if (!posts || posts.length === 0) {
     return <EmptyPosts />;
   }
 
+  // ✅ Use VirtualizedPostFeed for rendering
   return (
-    <div className="space-y-4">
-      {/* Posts */}
-      {allPosts.map((post: any) => (
-        <PostCard
-          key={post.id}
-          post={post}
-          isOptimistic={post._isOptimistic}
-          optimisticData={post._optimisticData}
-        />
-      ))}
-
-      {/* Load More Trigger (IntersectionObserver target) */}
-      <div ref={loadMoreRef} className="py-4">
-        {isFetchingNextPage && (
-          <Card>
-            <CardContent className="py-8 text-center">
-              <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary mb-2" />
-              <p className="text-sm text-muted-foreground">กำลังโหลดเพิ่มเติม...</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+    <VirtualizedPostFeed
+      posts={posts}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+      enableOptimisticUI={enableOptimisticUI}
+    />
   );
 }

@@ -5,9 +5,10 @@
 // React Query hooks สำหรับดึงข้อมูล Followers และ Following
 // ============================================================================
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import followService from '../services/follow.service';
 import type { PaginationParams } from '@/types/common';
+import type { GetFollowersCursorParams, GetFollowingCursorParams } from '@/types/request';
 
 // ============================================================================
 // QUERY KEYS
@@ -182,6 +183,84 @@ export function useMutualFollows(
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
     retry: 1,
+  });
+}
+
+// ============================================================================
+// INFINITE SCROLL QUERIES - NEW (Cursor-based)
+// ============================================================================
+
+/**
+ * Infinite scroll สำหรับรายชื่อผู้ติดตาม (Followers) - Cursor-based
+ *
+ * @param userId - ID ของผู้ใช้ที่ต้องการดูรายชื่อผู้ติดตาม
+ * @param params - พารามิเตอร์ (limit)
+ * @param options - Query options (enabled)
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteFollowers(userId, { limit: 20 });
+ */
+export function useInfiniteFollowers(
+  userId: string,
+  params?: Omit<GetFollowersCursorParams, 'cursor'>,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    queryKey: [...followKeys.followers(userId), 'infinite', params] as const,
+    queryFn: async ({ pageParam }) => {
+      const response = await followService.getFollowers(userId, {
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch followers');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    enabled: options?.enabled !== undefined ? options.enabled : !!userId,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+/**
+ * Infinite scroll สำหรับรายชื่อผู้ที่กำลังติดตาม (Following) - Cursor-based
+ *
+ * @param userId - ID ของผู้ใช้ที่ต้องการดูรายชื่อผู้ที่ติดตาม
+ * @param params - พารามิเตอร์ (limit)
+ * @param options - Query options (enabled)
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteFollowing(userId, { limit: 20 });
+ */
+export function useInfiniteFollowing(
+  userId: string,
+  params?: Omit<GetFollowingCursorParams, 'cursor'>,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    queryKey: [...followKeys.following(userId), 'infinite', params] as const,
+    queryFn: async ({ pageParam }) => {
+      const response = await followService.getFollowing(userId, {
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch following');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    enabled: options?.enabled !== undefined ? options.enabled : !!userId,
+    staleTime: 2 * 60 * 1000,
   });
 }
 

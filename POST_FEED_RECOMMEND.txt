@@ -1,0 +1,281 @@
+1. ภาพรวม: โครง Post ตอนนี้ “พร้อมทำ Virtual” ไหม?
+
+สั้น ๆ คือ:
+👉 “พร้อม 80% แล้ว เหลือแค่ต้องกำหนดกติกาเรื่องความสูงให้ชัด”
+
+สิ่งที่คุณมีตอนนี้ดีมากแล้ว:
+
+แยก post type ชัด: text | image | gallery | video
+
+มี pattern ชัด: text-only, single image, gallery, video, crosspost, optimistic
+
+โครง header / footer / content ใกล้เคียง FB / X อยู่แล้ว
+
+จุดต้องตัดสินใจ เพื่อให้ Virtual Scroll ทำงานดี:
+
+รูปเดี่ยว: จะยอม “บังคับสัดส่วน” ไหม?
+
+gallery: จะใช้ layout แบบไหนเป็นมาตรฐาน?
+
+crosspost: จะปล่อยสูงได้แค่ไหน?
+
+video: จะรองรับ portrait หรือบังคับ landscape?
+
+ผมสรุปคำแนะนำแบบฟันธงให้ด้านล่างเลย 👇
+
+2. Library สำหรับ Virtual Feed — เลือกอะไรดี?
+
+จากที่คุณเล่า + stack ปัจจุบัน (ใช้ React Query อยู่แล้ว)
+
+✅ ผมแนะนำเริ่มจาก react-virtuoso
+
+เหตุผล:
+
+ใช้งานง่ายมาก (แทบ plug & play)
+
+รองรับ dynamic height ในตัว (ไม่ต้องเขียน estimate เองเยอะในเฟสแรก)
+
+มี infinite scroll (endReached) มาให้เลย
+
+เหมาะกับ “เริ่มทำให้ใช้ได้ก่อน แล้วค่อยจูนทีหลัง”
+
+TanStack Virtual ดีมากเหมือนกัน แต่เหมาะตอนคุณอยากจูนละเอียด / custom หนัก ๆ แล้วค่อยย้ายไปก็ยังทัน
+
+3. รูปเดี่ยว (Single Image Post) — ขอให้ “ตัดใจ” สักอย่าง
+
+นี่คือ source ความปั่นป่วนของ virtual scroll เลย 😂
+ตอนนี้คุณปล่อยให้รูปใช้ aspect ratio จริง → ความสูงปั่นมาก 400–1200px
+
+ผมแนะนำแบบนี้:
+
+✅ ข้อเสนอ (สำหรับเว็บ feed แบบ social):
+
+Frontend:
+
+<div className="relative w-full max-h-[600px] overflow-hidden">
+  <div className="aspect-[4/5] sm:aspect-[16/9] w-full">
+    {/* skeleton */}
+    {!loaded && <div className="w-full h-full bg-muted animate-pulse" />}
+
+    <img
+      src={url}
+      alt={alt}
+      className={cn(
+        "w-full h-full object-cover transition-opacity",
+        loaded ? "opacity-100" : "opacity-0"
+      )}
+      onLoad={() => setLoaded(true)}
+      loading="lazy"
+    />
+  </div>
+</div>
+
+
+หลักการ:
+
+ใช้ aspect-[4/5] (แนว IG) บน mobile, 16/9 สำหรับ desktop ก็ได้
+
+ครอบใน max-h-[600px] กันรูปสูงเกิน
+
+ใช้ object-cover → รูปโดน crop หน่อย แต่ UI เสถียร, virtual scroll แฮปปี้
+
+👉 ข้อแลกเปลี่ยน:
+รูปอาจโดนตัด แต่ UX feed จะนิ่งมาก และ virtualizer เดาง่าย
+
+ถ้าคุณโอเคที่จะ crop แบบ Instagram → จบสวยเลย
+
+4. Gallery (หลายรูป) — ทำให้ “โครงสร้างเหมือนกันทุกเคส”
+
+ตอนนี้ gallery height ยังไม่แน่ โดยเฉพาะ 3+ รูป
+
+ผมแนะนำ:
+
+✅ กติกา Gallery (เหมาะกับ virtual):
+
+ใช้กริด 2 แถวเป็นหลัก
+
+ทุก cell ใช้ aspect-square
+
+ทั้งกล่อง media สูง “คงที่” เช่น h-[300px] หรือ h-[360px]
+
+ตัวอย่าง:
+
+<div className="grid grid-cols-2 gap-1 h-[320px] overflow-hidden rounded-lg">
+  {images.slice(0, 4).map((img, i) => (
+    <div key={img.id} className="relative w-full h-full">
+      <img
+        src={img.url}
+        className="w-full h-full object-cover"
+        loading="lazy"
+      />
+      {i === 3 && images.length > 4 && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xl font-semibold">
+          +{images.length - 4}
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+
+2 รูป → เอาแค่แถวบน
+
+3 รูป → 2 บน, 1 ล่าง (อีกฝั่งเป็น empty/gradient ก็ได้)
+
+4+ รูป → 2x2 + overlay “+x”
+
+ผลลัพธ์:
+
+Gallery ทุกแบบ ~สูงเท่ากัน → ดีมากสำหรับ virtual
+
+DOM ภายในต่างกันได้ แต่ container สูง fix
+
+5. Video Post — ผมว่า “ดีแล้ว” แค่กำหนด max-height
+
+ตอนนี้คุณบังคับ 16:9 → ดีต่อ virtual มาก เพราะ predict ได้
+
+เพิ่มแค่:
+
+<div className="w-full max-h-[600px]">
+  <div className="aspect-video">
+    <video
+      src={src}
+      controls
+      className="w-full h-full rounded-lg bg-black"
+    />
+  </div>
+</div>
+
+
+ถ้าอนาคตอยากรองรับ portrait video:
+
+เฟสแรก: ยังไม่ต้อง รองรับเฉพาะ landscape/16:9 ไปก่อน
+
+ถ้าจำเป็นจริง ๆ: ค่อยเพิ่ม rule detect + max-height เฉพาะ portrait ทีหลัง
+
+6. Crosspost — แนะนำให้ “บีบ inner card” ไม่งั้นสูงมาก
+
+ตอนนี้ crosspost เสี่ยงสูงมาก (nested + media)
+
+ผมแนะนำ:
+
+จำกัด ความสูงของ source post เช่น max-h-[320px]
+
+เติม gradient + “ดูโพสต์ต้นฉบับ” แทนการโชว์ทั้งหมด
+
+ตัวอย่าง:
+
+<div className="border-l-2 border-primary/60 pl-3 mt-2">
+  <div className="text-xs text-muted-foreground mb-1">
+    🔁 โพสต์จาก @{source.author.username}
+  </div>
+
+  <div className="relative max-h-[320px] overflow-hidden rounded-md bg-muted/40">
+    <SourcePostPreview post={source} /> {/* header + text + media แรก */}
+
+    {/* overlay ถ้า content ยาว */}
+    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background to-transparent flex items-end justify-center">
+      <button className="mb-2 text-xs px-2 py-1 rounded-full bg-background/80 border">
+        ดูโพสต์ต้นฉบับ
+      </button>
+    </div>
+  </div>
+</div>
+
+
+ผล:
+
+Crosspost card ไม่บานเกิน 900–1000px
+
+Virtual feed ยังเดาง่าย
+
+UX ดี: user เข้าไปดู full post ที่หน้า detail แทน
+
+7. Optimistic Post — ใช้ layout เดียวกับของจริง (ดีมากแล้ว)
+
+สิ่งที่คุณทำถูกแล้ว:
+
+ใช้ PostCard pattern เดียวกับของจริง
+
+เพิ่ม badge “กำลังอัปโหลด…”
+
+ปิด action (like/comment/share) ชั่วคราว
+
+แนะนำเพิ่มแค่:
+
+ให้ optimistic card สูง “เท่า” กับรูปแบบจริง (ใช้ component เดียวกัน)
+
+อย่าทำ layout พิเศษที่เปลี่ยนสูงเยอะ เช่น extra margin พิเศษขนาดใหญ่
+
+จะทำให้ virtual scroll ไม่ต้องคิดสองรอบ (temp/real)
+
+8. Height Estimation Strategy (ให้เหมาะกับ Virtual)
+
+เพราะคุณจะใช้ react-virtuoso, ผมแนะนำ:
+
+เฟสแรก (ง่ายสุด):
+
+ปรับ layout ตามข้อ 3–7 ให้ media container สูง predictable
+
+ใช้ Virtuoso แบบปกติ (มันวัดให้เองจาก DOM)
+
+ยัง ไม่ต้องเขียน estimatePostHeight เลยก็ได้
+
+เฟสสอง (อยากจูนเพิ่มภายหลัง):
+
+ถ้าต้องการประสิทธิภาพสุด:
+
+ใช้สูตรประมาณ height แบบที่คุณ propose (ดีแล้ว)
+
+แต่มองไว้เป็น optimization step ไม่ใช่ requirement แรกเริ่ม
+
+9. แล้วควรเริ่มจากอะไร “ตอนนี้เลย”?
+
+ถ้าจะเริ่มทำทันที ผมแนะนำ flow นี้:
+
+ปรับ PostCard / Media component ก่อน
+
+Single image → บังคับ aspect ratio + max-height
+
+Gallery → ทำให้ container สูง fix
+
+Crosspost → จำกัด height source post
+
+Video → wrap ใน aspect-video + max-height
+
+ค่อยหาเวลาเปลี่ยน <InfinitePostFeed> → react-virtuoso
+
+ยังใช้ React Query + cursor เหมือนเดิม
+
+แค่เปลี่ยน body เป็น:
+
+<Virtuoso
+  data={posts}
+  itemContent={(index, post) => (
+    <PostCard key={post.id ?? post.tempId} post={post} />
+  )}
+  endReached={() => hasNextPage && fetchNextPage()}
+  overscan={5}
+/>
+
+
+ค่อยวัด performance และปรับ overscan, memo, ฯลฯ
+
+10. สรุปสั้น ๆ ให้คุณตัดสินใจง่าย ๆ
+
+✅ เอกสารที่ทีม frontend เขียนมา “คิดครอบคลุมดีแล้ว”
+
+✅ แต่ถ้าอยากเริ่มทำจริง วันนี้เลย → ต้อง “ตัดสินใจเชิง design” บางอย่าง
+
+ผมแนะนำให้:
+
+บังคับรูป (aspect ratio + max-height)
+
+บังคับความสูง gallery ให้ fix
+
+จำกัดความสูง crosspost ด้วย max-height + overlay
+
+ใช้ react-virtuoso เป็น virtual library ตัวแรก
+
+ถ้าคุณโอเคกับข้อแลกเปลี่ยนเรื่องรูปโดน crop นิดหน่อย
+ผมบอกได้เต็มปากเลยว่า: เส้นทางนี้ “โคตรเวิร์ก” สำหรับ feed ยาว + virtual scroll ✅

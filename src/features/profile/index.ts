@@ -17,6 +17,8 @@ export {
   useFollowing,
   useMutualFollows,
   useFollowStatus,
+  useInfiniteFollowers,
+  useInfiniteFollowing,
   followKeys
 } from './hooks/useFollows';
 

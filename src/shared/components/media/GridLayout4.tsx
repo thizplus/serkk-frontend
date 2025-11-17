@@ -17,6 +17,8 @@ import type { GridLayoutProps } from "./types";
  * ├─────────┼─────────┤
  * │    3    │    4    │
  * └─────────┴─────────┘
+ *
+ * ✅ Expert Recommendation: Fixed height (320px) for virtual scroll stability
  */
 export function GridLayout4({
   media,
@@ -26,7 +28,14 @@ export function GridLayout4({
   className,
 }: GridLayoutProps) {
   return (
-    <div className={cn("grid grid-cols-2", `gap-${MEDIA_DISPLAY.GRID.GAP}`, className)}>
+    <div
+      className={cn(
+        "grid grid-cols-2 overflow-hidden",
+        `gap-${MEDIA_DISPLAY.GRID.GAP_COMPACT}`,
+        className
+      )}
+      style={{ height: `${MEDIA_DISPLAY.GRID.HEIGHT_FIXED}px` }}
+    >
       {media.slice(0, 4).map((item, index) => (
         <MediaItem
           key={item.id}

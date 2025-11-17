@@ -11,6 +11,7 @@ import { VoteButtons } from "@/features/posts/components/VoteButtons";
 import { CommentForm } from "@/features/comments/components/CommentForm";
 import { CommentTree } from "@/features/comments/components/CommentTree";
 import { useToggleVote } from "@/features/posts/hooks/useVotes";
+import { usePost } from "@/features/posts/hooks/usePosts";
 import { useCommentTree, useCreateComment, useUpdateComment, useDeleteComment } from "@/features/comments";
 import { Separator } from "@/components/ui/separator";
 import { MessageSquare } from "lucide-react";
@@ -54,6 +55,10 @@ export function MediaViewerDrawer({
 
   // Hooks
   const { handleVote } = useToggleVote();
+  // ✅ Fetch realtime post data from React Query cache
+  const { data: livePost } = usePost(post.id);
+  const currentPost = livePost || post; // Fallback to props if not loaded yet
+
   const { data: comments = [], refetch: refetchComments } = useCommentTree(post.id, {
     maxDepth: 10,
   });
@@ -73,7 +78,7 @@ export function MediaViewerDrawer({
 
   // Handlers
   const handleVoteClick = (vote: 'up' | 'down') => {
-    handleVote(post.id, 'post', vote, post.userVote);
+    handleVote(currentPost.id, 'post', vote, currentPost.userVote);
   };
 
   const handleCommentSubmit = async (content: string, parentId?: string) => {
@@ -188,8 +193,8 @@ export function MediaViewerDrawer({
             {/* Vote & Comment Count */}
             <div className="flex items-center gap-3 mb-4">
               <VoteButtons
-                votes={post.votes}
-                userVote={post.userVote}
+                votes={currentPost.votes}
+                userVote={currentPost.userVote}
                 onVote={handleVoteClick}
                 size="md"
                 orientation="horizontal"
@@ -197,7 +202,7 @@ export function MediaViewerDrawer({
 
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <MessageSquare size={18} />
-                <span className="text-sm font-medium">{post.commentCount} ความคิดเห็น</span>
+                <span className="text-sm font-medium">{currentPost.commentCount} ความคิดเห็น</span>
               </div>
             </div>
 

@@ -24,7 +24,8 @@ export interface ApiErrorResponse {
 }
 
 /**
- * Pagination Metadata
+ * Pagination Metadata (Offset-based)
+ * @deprecated Use CursorPaginationMeta instead for better performance
  */
 export interface PaginationMeta {
   total: number;
@@ -34,7 +35,19 @@ export interface PaginationMeta {
 }
 
 /**
- * Paginated Response
+ * Pagination Metadata (Cursor-based) - NEW
+ * Used for cursor-based pagination with better performance
+ */
+export interface CursorPaginationMeta {
+  nextCursor: string | null;
+  hasMore: boolean;
+  limit: number;
+  unreadCount?: number; // For notifications
+}
+
+/**
+ * Paginated Response (Offset-based)
+ * @deprecated Use CursorPaginatedResponse instead
  */
 export interface PaginatedResponse<T> {
   items: T[];
@@ -42,10 +55,28 @@ export interface PaginatedResponse<T> {
 }
 
 /**
- * Pagination Query Parameters
+ * Paginated Response (Cursor-based) - NEW
+ */
+export interface CursorPaginatedResponse<T> {
+  items: T[];
+  meta: CursorPaginationMeta;
+}
+
+/**
+ * Pagination Query Parameters (Offset-based)
+ * @deprecated Use CursorPaginationParams instead for better performance
  */
 export interface PaginationParams {
   offset?: number;
+  limit?: number;
+}
+
+/**
+ * Pagination Query Parameters (Cursor-based) - NEW
+ * Use cursor from previous response for next page
+ */
+export interface CursorPaginationParams {
+  cursor?: string;
   limit?: number;
 }
 
@@ -102,3 +133,13 @@ export type UserRole = 'user' | 'admin';
  * - published: โพสต์เผยแพร่แล้ว (มองเห็นได้ในฟีดสาธารณะ)
  */
 export type PostStatus = 'draft' | 'published';
+
+/**
+ * Post Type
+ * Backend จะตัดสินใจ type อัตโนมัติจาก media ที่แนบมา:
+ * - text: ไม่มี media
+ * - image: มี 1 รูป
+ * - gallery: มีหลายรูป
+ * - video: มี video (video มี priority สูงสุด)
+ */
+export type PostType = 'text' | 'image' | 'gallery' | 'video';

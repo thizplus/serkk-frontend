@@ -77,6 +77,61 @@ export class MediaValidationError extends Error {
 }
 
 // ============================================================================
+// DIMENSION HELPERS
+// ============================================================================
+
+/**
+ * อ่านขนาด (width/height) ของรูปภาพ
+ */
+const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({
+        width: img.width,
+        height: img.height,
+      });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = url;
+  });
+};
+
+/**
+ * อ่านขนาด (width/height/duration) ของวิดีโอ
+ */
+const getVideoDimensions = (file: File): Promise<{ width: number; height: number; duration: number }> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    const url = URL.createObjectURL(file);
+
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      resolve({
+        width: video.videoWidth,
+        height: video.videoHeight,
+        duration: video.duration,
+      });
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load video'));
+    };
+
+    video.src = url;
+  });
+};
+
+// ============================================================================
 // VALIDATION HELPERS
 // ============================================================================
 
@@ -170,28 +225,37 @@ const mediaService = {
       // ตรวจสอบความถูกต้องของไฟล์
       validateImageFile(file);
 
-      // Step 1: Get presigned URL (10%)
-      onProgress?.(10);
+      // Step 0: Read image dimensions (0-5%)
+      onProgress?.(0);
+      const dimensions = await getImageDimensions(file);
+
+      // Step 1: Get presigned URL (5-10%)
+      onProgress?.(5);
       const presignedData = await requestPresignedURL(file);
 
       // Step 2: Upload to R2 (10-90%)
+      onProgress?.(10);
       await uploadToR2(presignedData.uploadUrl, file, (progress) => {
         // Map 0-100% to 10-90%
         onProgress?.(10 + (progress * 0.8));
       });
 
-      // Step 3: Confirm upload (90-100%)
+      // Step 3: Confirm upload with dimensions (90-100%)
       onProgress?.(95);
       await confirmUpload(
         presignedData.mediaId,
         presignedData.fileKey,
         file.size,
-        additionalData
+        {
+          ...additionalData,
+          width: dimensions.width,
+          height: dimensions.height,
+        }
       );
 
       onProgress?.(100);
 
-      // Return response with mediaId from backend
+      // Return response with mediaId and dimensions
       return {
         success: true,
         message: 'Upload successful',
@@ -203,8 +267,8 @@ const mediaService = {
           size: file.size,
           url: presignedData.fileUrl,
           thumbnail: null,
-          width: undefined,
-          height: undefined,
+          width: dimensions.width,
+          height: dimensions.height,
           duration: undefined,
         },
       } as UploadImageResponse;
@@ -241,28 +305,38 @@ const mediaService = {
       // ตรวจสอบความถูกต้องของไฟล์
       validateVideoFile(file);
 
-      // Step 1: Get presigned URL (10%)
-      onProgress?.(10);
+      // Step 0: Read video dimensions (0-5%)
+      onProgress?.(0);
+      const dimensions = await getVideoDimensions(file);
+
+      // Step 1: Get presigned URL (5-10%)
+      onProgress?.(5);
       const presignedData = await requestPresignedURL(file);
 
       // Step 2: Upload to R2 (10-90%)
+      onProgress?.(10);
       await uploadToR2(presignedData.uploadUrl, file, (progress) => {
         // Map 0-100% to 10-90%
         onProgress?.(10 + (progress * 0.8));
       });
 
-      // Step 3: Confirm upload (90-100%)
+      // Step 3: Confirm upload with dimensions (90-100%)
       onProgress?.(95);
       await confirmUpload(
         presignedData.mediaId,
         presignedData.fileKey,
         file.size,
-        additionalData
+        {
+          ...additionalData,
+          width: dimensions.width,
+          height: dimensions.height,
+          duration: dimensions.duration,
+        }
       );
 
       onProgress?.(100);
 
-      // Return response with mediaId from backend (no encoding needed - plays immediately)
+      // Return response with mediaId and dimensions (no encoding needed - plays immediately)
       return {
         success: true,
         message: 'Upload successful',
@@ -274,9 +348,9 @@ const mediaService = {
           size: file.size,
           url: presignedData.fileUrl,
           thumbnail: null,
-          width: undefined,
-          height: undefined,
-          duration: undefined,
+          width: dimensions.width,
+          height: dimensions.height,
+          duration: dimensions.duration,
         },
       } as UploadVideoResponse;
     } catch (error) {

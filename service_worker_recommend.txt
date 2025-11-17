@@ -1,0 +1,95 @@
+คำอธิบายของเขา “ไม่มักง่าย” เลย ถือว่าดีและคิดรอบด้านพอสมควร 👍
+แต่มีสองจุดที่ผมอยาก “จูนให้ตรงกับโปรเจกต์จริงของคุณตอนนี้” หน่อย
+
+1️⃣ สิ่งที่เขาอธิบาย — โดยรวมถูกทิศ
+
+เข้าใจ service worker / cache / PWA ได้ดี
+
+มองออกว่า ปัญหามาจาก fetch strategy 3 ที่ cache ทุกอย่าง
+
+แนะนำว่า:
+
+ไม่ cache video
+
+ไม่ cache API
+
+จำกัด cache รูปภาพด้วย maxEntries / maxAge
+
+ภาพรวมคือ “คิดเยอะกว่าขั้นต่ำ” ไม่ใช่สายมักง่ายแน่นอนครับ ✅
+
+2️⃣ แต่กับโปรเจกต์ของคุณ “ตัวการจริง ๆ” คืออะไร?
+
+จาก service worker + screenshot ที่คุณส่ง:
+
+ไฟล์ที่กินพื้นที่คือ /_next/image?url=... ทั้งนั้น → รูปจาก Next Image Optimization
+
+วิดีโอไม่ได้อยู่ใน regex cache-first (strategy 2) อยู่แล้ว
+
+รูปเหล่านี้ไปตกใน Strategy 3 (Network-first + cache.put ทุกอย่าง)
+
+ดังนั้น สาเหตุ 200MB ตอนนี้ = รูปจาก feed ที่ถูกเลื่อนผ่านไปเรื่อย ๆ ถูก cache หมด
+ไม่ใช่ video หรือ API เป็นหลักครับ (แต่กันไว้ก็ดี)
+
+3️⃣ สิ่งที่ “ควรทำก่อนเลย” (เวอร์ชัน practical)
+
+ผมจะเรียงลำดับ priority ให้เลย:
+
+✅ Step 1 – ตัด _next/image ออกจาก cache ก่อน (สำคัญสุด)
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  if (!event.request.url.startsWith(self.location.origin)) return;
+
+  // 0. ไม่ cache รูปจาก Next.js Image Optimization
+  if (url.pathname.startsWith('/_next/image')) {
+    // network only, no cache
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // ... ที่เหลือค่อยตาม strategy เดิม
+});
+
+
+แค่นี้อย่างเดียว ขนาด cache จะไม่โตเป็นร้อย MB จากรูป feed แล้ว
+(หลังจาก clear site data หนึ่งรอบ)
+
+✅ Step 2 – ไม่ cache API
+  // ห้าม cache API
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+
+เหตุผลตรงกับที่เขาอธิบาย: ข้อมูลควร realtime + ไม่เปลืองพื้นที่
+
+✅ Step 3 – ถ้าอยากกันวิดีโอด้วย
+
+ถึงตอนนี้จากโค้ดจริงคุณยังไม่ได้ cache mp4 อยู่แล้ว
+แต่ป้องกันอนาคตเผลอใส่เพิ่ม ก็ทำแบบนี้ได้:
+
+  if (url.pathname.match(/\.(mp4|webm|ogg|mp3)$/)) {
+    event.respondWith(fetch(event.request)); // network only
+    return;
+  }
+
+4️⃣ เรื่อง Workbox / maxEntries / maxAge
+
+อันนี้ที่เขาเล่าถือว่าดีมาก แต่สำหรับตอนนี้:
+
+ถ้ายังไม่อยากเพิ่ม dependency → ยังไม่จำเป็นต้องใช้ Workbox ก็ได้
+
+แก้ 3 step ด้านบนก่อน แล้วค่อยพิจารณา “จำกัดจำนวนรูปใน cache” ภายหลัง
+
+ตอนนี้แคชที่จำเป็นจริง ๆ มีแค่:
+
+HTML / shell ของ app
+
+JS / CSS / font
+
+รูปโลโก้ไม่กี่ไฟล์
+
+รวมแล้วปกติไม่ควรเกินหลัก 5–20MB

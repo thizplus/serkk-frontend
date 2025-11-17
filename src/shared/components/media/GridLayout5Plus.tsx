@@ -21,6 +21,8 @@ import type { GridLayoutProps } from "./types";
  * ├───────┬───────┼─────┤
  * │   4   │   5   │     │
  * └───────┴───────┴─────┘
+ *
+ * ✅ Expert Recommendation: Fixed height (320px) for virtual scroll stability
  */
 export function GridLayout5Plus({
   media,
@@ -33,7 +35,14 @@ export function GridLayout5Plus({
   const remainingCount = Math.max(0, media.length - MEDIA_DISPLAY.GRID.PREVIEW_MAX_DISPLAY);
 
   return (
-    <div className={cn("grid grid-cols-3", `gap-${MEDIA_DISPLAY.GRID.GAP}`, className)}>
+    <div
+      className={cn(
+        "grid grid-cols-3 overflow-hidden",
+        `gap-${MEDIA_DISPLAY.GRID.GAP_COMPACT}`,
+        className
+      )}
+      style={{ height: `${MEDIA_DISPLAY.GRID.HEIGHT_FIXED}px` }}
+    >
       {/* Large top-left (spans 2 rows, 2 cols) */}
       <div className="col-span-2 row-span-2">
         <MediaItem

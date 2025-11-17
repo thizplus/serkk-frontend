@@ -17,6 +17,8 @@ import type { GridLayoutProps } from "./types";
  * │     1     ├─────┤
  * │           │  3  │
  * └───────────┴─────┘
+ *
+ * ✅ Expert Recommendation: Fixed height (320px) for virtual scroll stability
  */
 export function GridLayout3({
   media,
@@ -26,7 +28,14 @@ export function GridLayout3({
   className,
 }: GridLayoutProps) {
   return (
-    <div className={cn("grid grid-cols-2", `gap-${MEDIA_DISPLAY.GRID.GAP}`, className)}>
+    <div
+      className={cn(
+        "grid grid-cols-2 overflow-hidden",
+        `gap-${MEDIA_DISPLAY.GRID.GAP_COMPACT}`,
+        className
+      )}
+      style={{ height: `${MEDIA_DISPLAY.GRID.HEIGHT_FIXED}px` }}
+    >
       {/* Large left image (spans 2 rows) */}
       <MediaItem
         media={media[0]}
@@ -38,7 +47,7 @@ export function GridLayout3({
       />
 
       {/* Right column: 2 stacked images */}
-      <div className={cn("grid grid-rows-2", `gap-${MEDIA_DISPLAY.GRID.GAP}`)}>
+      <div className={cn("grid grid-rows-2", `gap-${MEDIA_DISPLAY.GRID.GAP_COMPACT}`)}>
         <MediaItem
           media={media[1]}
           index={1}

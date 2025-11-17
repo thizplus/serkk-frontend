@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AppLayout from "@/components/layouts/AppLayout";
@@ -15,7 +15,8 @@ import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import Link from "next/link";
 import {
-  useNotifications,
+  useInfiniteNotifications,
+  useInfiniteUnreadNotifications,
   useMarkAsRead,
   useMarkAllAsRead,
   useDeleteNotification,
@@ -31,30 +32,78 @@ export default function NotificationsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
 
-  // Fetch notifications from API
-  const { data, isLoading, error } = useNotifications({ limit: PAGINATION.MESSAGE_LIMIT });
+  // Fetch all notifications with infinite scroll
+  const {
+    data: allData,
+    isLoading: isLoadingAll,
+    error: errorAll,
+    hasNextPage: hasNextPageAll,
+    fetchNextPage: fetchNextPageAll,
+    isFetchingNextPage: isFetchingNextPageAll,
+  } = useInfiniteNotifications({
+    limit: PAGINATION.DEFAULT_LIMIT,
+  });
 
-  // Handle both response formats (with meta or total)
-  const notifications = data?.notifications || [];
-  const totalCount = data?.meta?.total || 0;
+  // Fetch unread notifications with infinite scroll
+  const {
+    data: unreadData,
+    isLoading: isLoadingUnread,
+    error: errorUnread,
+    hasNextPage: hasNextPageUnread,
+    fetchNextPage: fetchNextPageUnread,
+    isFetchingNextPage: isFetchingNextPageUnread,
+  } = useInfiniteUnreadNotifications({
+    limit: PAGINATION.DEFAULT_LIMIT,
+  });
 
-  // Debug response in development
-  if (process.env.NODE_ENV === 'development' && data) {
-    console.log('📬 Notifications Response:', data);
-    console.log('📊 Total Count:', totalCount);
-    console.log('📝 First Notification:', notifications[0]);
-  }
+  // Flatten notifications from all pages
+  const allNotifications = useMemo(() => {
+    return allData?.pages.flatMap((page: any) => page.notifications) ?? [];
+  }, [allData]);
+
+  const unreadNotifications = useMemo(() => {
+    return unreadData?.pages.flatMap((page: any) => page.notifications) ?? [];
+  }, [unreadData]);
+
+  // Get unread count from first page meta
+  const unreadCount = (allData?.pages[0] as any)?.unreadCount || unreadNotifications.length;
+
+  // Use appropriate data based on active tab
+  const notifications = activeTab === "all" ? allNotifications : unreadNotifications;
+  const isLoading = activeTab === "all" ? isLoadingAll : isLoadingUnread;
+  const error = activeTab === "all" ? errorAll : errorUnread;
+  const hasNextPage = activeTab === "all" ? hasNextPageAll : hasNextPageUnread;
+  const fetchNextPage = activeTab === "all" ? fetchNextPageAll : fetchNextPageUnread;
+  const isFetchingNextPage = activeTab === "all" ? isFetchingNextPageAll : isFetchingNextPageUnread;
 
   // Mutations
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  // Infinite scroll with IntersectionObserver
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const filteredNotifications = activeTab === "all"
-    ? notifications
-    : notifications.filter(n => !n.isRead);
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '500px', threshold: 0 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const filteredNotifications = notifications;
 
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
@@ -256,8 +305,9 @@ export default function NotificationsPage() {
 
           <TabsContent value={activeTab} className="mt-6">
             {filteredNotifications.length > 0 ? (
-              <div className="space-y-2">
-                {filteredNotifications.map((notification) => {
+              <>
+                <div className="space-y-2">
+                  {filteredNotifications.map((notification) => {
                   const timeAgo = formatDistanceToNow(new Date(notification.createdAt), {
                     addSuffix: true,
                     locale: th
@@ -361,7 +411,20 @@ export default function NotificationsPage() {
                     </Card>
                   );
                 })}
-              </div>
+                </div>
+
+                {/* Load More Trigger */}
+                <div ref={loadMoreRef} className="py-4">
+                  {isFetchingNextPage && (
+                    <Card>
+                      <CardContent className="py-8 text-center">
+                        <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary mb-2" />
+                        <p className="text-sm text-muted-foreground">กำลังโหลดเพิ่มเติม...</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </>
             ) : (
               <EmptyState
                 icon="Bell"

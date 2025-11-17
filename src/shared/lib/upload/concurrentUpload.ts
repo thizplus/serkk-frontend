@@ -68,12 +68,18 @@ export async function uploadMultipleFiles(
     return Math.round(totalProgress / files.length);
   };
 
+  // ⏱️ Track total upload time
+  const totalStartTime = Date.now();
+
   try {
     // ============================================================================
     // STEP 1: Get Batch Presigned URLs (1 API call for all files)
     // ============================================================================
     // ⚡ เร็วกว่า 25× เมื่อเทียบกับ single API!
+    const step1Start = Date.now();
     const batchPresignedData = await requestBatchPresignedURLs(files);
+    const step1Duration = ((Date.now() - step1Start) / 1000).toFixed(2);
+    console.log(`⏱️ STEP 1 (Presigned URLs): ${step1Duration}s for ${files.length} files`);
 
     // ============================================================================
     // STEP 2: Upload files to R2 concurrently (p-limit)
@@ -91,6 +97,7 @@ export async function uploadMultipleFiles(
 
     const uploadTasks = files.map((file, index) =>
       limit(async () => {
+        const fileUploadStart = Date.now();
         try {
           // Update status: uploading
           const uploadingProgress = {
@@ -123,6 +130,16 @@ export async function uploadMultipleFiles(
             }
           );
 
+          // ⏱️ Log individual file upload time
+          const fileUploadDuration = ((Date.now() - fileUploadStart) / 1000).toFixed(2);
+          const speedMBps = (file.size / 1024 / 1024 / parseFloat(fileUploadDuration)).toFixed(2);
+          console.log(
+            `✅ Upload success [${index + 1}/${files.length}]: ${file.name} | ` +
+            `Size: ${(file.size / 1024 / 1024).toFixed(2)}MB | ` +
+            `Time: ${fileUploadDuration}s | ` +
+            `Speed: ${speedMBps} MB/s`
+          );
+
           // ✅ Mark this file as 100% complete
           fileProgressMap.set(index, 100);
 
@@ -148,6 +165,14 @@ export async function uploadMultipleFiles(
 
           return completedProgress;
         } catch (error) {
+          // ⏱️ Log failed upload time
+          const fileUploadDuration = ((Date.now() - fileUploadStart) / 1000).toFixed(2);
+          console.error(
+            `❌ Upload failed [${index + 1}/${files.length}]: ${file.name} | ` +
+            `Time: ${fileUploadDuration}s | ` +
+            `Error:`, error
+          );
+
           // ✅ Mark failed file as 100% (failed)
           fileProgressMap.set(index, 100);
 
@@ -168,7 +193,10 @@ export async function uploadMultipleFiles(
     );
 
     // Wait for all uploads
+    const step2Start = Date.now();
     const results = await Promise.allSettled(uploadTasks);
+    const step2Duration = ((Date.now() - step2Start) / 1000).toFixed(2);
+    console.log(`⏱️ STEP 2 (Upload to R2): ${step2Duration}s total for ${files.length} files`);
 
     // Extract results
     const finalResults: UploadProgress[] = results.map((result, index) => {
@@ -185,6 +213,7 @@ export async function uploadMultipleFiles(
     // ⚡ เร็วกว่า 200× เมื่อเทียบกับ single confirm!
     if (successfulUploads.length > 0) {
       try {
+        const step3Start = Date.now();
         await confirmBatchUpload(
           successfulUploads.map(upload => ({
             mediaId: upload.mediaId,
@@ -193,8 +222,10 @@ export async function uploadMultipleFiles(
             contentType: upload.contentType,
           }))
         );
+        const step3Duration = ((Date.now() - step3Start) / 1000).toFixed(2);
+        console.log(`⏱️ STEP 3 (Confirm Upload): ${step3Duration}s for ${successfulUploads.length} files`);
       } catch (error) {
-        console.error('Batch confirm failed:', error);
+        console.error('❌ Batch confirm failed:', error);
         // Mark all as failed if confirm failed
         successfulUploads.forEach(({ index }) => {
           const failedProgress: UploadProgress = {
@@ -213,6 +244,19 @@ export async function uploadMultipleFiles(
     // Calculate success/failed counts
     const successCount = finalResults.filter(r => r.status === 'completed').length;
     const failedCount = finalResults.filter(r => r.status === 'failed').length;
+
+    // ⏱️ Log summary
+    const totalDuration = ((Date.now() - totalStartTime) / 1000).toFixed(2);
+    const totalSizeMB = files.reduce((sum, f) => sum + f.size, 0) / 1024 / 1024;
+    const avgSpeedMBps = (totalSizeMB / parseFloat(totalDuration)).toFixed(2);
+    console.log(
+      `\n📊 UPLOAD SUMMARY:\n` +
+      `   Files: ${successCount}/${files.length} successful\n` +
+      `   Total Size: ${totalSizeMB.toFixed(2)}MB\n` +
+      `   Total Time: ${totalDuration}s\n` +
+      `   Avg Speed: ${avgSpeedMBps} MB/s\n` +
+      `   Concurrency: ${concurrency} files at a time\n`
+    );
 
     return {
       success: successCount > 0,

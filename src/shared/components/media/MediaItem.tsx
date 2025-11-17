@@ -46,7 +46,7 @@ export function MediaItem({
   return (
     <div
       className={cn(
-        "relative overflow-hidden group shadow-sm hover:shadow-md transition-all bg-muted aspect-square",
+        "relative w-full h-full overflow-hidden group shadow-sm hover:shadow-md transition-all bg-muted",
         !editable && onClick && "cursor-pointer hover:scale-[1.02] transition-transform",
         className
       )}
@@ -57,7 +57,8 @@ export function MediaItem({
         <video
           src={media.url}
           poster={media.thumbnail}
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: 'top' }}
           muted={MEDIA_DISPLAY.VIDEO.MUTED_IN_GRID}
           preload={MEDIA_DISPLAY.VIDEO.PRELOAD}
         />
@@ -67,6 +68,7 @@ export function MediaItem({
           alt={`Media ${index + 1}`}
           fill
           className="object-cover"
+          style={{ objectPosition: 'top' }}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       )}

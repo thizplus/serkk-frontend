@@ -5,10 +5,10 @@
 // React Query hooks สำหรับการบันทึก/บุ๊คมาร์คโพสต์
 // ============================================================================
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import savedService from '../services/saved.service';
-import type { GetSavedPostsParams } from '@/types/request';
+import type { GetSavedPostsParams, GetSavedPostsCursorParams } from '@/types/request';
 import { TOAST_MESSAGES } from '@/config';
 
 // ============================================================================
@@ -42,6 +42,35 @@ export function useSavedPosts(params?: GetSavedPostsParams) {
       }
       return response.data?.posts || [];
     },
+  });
+}
+
+/**
+ * Infinite scroll สำหรับรายการโพสต์ที่บันทึกไว้ (Cursor-based) - NEW
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteSavedPosts({ limit: 20 });
+ */
+export function useInfiniteSavedPosts(params?: Omit<GetSavedPostsCursorParams, 'cursor'>) {
+  return useInfiniteQuery({
+    queryKey: [...savedKeys.lists(), 'infinite', params] as const,
+    queryFn: async ({ pageParam }) => {
+      const response = await savedService.getSavedPosts({
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch saved posts');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      // ใช้ hasMore และ nextCursor จาก backend
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 

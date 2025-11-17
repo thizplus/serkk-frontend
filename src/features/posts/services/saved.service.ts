@@ -6,12 +6,13 @@
 
 import apiService from '@/lib/api/http-client';
 import { API } from '@/lib/constants/api';
-import type { GetSavedPostsParams } from '@/types/request';
+import type { GetSavedPostsParams, GetSavedPostsCursorParams } from '@/types/request';
 import type {
   SavePostResponse,
   UnsavePostResponse,
   GetSavedStatusResponse,
   GetSavedPostsResponse,
+  GetSavedPostsCursorResponse,
 } from '@/types/response';
 
 /**
@@ -47,12 +48,19 @@ const savedService = {
   },
 
   /**
-   * ดึงรายการโพสต์ที่บันทึกไว้ทั้งหมด
-   * @param params - พารามิเตอร์ (offset, limit)
-   * @returns Promise<GetSavedPostsResponse>
+   * ดึงรายการโพสต์ที่บันทึกไว้ทั้งหมด (Cursor-based)
+   * @param params - พารามิเตอร์ (cursor, limit)
+   * @returns Promise<GetSavedPostsCursorResponse>
    */
-  getSavedPosts: async (params?: GetSavedPostsParams): Promise<GetSavedPostsResponse> => {
-    return apiService.get<GetSavedPostsResponse>(API.SAVED.LIST, params);
+  getSavedPosts: async (params?: GetSavedPostsCursorParams): Promise<GetSavedPostsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.SAVED.LIST}?${queryString}` : API.SAVED.LIST;
+
+    return apiService.get<GetSavedPostsCursorResponse>(url);
   },
 };
 

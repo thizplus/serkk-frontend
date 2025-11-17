@@ -1,15 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
 import { PageWrap } from "@/shared/components/layouts/PageWrap";
-import { PostFeed } from "@/features/posts";
+import { InfinitePostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Plus, Loader2 } from "@/config/icons";
+import { FileText, Plus } from "@/config/icons";
 import { useUser, useHasHydrated } from "@/features/auth";
-import { useUserPosts } from "@/features/posts";
-import { LoadingState, EmptyState } from "@/components/common";
+import { useInfiniteUserPosts } from "@/features/posts";
+import { LoadingState } from "@/components/common";
 import { LOADING_MESSAGES, PAGINATION } from "@/config";
 
 export const dynamic = 'force-dynamic';
@@ -19,17 +20,29 @@ export default function MyPostsPage() {
   const hasHydrated = useHasHydrated();
   const currentUser = useUser();
 
-  // ดึงโพสต์ของผู้ใช้ที่ล็อกอินอยู่
-  const { data: myPosts = [], isLoading, error } = useUserPosts(
+  // ดึงโพสต์ของผู้ใช้ที่ล็อกอินอยู่ (infinite scroll)
+  const {
+    data,
+    isLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteUserPosts(
     currentUser?.id || "",
     {
+      sortBy: 'new', // เรียงตามใหม่ล่าสุด
+      limit: PAGINATION.DEFAULT_LIMIT,
+    },
+    {
       enabled: !!currentUser?.id, // เรียก API เฉพาะเมื่อมี user ID
-      params: {
-        sortBy: 'new', // เรียงตามใหม่ล่าสุด
-        limit: PAGINATION.MESSAGE_LIMIT,
-      }
     }
   );
+
+  // Flatten posts from all pages
+  const myPosts = useMemo(() => {
+    return data?.pages.flatMap((page) => page.posts) ?? [];
+  }, [data]);
 
   // รอให้ hydration เสร็จก่อน (ป้องกัน flash ของ "กรุณาล็อกอิน")
   if (!hasHydrated) {
@@ -103,51 +116,18 @@ export default function MyPostsPage() {
             สร้างโพสต์
           </Button>
         </div>
-
-        {/* Loading State */}
-        {isLoading && (
-          <Card>
-            <CardContent>
-              <LoadingState message={LOADING_MESSAGES.POST.LOADING} />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <p className="text-lg text-destructive mb-2">
-                ไม่สามารถโหลดโพสต์ได้
-              </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
-              </p>
-              <Button onClick={() => window.location.reload()}>
-                ลองใหม่อีกครั้ง
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Empty State */}
-        {!isLoading && !error && myPosts.length === 0 && (
-          <EmptyState
-            icon="FileText"
-            title="ยังไม่มีโพสต์"
-            description="คุณยังไม่ได้สร้างโพสต์ เริ่มสร้างโพสต์แรกของคุณเลย!"
-            action={{
-              label: "สร้างโพสต์",
-              onClick: () => router.push("/create-post"),
-            }}
-          />
-        )}
       </PageWrap>
 
-      {/* My Posts Feed - NO WRAP (edge-to-edge) */}
-      {!isLoading && !error && myPosts.length > 0 && (
-        <PostFeed posts={myPosts} enableOptimisticUI={true} />
-      )}
+      {/* My Posts Feed - NO WRAP (edge-to-edge) - Infinite Scroll + Virtualized */}
+      <InfinitePostFeed
+        posts={myPosts}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage}
+        isLoading={isLoading}
+        error={error || null}
+        enableOptimisticUI={true}
+      />
     </AppLayout>
   );
 }

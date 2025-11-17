@@ -5,13 +5,14 @@
 // React Query hooks สำหรับ Comments
 // ============================================================================
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import commentService from '../services/comment.service';
 import type {
   CreateCommentRequest,
   UpdateCommentRequest,
-  GetCommentsParams
+  GetCommentsParams,
+  GetCommentsCursorParams
 } from '@/types/request';
 import { TOAST_MESSAGES } from '@/config';
 
@@ -88,6 +89,108 @@ export function useCommentsByAuthor(userId: string, params?: GetCommentsParams) 
     },
     enabled: !!userId,
     staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+// ============================================================================
+// INFINITE SCROLL QUERIES - NEW (Cursor-based)
+// ============================================================================
+
+/**
+ * Infinite scroll สำหรับคอมเมนต์ของโพสต์ (Cursor-based)
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteComments(postId, { sortBy: 'hot' });
+ */
+export function useInfiniteComments(
+  postId: string,
+  params?: Omit<GetCommentsCursorParams, 'cursor'>
+) {
+  return useInfiniteQuery({
+    queryKey: [...commentKeys.list(postId), 'infinite', params] as const,
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+      const response = await commentService.getByPostId(postId, {
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch comments');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      // ใช้ hasMore และ nextCursor จาก backend
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    enabled: !!postId,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+/**
+ * Infinite scroll สำหรับ replies ของคอมเมนต์ (Cursor-based)
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteReplies(commentId);
+ */
+export function useInfiniteReplies(
+  commentId: string,
+  params?: Omit<GetCommentsCursorParams, 'cursor'>
+) {
+  return useInfiniteQuery({
+    queryKey: [...commentKeys.all, 'replies', commentId, 'infinite', params] as const,
+    queryFn: async ({ pageParam }) => {
+      const response = await commentService.getReplies(commentId, {
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 10,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch replies');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    enabled: !!commentId,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+/**
+ * Infinite scroll สำหรับคอมเมนต์ทั้งหมดของผู้ใช้ (Cursor-based)
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteCommentsByAuthor(userId);
+ */
+export function useInfiniteCommentsByAuthor(
+  userId: string,
+  params?: Omit<GetCommentsCursorParams, 'cursor'>,
+  options?: { enabled?: boolean }
+) {
+  return useInfiniteQuery({
+    queryKey: [...commentKeys.all, 'author', userId, 'infinite', params] as const,
+    queryFn: async ({ pageParam }) => {
+      const response = await commentService.getByAuthor(userId, {
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch user comments');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    enabled: options?.enabled !== undefined ? options.enabled : !!userId,
+    staleTime: 2 * 60 * 1000,
   });
 }
 

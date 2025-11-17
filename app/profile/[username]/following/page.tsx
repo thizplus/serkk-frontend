@@ -1,12 +1,13 @@
 "use client";
 
+import { useMemo, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, UserPlus, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useFollowing } from "@/features/profile";
+import { useInfiniteFollowing } from "@/features/profile";
 import { useUserProfile } from "@/features/profile";
 import { useUser, useHasHydrated } from '@/features/auth';
 import { UserCard } from "@/features/profile";
@@ -33,22 +34,53 @@ export default function FollowingPage() {
   const profileUser = isOwnProfile ? currentUser : profileData;
   const userId = profileUser?.id;
 
-  // Fetch following
+  // Fetch following with infinite scroll
   const {
-    data: followingData,
+    data,
     isLoading: isLoadingFollowing,
     error: followingError,
-  } = useFollowing(userId || '', { limit: PAGINATION.MESSAGE_LIMIT }, {
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteFollowing(userId || '', {
+    limit: PAGINATION.DEFAULT_LIMIT,
+  }, {
     enabled: !!userId,
   });
 
-  // ถ้าเป็นหน้า following ของตัวเอง → force isFollowing = true
-  // เพราะคนในลิสต์นี้คือคนที่เรากำลังติดตามอยู่แล้ว
-  const following = followingData?.users.map(user => ({
-    ...user,
-    isFollowing: isOwnProfile ? true : user.isFollowing, // Force true สำหรับโปรไฟล์ตัวเอง
-  })) || [];
-  const totalCount = followingData?.meta?.total || 0;
+  // Flatten following from all pages and force isFollowing = true for own profile
+  const following = useMemo(() => {
+    const users = data?.pages.flatMap((page: any) => page.users) ?? [];
+    return users.map(user => ({
+      ...user,
+      isFollowing: isOwnProfile ? true : user.isFollowing,
+    }));
+  }, [data, isOwnProfile]);
+
+  // Get total count from first page meta
+  const totalCount = (data?.pages[0] as any)?.meta?.total || following.length;
+
+  // Infinite scroll with IntersectionObserver
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '500px', threshold: 0 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Loading state
   if (!hasHydrated || isLoadingProfile) {
@@ -143,11 +175,25 @@ export default function FollowingPage() {
             </CardContent>
           </Card>
         ) : following.length > 0 ? (
-          <div className="space-y-3">
-            {following.map((user) => (
-              <UserCard key={user.id} user={user} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3">
+              {following.map((user) => (
+                <UserCard key={user.id} user={user} />
+              ))}
+            </div>
+
+            {/* Load More Trigger */}
+            <div ref={loadMoreRef} className="py-4">
+              {isFetchingNextPage && (
+                <Card>
+                  <CardContent className="py-8 text-center">
+                    <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary mb-2" />
+                    <p className="text-sm text-muted-foreground">กำลังโหลดเพิ่มเติม...</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </>
         ) : (
           <Card>
             <CardContent className="py-16 text-center">

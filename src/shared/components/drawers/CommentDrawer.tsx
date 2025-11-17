@@ -11,6 +11,7 @@ import { VoteButtons } from "@/features/posts/components/VoteButtons";
 import { CommentForm } from "@/features/comments/components/CommentForm";
 import { CommentTree } from "@/features/comments/components/CommentTree";
 import { useToggleVote } from "@/features/posts/hooks/useVotes";
+import { usePost } from "@/features/posts/hooks/usePosts";
 import { useCommentTree, useCreateComment, useUpdateComment, useDeleteComment } from "@/features/comments";
 import { Separator } from "@/components/ui/separator";
 import { MessageSquare } from "lucide-react";
@@ -47,6 +48,10 @@ export function CommentDrawer({
 
   // Hooks
   const { handleVote } = useToggleVote();
+  // ✅ Fetch realtime post data from React Query cache
+  const { data: livePost } = usePost(post.id);
+  const currentPost = livePost || post; // Fallback to props if not loaded yet
+
   const { data: comments = [], refetch: refetchComments } = useCommentTree(post.id, {
     maxDepth: 10,
   });
@@ -63,7 +68,7 @@ export function CommentDrawer({
 
   // Handlers
   const handleVoteClick = (vote: 'up' | 'down') => {
-    handleVote(post.id, 'post', vote, post.userVote);
+    handleVote(currentPost.id, 'post', vote, currentPost.userVote);
   };
 
   const handleCommentSubmit = async (content: string, parentId?: string) => {
@@ -144,13 +149,13 @@ export function CommentDrawer({
         >
           {/* Post Title & Info - Sticky Header */}
           <div className="px-4 pt-6 pb-4 border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10">
-            <h2 className="font-bold text-lg mb-2 line-clamp-2">{post.title}</h2>
+            <h2 className="font-bold text-lg mb-2 line-clamp-2">{currentPost.title}</h2>
 
             {/* Vote & Comment Count */}
             <div className="flex items-center gap-3">
               <VoteButtons
-                votes={post.votes}
-                userVote={post.userVote}
+                votes={currentPost.votes}
+                userVote={currentPost.userVote}
                 onVote={handleVoteClick}
                 size="sm"
                 orientation="horizontal"
@@ -158,7 +163,7 @@ export function CommentDrawer({
 
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <MessageSquare size={16} />
-                <span className="text-sm font-medium">{post.commentCount} ความคิดเห็น</span>
+                <span className="text-sm font-medium">{currentPost.commentCount} ความคิดเห็น</span>
               </div>
             </div>
           </div>

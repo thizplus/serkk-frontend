@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, use } from "react";
+import { useState, useEffect, useMemo, use, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
@@ -24,7 +24,7 @@ import {
 } from "@/config/icons";
 import { useUser, useHasHydrated } from '@/features/auth';
 import { useInfiniteUserPosts } from "@/features/posts";
-import { useCommentsByAuthor } from "@/features/comments";
+import { useInfiniteCommentsByAuthor } from "@/features/comments";
 import { useUserProfile } from "../hooks/useUsers";
 import { useToggleFollow } from "../hooks/useFollowMutations";
 import { ProfileCommentCard } from "@/features/comments";
@@ -111,15 +111,46 @@ export function ProfileContent({ params }: ProfileContentProps) {
     return postsData?.pages.flatMap((page) => page.posts) ?? [];
   }, [postsData]);
 
-  // Fetch user's comments using React Query hook
+  // Fetch user's comments using infinite scroll
   const {
-    data: userComments = [],
+    data: commentsData,
     isLoading: isLoadingComments,
     error: commentsError,
-  } = useCommentsByAuthor(profileUser?.id || '', {
-    // Fetch comments for the profile being viewed
+    hasNextPage: hasNextPageComments,
+    fetchNextPage: fetchNextPageComments,
+    isFetchingNextPage: isFetchingNextPageComments,
+  } = useInfiniteCommentsByAuthor(profileUser?.id || '', {
     limit: PAGINATION.DEFAULT_LIMIT,
+  }, {
+    enabled: !!profileUser?.id,
   });
+
+  // Flatten comments from all pages
+  const userComments = useMemo(() => {
+    return commentsData?.pages.flatMap((page) => page.comments) ?? [];
+  }, [commentsData]);
+
+  // Infinite scroll for comments
+  const commentsLoadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!commentsLoadMoreRef.current || !hasNextPageComments || isFetchingNextPageComments) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPageComments && !isFetchingNextPageComments) {
+          fetchNextPageComments();
+        }
+      },
+      { rootMargin: '500px', threshold: 0 }
+    );
+
+    observer.observe(commentsLoadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [hasNextPageComments, isFetchingNextPageComments, fetchNextPageComments]);
 
   // Follow/Unfollow functionality (ต้องเรียกก่อน early returns)
   const { handleToggleFollow, isLoading: isFollowLoading } = useToggleFollow();
@@ -389,11 +420,25 @@ export function ProfileContent({ params }: ProfileContentProps) {
                 </CardContent>
               </Card>
             ) : userComments.length > 0 ? (
-              <div className="space-y-3">
-                {userComments.map((comment) => (
-                  <ProfileCommentCard key={comment.id} comment={comment} />
-                ))}
-              </div>
+              <>
+                <div className="space-y-3">
+                  {userComments.map((comment) => (
+                    <ProfileCommentCard key={comment.id} comment={comment} />
+                  ))}
+                </div>
+
+                {/* Load More Trigger for Comments */}
+                <div ref={commentsLoadMoreRef} className="py-4">
+                  {isFetchingNextPageComments && (
+                    <Card>
+                      <CardContent className="py-8 text-center">
+                        <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary mb-2" />
+                        <p className="text-sm text-muted-foreground">กำลังโหลดคอมเมนต์เพิ่มเติม...</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </>
             ) : (
               <EmptyState
                 icon="MessageSquare"

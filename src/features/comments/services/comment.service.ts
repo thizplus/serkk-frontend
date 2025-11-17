@@ -9,6 +9,7 @@ import type {
   CreateCommentRequest,
   UpdateCommentRequest,
   GetCommentsParams,
+  GetCommentsCursorParams,
   GetCommentTreeParams,
 } from '@/types/request';
 import type {
@@ -17,8 +18,11 @@ import type {
   UpdateCommentResponse,
   DeleteCommentResponse,
   ListCommentsResponse,
+  ListCommentsCursorResponse,
   ListCommentsByAuthorResponse,
+  ListCommentsByAuthorCursorResponse,
   GetCommentRepliesResponse,
+  GetCommentRepliesCursorResponse,
   GetCommentTreeResponse,
   GetCommentParentChainResponse,
 } from '@/types/response';
@@ -66,39 +70,61 @@ const commentService = {
   },
 
   /**
-   * ดึงคอมเมนต์ทั้งหมดของโพสต์
+   * ดึงคอมเมนต์ทั้งหมดของโพสต์ (Cursor-based)
    * @param postId - ID ของโพสต์
-   * @param params - พารามิเตอร์ (sortBy, offset, limit)
-   * @returns Promise<ListCommentsResponse>
+   * @param params - พารามิเตอร์ (cursor, sortBy, limit)
+   * @returns Promise<ListCommentsCursorResponse>
    */
-  getByPostId: async (postId: string, params?: GetCommentsParams): Promise<ListCommentsResponse> => {
-    return apiService.get<ListCommentsResponse>(API.COMMENT.BY_POST(postId), params);
+  getByPostId: async (postId: string, params?: GetCommentsCursorParams): Promise<ListCommentsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.COMMENT.BY_POST(postId)}?${queryString}` : API.COMMENT.BY_POST(postId);
+
+    return apiService.get<ListCommentsCursorResponse>(url);
   },
 
   /**
-   * ดึงคอมเมนต์ทั้งหมดของผู้เขียนคนใดคนหนึ่ง
+   * ดึงคอมเมนต์ทั้งหมดของผู้เขียนคนใดคนหนึ่ง (Cursor-based)
    * @param userId - ID ของผู้เขียน
-   * @param params - พารามิเตอร์ (offset, limit)
-   * @returns Promise<ListCommentsByAuthorResponse>
+   * @param params - พารามิเตอร์ (cursor, limit)
+   * @returns Promise<ListCommentsByAuthorCursorResponse>
    */
   getByAuthor: async (
     userId: string,
-    params?: GetCommentsParams
-  ): Promise<ListCommentsByAuthorResponse> => {
-    return apiService.get<ListCommentsByAuthorResponse>(API.COMMENT.BY_AUTHOR(userId), params);
+    params?: GetCommentsCursorParams
+  ): Promise<ListCommentsByAuthorCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.COMMENT.BY_AUTHOR(userId)}?${queryString}` : API.COMMENT.BY_AUTHOR(userId);
+
+    return apiService.get<ListCommentsByAuthorCursorResponse>(url);
   },
 
   /**
-   * ดึงคำตอบโดยตรงของคอมเมนต์
+   * ดึงคำตอบโดยตรงของคอมเมนต์ (Cursor-based)
    * @param commentId - ID ของคอมเมนต์
-   * @param params - พารามิเตอร์ (offset, limit)
-   * @returns Promise<GetCommentRepliesResponse>
+   * @param params - พารามิเตอร์ (cursor, limit)
+   * @returns Promise<GetCommentRepliesCursorResponse>
    */
   getReplies: async (
     commentId: string,
-    params?: GetCommentsParams
-  ): Promise<GetCommentRepliesResponse> => {
-    return apiService.get<GetCommentRepliesResponse>(API.COMMENT.REPLIES(commentId), params);
+    params?: GetCommentsCursorParams
+  ): Promise<GetCommentRepliesCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.COMMENT.REPLIES(commentId)}?${queryString}` : API.COMMENT.REPLIES(commentId);
+
+    return apiService.get<GetCommentRepliesCursorResponse>(url);
   },
 
   /**

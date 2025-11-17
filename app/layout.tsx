@@ -10,6 +10,7 @@ import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analyti
 import { PWAInstaller } from "@/features/pwa";
 import { DrawerProvider } from "@/shared/contexts/DrawerContext";
 import { DrawerManager } from "@/shared/components/drawers/DrawerManager";
+import { OptimisticPostsProvider } from "@/features/posts/providers/OptimisticPostsProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -125,15 +126,17 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <DrawerProvider>
-              <ChatProvider>
-                <NotificationProvider>
-                  {children}
-                  <DrawerManager />
-                  <Toaster />
-                </NotificationProvider>
-              </ChatProvider>
-            </DrawerProvider>
+            <OptimisticPostsProvider>
+              <DrawerProvider>
+                <ChatProvider>
+                  <NotificationProvider>
+                    {children}
+                    <DrawerManager />
+                    <Toaster />
+                  </NotificationProvider>
+                </ChatProvider>
+              </DrawerProvider>
+            </OptimisticPostsProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

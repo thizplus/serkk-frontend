@@ -5,7 +5,7 @@ import Script from "next/script";
 import { ArrowLeft, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { PageWrap } from "@/shared/components/layouts/PageWrap";
-import { PostCard } from "@/features/posts";
+import { PostDetail } from "@/features/posts";
 import { CommentTree } from "@/features/comments";
 import { CommentForm } from "@/features/comments";
 import { Button } from "@/components/ui/button";
@@ -173,8 +173,8 @@ export function PostDetailContent({ postId, jsonLd }: PostDetailContentProps) {
         </Button>
       </PageWrap>
 
-      {/* Post Card - NO WRAP (edge-to-edge) */}
-      <PostCard post={post} disableNavigation />
+      {/* Post Detail - NO WRAP (edge-to-edge) */}
+      <PostDetail post={post} />
 
       {/* Comments Section - wrapped with PageWrap */}
      

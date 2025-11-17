@@ -1,14 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/layouts/AppLayout";
 import { PageWrap } from "@/shared/components/layouts/PageWrap";
-import { PostFeed } from "@/features/posts";
+import { InfinitePostFeed } from "@/features/posts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, Plus, Loader2 } from "@/config/icons";
 import { useUser, useHasHydrated } from "@/features/auth";
-import { useSavedPosts } from "@/features/posts";
+import { useInfiniteSavedPosts } from "@/features/posts";
 import { LoadingState, EmptyState } from "@/components/common";
 import { LOADING_MESSAGES, PAGINATION } from "@/config";
 
@@ -19,10 +20,22 @@ export default function SavedPage() {
   const hasHydrated = useHasHydrated();
   const currentUser = useUser();
 
-  // ดึงโพสต์ที่บันทึกไว้
-  const { data: savedPosts = [], isLoading, error } = useSavedPosts({
-    limit: PAGINATION.MESSAGE_LIMIT,
+  // ดึงโพสต์ที่บันทึกไว้ แบบ infinite scroll
+  const {
+    data,
+    isLoading,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteSavedPosts({
+    limit: PAGINATION.DEFAULT_LIMIT,
   });
+
+  // Flatten posts from all pages
+  const savedPosts = useMemo(() => {
+    return data?.pages.flatMap((page: any) => page.posts) ?? [];
+  }, [data]);
 
 
   // รอให้ hydration เสร็จก่อน (ป้องกัน flash ของ "กรุณาล็อกอิน")
@@ -138,9 +151,16 @@ export default function SavedPage() {
         )}
       </PageWrap>
 
-      {/* Saved Posts Feed - NO WRAP (edge-to-edge) */}
+      {/* Saved Posts Feed - NO WRAP (edge-to-edge) - Infinite Scroll */}
       {!isLoading && !error && savedPosts.length > 0 && (
-        <PostFeed posts={savedPosts} />
+        <InfinitePostFeed
+          posts={savedPosts}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          isLoading={isLoading}
+          error={error || null}
+        />
       )}
     </AppLayout>
   );

@@ -10,6 +10,7 @@ import type {
   CreatePostRequest,
   UpdatePostRequest,
   GetPostsParams,
+  GetPostsCursorParams,
   SearchPostsParams,
   CreateCrosspostRequest,
 } from '@/types/request';
@@ -19,10 +20,13 @@ import type {
   UpdatePostResponse,
   DeletePostResponse,
   ListPostsResponse,
+  ListPostsCursorResponse,
   SearchPostsResponse,
   CreateCrosspostResponse,
   GetCrosspostsResponse,
+  GetCrosspostsCursorResponse,
   GetFeedResponse,
+  GetFeedCursorResponse,
 } from '@/types/response';
 
 /**
@@ -68,42 +72,75 @@ const postService = {
   },
 
   /**
-   * ดึงรายการโพสต์ทั้งหมด พร้อม pagination และ sorting
-   * @param params - พารามิเตอร์ (offset, limit, sortBy)
-   * @returns Promise<ListPostsResponse>
+   * ดึงรายการโพสต์ทั้งหมด พร้อม cursor pagination และ sorting
+   * @param params - พารามิเตอร์ (cursor, limit, sortBy)
+   * @returns Promise<ListPostsCursorResponse>
    */
-  list: async (params?: GetPostsParams): Promise<ListPostsResponse> => {
-    return apiService.get<ListPostsResponse>(API.POST.LIST, params);
+  list: async (params?: GetPostsCursorParams): Promise<ListPostsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params?.tag) queryParams.append('tag', params.tag);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.POST.LIST}?${queryString}` : API.POST.LIST;
+
+    return apiService.get<ListPostsCursorResponse>(url);
   },
 
   /**
-   * ดึงโพสต์ของผู้เขียนคนใดคนหนึ่ง
+   * ดึงโพสต์ของผู้เขียนคนใดคนหนึ่ง (Cursor-based)
    * @param userId - ID ของผู้เขียน
-   * @param params - พารามิเตอร์ (offset, limit, sortBy)
-   * @returns Promise<ListPostsResponse>
+   * @param params - พารามิเตอร์ (cursor, limit, sortBy)
+   * @returns Promise<ListPostsCursorResponse>
    */
-  getByAuthor: async (userId: string, params?: GetPostsParams): Promise<ListPostsResponse> => {
-    return apiService.get<ListPostsResponse>(API.POST.BY_AUTHOR(userId), params);
+  getByAuthor: async (userId: string, params?: GetPostsCursorParams): Promise<ListPostsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.POST.BY_AUTHOR(userId)}?${queryString}` : API.POST.BY_AUTHOR(userId);
+
+    return apiService.get<ListPostsCursorResponse>(url);
   },
 
   /**
-   * ดึงโพสต์ที่มี tag ระบุ
+   * ดึงโพสต์ที่มี tag ระบุ (Cursor-based)
    * @param tagName - ชื่อ tag
-   * @param params - พารามิเตอร์ (offset, limit, sortBy)
-   * @returns Promise<ListPostsResponse>
+   * @param params - พารามิเตอร์ (cursor, limit, sortBy)
+   * @returns Promise<ListPostsCursorResponse>
    */
-  getByTag: async (tagName: string, params?: GetPostsParams): Promise<ListPostsResponse> => {
-    return apiService.get<ListPostsResponse>(API.POST.BY_TAG(tagName), params);
+  getByTag: async (tagName: string, params?: GetPostsCursorParams): Promise<ListPostsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.POST.BY_TAG(tagName)}?${queryString}` : API.POST.BY_TAG(tagName);
+
+    return apiService.get<ListPostsCursorResponse>(url);
   },
 
   /**
-   * ดึงโพสต์ที่มี tag ID ระบุ (เพื่อหลีกเลี่ยงปัญหา URL encoding กับ tag ภาษาไทย)
+   * ดึงโพสต์ที่มี tag ID ระบุ (Cursor-based)
    * @param tagId - ID ของ tag
-   * @param params - พารามิเตอร์ (offset, limit, sortBy)
-   * @returns Promise<ListPostsResponse>
+   * @param params - พารามิเตอร์ (cursor, limit, sortBy)
+   * @returns Promise<ListPostsCursorResponse>
    */
-  getByTagId: async (tagId: string, params?: GetPostsParams): Promise<ListPostsResponse> => {
-    return apiService.get<ListPostsResponse>(API.POST.BY_TAG_ID(tagId), params);
+  getByTagId: async (tagId: string, params?: GetPostsCursorParams): Promise<ListPostsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.POST.BY_TAG_ID(tagId)}?${queryString}` : API.POST.BY_TAG_ID(tagId);
+
+    return apiService.get<ListPostsCursorResponse>(url);
   },
 
   /**
@@ -116,12 +153,20 @@ const postService = {
   },
 
   /**
-   * ดึง feed ส่วนตัว (personalized feed)
-   * @param params - พารามิเตอร์ (offset, limit, sortBy)
-   * @returns Promise<GetFeedResponse>
+   * ดึง feed ส่วนตัว (personalized feed) - Cursor-based
+   * @param params - พารามิเตอร์ (cursor, limit, sortBy)
+   * @returns Promise<GetFeedCursorResponse>
    */
-  getFeed: async (params?: GetPostsParams): Promise<GetFeedResponse> => {
-    return apiService.get<GetFeedResponse>(API.POST.FEED, params);
+  getFeed: async (params?: GetPostsCursorParams): Promise<GetFeedCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.POST.FEED}?${queryString}` : API.POST.FEED;
+
+    return apiService.get<GetFeedCursorResponse>(url);
   },
 
   /**
@@ -138,13 +183,20 @@ const postService = {
   },
 
   /**
-   * ดึงรายการ crossposts ทั้งหมดของโพสต์
+   * ดึงรายการ crossposts ทั้งหมดของโพสต์ (Cursor-based)
    * @param postId - ID ของโพสต์
-   * @param params - พารามิเตอร์ (offset, limit)
-   * @returns Promise<GetCrosspostsResponse>
+   * @param params - พารามิเตอร์ (cursor, limit)
+   * @returns Promise<GetCrosspostsCursorResponse>
    */
-  getCrossposts: async (postId: string, params?: GetPostsParams): Promise<GetCrosspostsResponse> => {
-    return apiService.get<GetCrosspostsResponse>(API.POST.GET_CROSSPOSTS(postId), params);
+  getCrossposts: async (postId: string, params?: GetPostsCursorParams): Promise<GetCrosspostsCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.POST.GET_CROSSPOSTS(postId)}?${queryString}` : API.POST.GET_CROSSPOSTS(postId);
+
+    return apiService.get<GetCrosspostsCursorResponse>(url);
   },
 };
 

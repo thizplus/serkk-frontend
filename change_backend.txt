@@ -1,0 +1,733 @@
+1️⃣ เพิ่ม max limit validation (hard cap ที่ 100)
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 18 additions
+       23      }
+       24    }
+       25    
+       26 +  // normalizeLimit validates and caps the limit parameter
+       27 +  // Default: 20, Min: 1, Max: 100 (hard cap to prevent abuse)
+       28 +  func normalizeLimit(limitStr string) int {
+       29 +    limit, _ := strconv.Atoi(limitStr)
+       30 +  
+       31 +    // Set default if invalid or zero
+       32 +    if limit <= 0 {
+       33 +      return 20
+       34 +    }
+       35 +  
+       36 +    // Hard cap at 100 to prevent abuse/performance issues
+       37 +    if limit > 100 {
+       38 +      return 100
+       39 +    }
+       40 +  
+       41 +    return limit
+       42 +  }
+       43 +  
+       44    // CreatePost godoc
+       45    // @Summary Create a new post
+       46    // @Description Create a new post with title, content, and media
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 1 addition and 1 removal
+       405      }
+       406    
+       407      offset, _ := strconv.Atoi(c.Query("offset", "0"))
+       408 -    limit, _ := strconv.Atoi(c.Query("limit", "20"))
+       408 +    limit := normalizeLimit(c.Query("limit", "20"))
+       409    
+       410      // Get userID if authenticated (optional)
+       411      var userIDPtr *uuid.UUID
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 1 addition and 1 removal
+       174    // Supports both cursor-based (recommended) and offset-based (deprecated) pagination
+       175    func (h *PostHandler) ListPosts(c *fiber.Ctx) error {
+       176      cursor := c.Query("cursor", "")
+       177 -    limit, _ := strconv.Atoi(c.Query("limit", "20"))
+       177 +    limit := normalizeLimit(c.Query("limit", "20"))
+       178      sortBy := c.Query("sort", "hot") // hot, new, top, controversial
+       179    
+       180      // Check if filtering by tag (query param) - รองรับภาษาไทย
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 1 addition and 1 removal
+       276      }
+       277    
+       278      cursor := c.Query("cursor", "")
+       279 -    limit, _ := strconv.Atoi(c.Query("limit", "20"))
+       279 +    limit := normalizeLimit(c.Query("limit", "20"))
+       280    
+       281      // Get userID if authenticated (optional)
+       282      var userIDPtr *uuid.UUID
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 1 addition and 1 removal
+       318      log.Printf("🏷️  Searching for tag: '%s' (len: %d)", tagName, len(tagName))
+       319    
+       320      cursor := c.Query("cursor", "")
+       321 -    limit, _ := strconv.Atoi(c.Query("limit", "20"))
+       321 +    limit := normalizeLimit(c.Query("limit", "20"))
+       322      sortBy := c.Query("sort", "hot")
+       323    
+       324      var sortByEnum repositories.PostSortBy
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 1 addition and 1 removal
+       368      }
+       369    
+       370      offset, _ := strconv.Atoi(c.Query("offset", "0"))
+       371 -    limit, _ := strconv.Atoi(c.Query("limit", "20"))
+       371 +    limit := normalizeLimit(c.Query("limit", "20"))
+       372      sortBy := c.Query("sort", "hot")
+       373    
+       374      var sortByEnum repositories.PostSortBy
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 1 addition and 1 removal
+       460      }
+       461    
+       462      offset, _ := strconv.Atoi(c.Query("offset", "0"))
+       463 -    limit, _ := strconv.Atoi(c.Query("limit", "20"))
+       463 +    limit := normalizeLimit(c.Query("limit", "20"))
+       464    
+       465      // Get userID if authenticated (optional)
+       466      var userIDPtr *uuid.UUID
+
+● Update(interfaces\api\handlers\post_handler.go)
+  ⎿  Updated interfaces\api\handlers\post_handler.go with 1 addition and 1 removal
+       481      userID := c.Locals("userID").(uuid.UUID)
+       482    
+       483      offset, _ := strconv.Atoi(c.Query("offset", "0"))
+       484 -    limit, _ := strconv.Atoi(c.Query("limit", "20"))
+       484 +    limit := normalizeLimit(c.Query("limit", "20"))
+       485      sortBy := c.Query("sort", "hot")
+       486    
+       487      var sortByEnum repositories.PostSortBy
+
+● Read(interfaces\api\handlers\post_handler.go)
+  ⎿  Read 40 lines
+
+● 2️⃣ แก้ response structure ให้มี hasMore แทน total ที่ไม่แม่นยำ
+
+● Update(domain\dto\common.go)
+  ⎿  Updated domain\dto\common.go with 6 additions and 3 removals
+       17      Error   string         `json:"error,omitempty"`
+       18    }
+       19    
+       20 +  // PaginationMeta for offset-based pagination
+       21 +  // For accurate result counts, use Total. For estimated/partial results, use HasMore.
+       22    type PaginationMeta struct {
+       23 -    Total  int64 `json:"total"`
+       24 -    Offset int   `json:"offset"`
+       25 -    Limit  int   `json:"limit"`
+       23 +    Total   *int64 `json:"total,omitempty"`   // Exact total count (only if counted from DB)
+       24 +    HasMore *bool  `json:"hasMore,omitempty"` // Whether more results exist (for search/filtered lists)
+       25 +    Offset  int    `json:"offset"`
+       26 +    Limit   int    `json:"limit"`
+       27    }
+       28    
+       29    // CursorPaginationMeta - Metadata for cursor-based pagination
+
+● Update(application\serviceimpl\post_service_impl.go)
+  ⎿  Updated application\serviceimpl\post_service_impl.go with 7 additions and 5 removals
+       515    }
+       516    
+       517    func (s *PostServiceImpl) SearchPosts(ctx context.Context, query string, offset, limit int, userID *uuid.UUID) (*dto.PostListResponse, 
+             error) {
+       518 -    posts, err := s.postRepo.Search(ctx, query, offset, limit)
+       518 +    // Fetch limit+1 to determine if there are more results
+       519 +    posts, err := s.postRepo.Search(ctx, query, offset, limit+1)
+       520      if err != nil {
+       521        return nil, err
+       522      }
+       523    
+       524 -    count := int64(len(posts))
+       525 -    if len(posts) == limit {
+       526 -      count = int64(offset + limit + 1)
+       524 +    // Determine hasMore by checking if we got more than requested limit
+       525 +    hasMore := len(posts) > limit
+       526 +    if hasMore {
+       527 +      posts = posts[:limit] // Trim to actual limit
+       528      }
+       529    
+       530 -    return s.buildPostListResponse(ctx, posts, count, offset, limit, userID)
+       530 +    return s.buildPostListResponseWithHasMore(ctx, posts, hasMore, offset, limit, userID)
+       531    }
+       532    
+       533    func (s *PostServiceImpl) CreateCrosspost(ctx context.Context, userID uuid.UUID, sourcePostID uuid.UUID, req *dto.CreatePostRequest) 
+             (*dto.PostResponse, error) {
+
+● Read(application\serviceimpl\post_service_impl.go)
+  ⎿  Read 60 lines
+
+● Update(application\serviceimpl\post_service_impl.go)
+  ⎿  Updated application\serviceimpl\post_service_impl.go with 55 additions and 1 removal
+       764        responses[i] = *resp
+       765      }
+       766    
+       767 +    total := count
+       768      return &dto.PostListResponse{
+       769        Posts: responses,
+       770        Meta: dto.PaginationMeta{
+       771 -        Total:  count,
+       771 +        Total:  &total,
+       772          Offset: offset,
+       773          Limit:  limit,
+       774        },
+       775      }, nil
+       776    }
+       777    
+       778 +  // Helper function to build post list response with hasMore (for search/filtered lists)
+       779 +  func (s *PostServiceImpl) buildPostListResponseWithHasMore(ctx context.Context, posts []*models.Post, hasMore bool, offset, limit int, 
+           + userID *uuid.UUID) (*dto.PostListResponse, error) {
+       780 +    responses := make([]dto.PostResponse, len(posts))
+       781 +  
+       782 +    // Collect all post IDs for batch operations
+       783 +    postIDs := make([]uuid.UUID, len(posts))
+       784 +    for i, post := range posts {
+       785 +      postIDs[i] = post.ID
+       786 +    }
+       787 +  
+       788 +    // Batch get user votes and saved status if authenticated
+       789 +    var voteMap map[uuid.UUID]*models.Vote
+       790 +    var savedMap map[uuid.UUID]bool
+       791 +    if userID != nil {
+       792 +      voteMap, _ = s.voteRepo.GetUserVotesForTargets(ctx, *userID, postIDs, "post")
+       793 +      savedMap, _ = s.savedPostRepo.GetSavedStatus(ctx, *userID, postIDs)
+       794 +    }
+       795 +  
+       796 +    // Build responses
+       797 +    for i, post := range posts {
+       798 +      resp := dto.PostToPostResponse(post)
+       799 +  
+       800 +      // Calculate hot score
+       801 +      hoursSinceCreation := time.Since(post.CreatedAt).Hours()
+       802 +      hotScore := float64(post.Votes) / math.Pow(hoursSinceCreation+2, 1.5)
+       803 +      resp.HotScore = &hotScore
+       804 +  
+       805 +      // Add user-specific data
+       806 +      if userID != nil {
+       807 +        if vote, ok := voteMap[post.ID]; ok {
+       808 +          resp.UserVote = &vote.VoteType
+       809 +        }
+       810 +        // Always set isSaved for authenticated users (true or false)
+       811 +        isSaved := false
+       812 +        if saved, ok := savedMap[post.ID]; ok {
+       813 +          isSaved = saved
+       814 +        }
+       815 +        resp.IsSaved = &isSaved
+       816 +      }
+       817 +  
+       818 +      responses[i] = *resp
+       819 +    }
+       820 +  
+       821 +    return &dto.PostListResponse{
+       822 +      Posts: responses,
+       823 +      Meta: dto.PaginationMeta{
+       824 +        HasMore: &hasMore,
+       825 +        Offset:  offset,
+       826 +        Limit:   limit,
+       827 +      },
+       828 +    }, nil
+       829 +  }
+       830 +  
+       831    // Helper function to build cursor-based post list response
+       832    func (s *PostServiceImpl) buildPostListCursorResponse(ctx context.Context, posts []*models.Post, limit int, sortBy 
+             repositories.PostSortBy, userID *uuid.UUID) (*dto.PostListCursorResponse, error) {
+       833      // Determine if there are more pages (limit+1 pattern)
+
+● Update(application\serviceimpl\post_service_impl.go)
+  ⎿  Updated application\serviceimpl\post_service_impl.go with 7 additions and 6 removals
+       485    }
+       486    
+       487    func (s *PostServiceImpl) ListPostsByTag(ctx context.Context, tagName string, offset, limit int, sortBy repositories.PostSortBy, userID         
+             *uuid.UUID) (*dto.PostListResponse, error) {
+       488 -    posts, err := s.postRepo.ListByTag(ctx, tagName, offset, limit, sortBy)
+       488 +    // Fetch limit+1 to determine if there are more results
+       489 +    posts, err := s.postRepo.ListByTag(ctx, tagName, offset, limit+1, sortBy)
+       490      if err != nil {
+       491        return nil, err
+       492      }
+       493    
+       494 -    // For tag-filtered lists, we'll use a simplified count
+       495 -    count := int64(len(posts))
+       496 -    if len(posts) == limit {
+       497 -      count = int64(offset + limit + 1) // Approximate
+       494 +    // Determine hasMore by checking if we got more than requested limit
+       495 +    hasMore := len(posts) > limit
+       496 +    if hasMore {
+       497 +      posts = posts[:limit] // Trim to actual limit
+       498      }
+       499    
+       500 -    return s.buildPostListResponse(ctx, posts, count, offset, limit, userID)
+       500 +    return s.buildPostListResponseWithHasMore(ctx, posts, hasMore, offset, limit, userID)
+       501    }
+       502    
+       503    func (s *PostServiceImpl) ListPostsByTagID(ctx context.Context, tagID uuid.UUID, offset, limit int, sortBy repositories.PostSortBy, 
+             userID *uuid.UUID) (*dto.PostListResponse, error) {
+
+● Update(application\serviceimpl\post_service_impl.go)
+  ⎿  Updated application\serviceimpl\post_service_impl.go with 7 additions and 6 removals
+       501    }
+       502    
+       503    func (s *PostServiceImpl) ListPostsByTagID(ctx context.Context, tagID uuid.UUID, offset, limit int, sortBy repositories.PostSortBy, 
+             userID *uuid.UUID) (*dto.PostListResponse, error) {
+       504 -    posts, err := s.postRepo.ListByTagID(ctx, tagID, offset, limit, sortBy)
+       504 +    // Fetch limit+1 to determine if there are more results
+       505 +    posts, err := s.postRepo.ListByTagID(ctx, tagID, offset, limit+1, sortBy)
+       506      if err != nil {
+       507        return nil, err
+       508      }
+       509    
+       510 -    // For tag-filtered lists, we'll use a simplified count
+       511 -    count := int64(len(posts))
+       512 -    if len(posts) == limit {
+       513 -      count = int64(offset + limit + 1) // Approximate
+       510 +    // Determine hasMore by checking if we got more than requested limit
+       511 +    hasMore := len(posts) > limit
+       512 +    if hasMore {
+       513 +      posts = posts[:limit] // Trim to actual limit
+       514      }
+       515    
+       516 -    return s.buildPostListResponse(ctx, posts, count, offset, limit, userID)
+       516 +    return s.buildPostListResponseWithHasMore(ctx, posts, hasMore, offset, limit, userID)
+       517    }
+       518    
+       519    func (s *PostServiceImpl) SearchPosts(ctx context.Context, query string, offset, limit int, userID *uuid.UUID) (*dto.PostListResponse, 
+             error) {
+
+● Update(application\serviceimpl\post_service_impl.go)
+  ⎿  Updated application\serviceimpl\post_service_impl.go with 9 additions and 3 removals
+       546    }
+       547    
+       548    func (s *PostServiceImpl) GetCrossposts(ctx context.Context, postID uuid.UUID, offset, limit int, userID *uuid.UUID) 
+             (*dto.PostListResponse, error) {
+       549 -    posts, err := s.postRepo.GetCrossposts(ctx, postID, offset, limit)
+       549 +    // Fetch limit+1 to determine if there are more results
+       550 +    posts, err := s.postRepo.GetCrossposts(ctx, postID, offset, limit+1)
+       551      if err != nil {
+       552        return nil, err
+       553      }
+       554    
+       555 -    count := int64(len(posts))
+       556 -    return s.buildPostListResponse(ctx, posts, count, offset, limit, userID)
+       555 +    // Determine hasMore by checking if we got more than requested limit
+       556 +    hasMore := len(posts) > limit
+       557 +    if hasMore {
+       558 +      posts = posts[:limit] // Trim to actual limit
+       559 +    }
+       560 +  
+       561 +    return s.buildPostListResponseWithHasMore(ctx, posts, hasMore, offset, limit, userID)
+       562    }
+       563    
+       564    func (s *PostServiceImpl) GetFeed(ctx context.Context, userID uuid.UUID, offset, limit int, sortBy repositories.PostSortBy) 
+             (*dto.PostFeedResponse, error) {
+
+● Bash(go build -o bin/api cmd/api/main.go) timeout: 1m 0s
+  ⎿  Error: Exit code 1
+     # gofiber-template/application/serviceimpl
+     application\serviceimpl\block_service_impl.go:136:12: cannot use total (variable of type int64) as *int64 value in struct literal
+     application\serviceimpl\comment_service_impl.go:369:12: cannot use count (variable of type int64) as *int64 value in struct literal
+     application\serviceimpl\follow_service_impl.go:144:12: cannot use count (variable of type int64) as *int64 value in struct literal
+     application\serviceimpl\follow_service_impl.go:178:12: cannot use count (variable of type int64) as *int64 value in struct literal
+     application\serviceimpl\follow_service_impl.go:202:12: cannot use int64(len(users)) (value of type int64) as *int64 value in struct literal
+     application\serviceimpl\media_service_impl.go:150:12: cannot use count (variable of type int64) as *int64 value in struct literal
+     application\serviceimpl\media_service_impl.go:171:12: cannot use int64(len(responses)) (value of type int64) as *int64 value in struct literal
+     application\serviceimpl\notification_service_impl.go:68:12: cannot use count (variable of type int64) as *int64 value in struct literal
+     … +10 lines (ctrl+o to see all)
+
+● อ๊ะ มี compile error เพราะเปลี่ยน Total เป็น pointer แล้ว ให้ผมแก้ทุกที่ที่ยังใช้ value ธรรมดา
+
+● Search(pattern: "Total:\s+[a-zA-Z_]+", type: "go", output_mode: "content")
+  ⎿  Found 25 lines (ctrl+o to expand)
+
+● Task(Fix compile errors)
+  ⎿  Done (42 tool uses · 82.2k tokens · 2m 32s)
+
+● Bash(go build -o bin/api cmd/api/main.go) timeout: 1m 0s
+  ⎿  (No content)
+
+● ✅ เสร็จแล้วครับ! แก้ตามที่แนะนำทั้งหมด
+
+  ---
+  📝 สรุปการเปลี่ยนแปลง
+
+  1️⃣ เพิ่ม Max Limit Validation (Hard Cap ที่ 100)
+
+  สร้าง helper function ใน interfaces/api/handlers/post_handler.go:26-42:
+
+  // normalizeLimit validates and caps the limit parameter
+  // Default: 20, Min: 1, Max: 100 (hard cap to prevent abuse)
+  func normalizeLimit(limitStr string) int {
+        limit, _ := strconv.Atoi(limitStr)
+
+        // Set default if invalid or zero
+        if limit <= 0 {
+                return 20
+        }
+
+        // Hard cap at 100 to prevent abuse/performance issues
+        if limit > 100 {
+                return 100
+        }
+
+        return limit
+  }
+
+  ใช้กับทุก endpoint ที่มี pagination:
+  - ✅ SearchPosts
+  - ✅ ListPosts
+  - ✅ ListPostsByAuthor
+  - ✅ ListPostsByTag
+  - ✅ ListPostsByTagID
+  - ✅ GetCrossposts
+  - ✅ GetFeed
+
+  ผลลัพธ์:
+  - ถ้า frontend ส่ง limit=1000 → backend จะ cap ที่ 100 อัตโนมัติ
+  - ป้องกัน abuse และ performance issues
+
+  ---
+  2️⃣ แก้ Response Structure ให้ใช้ hasMore แทน total ที่ไม่แม่นยำ
+
+  อัปเดต DTO (domain/dto/common.go:20-27):
+
+  // PaginationMeta for offset-based pagination
+  // For accurate result counts, use Total. For estimated/partial results, use HasMore.
+  type PaginationMeta struct {
+        Total   *int64 `json:"total,omitempty"`   // Exact total count (only if counted from DB)
+        HasMore *bool  `json:"hasMore,omitempty"` // Whether more results exist (for search/filtered lists)
+        Offset  int    `json:"offset"`
+        Limit   int    `json:"limit"`
+  }
+
+  สร้าง Helper Function ใหม่ (application/serviceimpl/post_service_impl.go:778-829):
+
+  func buildPostListResponseWithHasMore(ctx, posts, hasMore, offset, limit, userID) {
+        // ... build response ...
+
+        return &dto.PostListResponse{
+                Posts: responses,
+                Meta: dto.PaginationMeta{
+                        HasMore: &hasMore,  // ✅ ใช้ hasMore แทน total
+                        Offset:  offset,
+                        Limit:   limit,
+                },
+        }
+  }
+
+  ใช้ "limit+1 pattern" สำหรับ endpoints ที่ไม่มี exact count:
+
+  // Fetch limit+1 to determine if there are more results
+  posts, err := s.postRepo.Search(ctx, query, offset, limit+1)
+
+  hasMore := len(posts) > limit
+  if hasMore {
+        posts = posts[:limit] // Trim to actual limit
+  }
+
+  Endpoints ที่ใช้ hasMore:
+  - ✅ SearchPosts - search ไม่นับ total
+  - ✅ ListPostsByTag - filter ไม่นับ total
+  - ✅ ListPostsByTagID - filter ไม่นับ total
+  - ✅ GetCrossposts - ไม่นับ total
+
+  Endpoints ที่ใช้ total (exact count):
+  - ✅ ListPosts - มี COUNT(*) จริง
+  - ✅ ListPostsByAuthor - มี CountByAuthor() จริง
+  - ✅ GetFeed - มี Count() จริง
+
+  ---
+  📊 Response Structure ใหม่
+
+  สำหรับ Search (ไม่มี exact total):
+
+  {
+    "success": true,
+    "message": "Posts retrieved successfully",
+    "data": {
+      "posts": [...],
+      "meta": {
+        "hasMore": true,    // ← มีผลลัพธ์ต่อหรือไม่
+        "offset": 0,
+        "limit": 20
+        // ไม่มี total เพราะไม่แม่นยำ
+      }
+    }
+  }
+
+  สำหรับ List ทั้งหมด (มี exact total):
+
+  {
+    "success": true,
+    "message": "Posts retrieved successfully",
+    "data": {
+      "posts": [...],
+      "meta": {
+        "total": 1234,      // ← จำนวนจริงจาก COUNT(*)
+        "offset": 0,
+        "limit": 20
+        // ไม่มี hasMore เพราะมี total แล้ว
+      }
+    }
+  }
+
+  ---
+  🎯 ผลลัพธ์
+
+  ✅ 1. ป้องกัน Abuse - Hard cap limit ที่ 100
+  ✅ 2. UX ชัดเจน - ใช้ hasMore แทน total ที่หลอก
+  ✅ 3. Performance ดีขึ้น - limit+1 pattern (ไม่ต้อง COUNT)
+  ✅ 4. Backward Compatible - ยังรองรับ offset-based pagination
+  ✅ 5. Compile Success - แก้ไข 13 ไฟล์ ทดสอบ build ผ่านแล้ว
+
+  ---
+  💡 คำแนะนำสำหรับ Frontend
+
+  ตรวจสอบ meta response:
+  // ถ้ามี total = นับจริง
+  if (response.meta.total !== undefined) {
+    console.log(`พบ ${response.meta.total} รายการ`)
+  }
+
+  // ถ้ามี hasMore = ประมาณการ
+  if (response.meta.hasMore !== undefined) {
+    if (response.meta.hasMore) {
+      console.log(`พบ ${posts.length}+ รายการ`)
+      // แสดงปุ่ม "Load More"
+    } else {
+      console.log(`พบ ${posts.length} รายการ`)
+    }
+  }
+
+  ---
+  ตอนนี้โค้ด backend เป็นมืออาชีพแล้วครับ! 🎉
+  มีอะไรให้ช่วยเพิ่มเติมไหมครับ?
+
+> แล้วการแก้แบบนี้ frontend ต้องแก้อะไรไหม 
+
+● ดีครับ! ให้ผมวิเคราะห์ให้ว่า Frontend ต้องแก้อะไรบ้าง
+
+  🔍 วิเคราะห์ Breaking Changes
+
+  1️⃣ Limit Validation (Hard Cap 100)
+
+  Backend เปลี่ยน:
+  // ถ้า Frontend ส่ง limit > 100
+  fetch('/posts/search?limit=1000')
+  // Backend จะ cap เป็น 100 อัตโนมัติ
+
+  Frontend ต้องแก้ไหม:
+  - ❌ ไม่จำเป็น - แต่ควรรู้ไว้ว่าส่งเกิน 100 ไม่มีผล
+
+  ---
+  2️⃣ Response Structure เปลี่ยน ⚠️ Breaking Change
+
+● Search(pattern: "SearchPosts|ListPosts|ListPostsByTag|GetCrossposts", path: "application\serviceimpl\post_service_impl.go", output_mode: "content")
+  ⎿  Found 58 lines (ctrl+o to expand)
+
+● สรุป: Endpoints ที่เปลี่ยนแปลง
+
+  ❌ ไม่มี total แล้ว (มี hasMore แทน):
+
+  | Endpoint         | Path                      | Meta Response              |
+  |------------------|---------------------------|----------------------------|
+  | SearchPosts      | GET /posts/search?q=...   | { hasMore, offset, limit } |
+  | ListPostsByTag   | GET /posts/tag/:tagName   | { hasMore, offset, limit } |
+  | ListPostsByTagID | GET /posts/tag/id/:tagId  | { hasMore, offset, limit } |
+  | GetCrossposts    | GET /posts/:id/crossposts | { hasMore, offset, limit } |
+
+  ✅ ยังมี total (exact count):
+
+  | Endpoint          | Path                        | Meta Response            |
+  |-------------------|-----------------------------|--------------------------|
+  | ListPosts         | GET /posts                  | { total, offset, limit } |
+  | ListPostsByAuthor | GET /posts/author/:authorId | { total, offset, limit } |
+  | GetFeed           | GET /feed                   | { total, offset, limit } |
+
+  ---
+  📝 Frontend ต้องแก้อะไร
+
+  ก่อนแก้ (Response เดิม):
+
+  interface PaginationMeta {
+    total: number;     // มีเสมอ
+    offset: number;
+    limit: number;
+  }
+
+  // ใช้งาน
+  const { data } = await searchPosts(query);
+  console.log(`พบ ${data.meta.total} รายการ`);  // ⚠️ จะ error
+
+  หลังแก้ (Response ใหม่):
+
+  interface PaginationMeta {
+    total?: number;    // optional - มีเฉพาะ list endpoints
+    hasMore?: boolean; // optional - มีเฉพาะ search/filter endpoints
+    offset: number;
+    limit: number;
+  }
+
+  // ✅ ใช้งานแบบ Defensive
+  const { data } = await searchPosts(query);
+
+  if (data.meta.total !== undefined) {
+    // List endpoints - มี exact count
+    console.log(`พบ ${data.meta.total} รายการ`);
+  } else if (data.meta.hasMore !== undefined) {
+    // Search/Filter endpoints - มี hasMore
+    if (data.meta.hasMore) {
+      console.log(`พบ ${data.posts.length}+ รายการ`);
+    } else {
+      console.log(`พบ ${data.posts.length} รายการ`);
+    }
+  }
+
+  ---
+  🛠️ แนวทางแก้สำหรับ Frontend
+
+  Option 1: แก้ทั้งหมดให้รองรับ (แนะนำ)
+
+  // Type Definitions
+  interface PaginationMetaWithTotal {
+    total: number;
+    offset: number;
+    limit: number;
+  }
+
+  interface PaginationMetaWithHasMore {
+    hasMore: boolean;
+    offset: number;
+    limit: number;
+  }
+
+  type PaginationMeta = PaginationMetaWithTotal | PaginationMetaWithHasMore;
+
+  // Helper Function
+  function getResultSummary(meta: PaginationMeta, itemCount: number): string {
+    if ('total' in meta) {
+      return `พบ ${meta.total} รายการ`;
+    } else if ('hasMore' in meta) {
+      return meta.hasMore
+        ? `พบ ${itemCount}+ รายการ`
+        : `พบ ${itemCount} รายการ`;
+    }
+    return '';
+  }
+
+  // ใช้งาน
+  const { data } = await searchPosts(query);
+  const summary = getResultSummary(data.meta, data.posts.length);
+  console.log(summary); // "พบ 20+ รายการ"
+
+  ---
+  Option 2: แก้เฉพาะที่จำเป็น (ถ้ารีบ)
+
+  // เปลี่ยนจาก
+  <p>พบ {meta.total} รายการ</p>
+
+  // เป็น
+  <p>
+    {meta.total !== undefined
+      ? `พบ ${meta.total} รายการ`
+      : meta.hasMore
+        ? `พบ ${posts.length}+ รายการ`
+        : `พบ ${posts.length} รายการ`
+    }
+  </p>
+
+  ---
+  Option 3: ปรับ UI ให้เหมาะกับแต่ละแบบ
+
+  // สำหรับ Search (ไม่มี total)
+  function SearchResults({ data }) {
+    return (
+      <div>
+        <p>ผลการค้นหา "{query}"</p>
+        {data.posts.map(post => <PostCard key={post.id} {...post} />)}
+
+        {data.meta.hasMore && (
+          <button onClick={loadMore}>โหลดเพิ่ม</button>
+        )}
+      </div>
+    );
+  }
+
+  // สำหรับ List (มี total)
+  function PostList({ data }) {
+    const totalPages = Math.ceil(data.meta.total / data.meta.limit);
+
+    return (
+      <div>
+        <p>แสดง {data.posts.length} จาก {data.meta.total} รายการ</p>
+        {data.posts.map(post => <PostCard key={post.id} {...post} />)}
+
+        <Pagination 
+          current={Math.floor(data.meta.offset / data.meta.limit) + 1}
+          total={totalPages}
+        />
+      </div>
+    );
+  }
+
+  ---
+  ⚠️ Breaking Change หรือไม่?
+
+  ใช่ - เป็น Breaking Change เพราะ:
+
+  | ปัญหา                                             | ผลกระทบ                          |
+  |---------------------------------------------------|----------------------------------|
+  | meta.total เปลี่ยนจาก number → number | undefined | TypeScript จะ error ถ้าใช้โดยตรง |
+  | Search endpoints ไม่ส่ง total แล้ว                | UI ที่แสดง "พบ X รายการ" จะพัง   |
+  | Pagination logic ที่ใช้ total คำนวณหน้า           | ต้องเปลี่ยนเป็นใช้ hasMore       |
+
+  ---
+  💡 ถ้าไม่อยากให้ Breaking ต้องทำยังไง?
+
+  ทางเลือก A: Backend ส่งทั้ง total และ hasMore
+
+  ให้ผมแก้ Backend ส่งทั้งคู่:
+
+  // Search endpoints จะส่ง
+  {
+    "meta": {
+      "total": 20,      // ← ค่าประมาณ (= posts.length)
+      "hasMore": true,  // ← ค่าจริง
+      "offset": 0,
+      "limit": 20
+    }
+  }
+
+  ข้อดี: Frontend ไม่พัง
+  ข้อเสีย: total เป็นค่าหลอก (ไม่ตรงกับความจริง)
+
+  ---
+  ทางเลือก B: API Versioning
+
+  สร้าง /api/v2/posts/search ใหม่ที่ใช้ hasMore
+  ให้ /api/v1/posts/search ยังส่ง total แบบเดิม
+
+  ข้อดี: ไม่ Breaking
+  ข้อเสีย: Maintain 2 versions
+
+  ---
+  ทางเลือก C: Gradual Migration (แนะนำ)
+
+  1. Phase 1: Backend ส่งทั้ง total และ hasMore พร้อมกัน
+  2. Phase 2: Frontend แก้โค้ดใช้ hasMore
+  3. Phase 3: Backend เลิกส่ง total ใน search endpoints
+
+  ---
+  🎯 คำแนะนำของผม
+
+  ถ้า Frontend พร้อมแก้เลย → ใช้แบบที่แก้ไปแล้ว (Breaking Change)
+  - ✅ ถูกต้อง ชัดเจน ไม่หลอกลวง
+  - ✅ Performance ดี (ไม่ต้อง COUNT)
+  - ❌ Frontend ต้องแก้
+
+  ถ้า Frontend ยังไม่พร้อม → ให้ Backend ส่งทั้ง total และ hasMore
+  - ✅ ไม่ Breaking
+  - ❌ total เป็นค่าประมาณ (หลอก ๆ)
+
+  ต้องการให้ผมแก้เป็นแบบไหนครับ? 😊

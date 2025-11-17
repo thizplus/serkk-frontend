@@ -7,16 +7,22 @@ import apiService from '@/lib/api/http-client';
 import { API } from '@/lib/constants/api';
 import type {
   GetFollowersParams,
+  GetFollowersCursorParams,
   GetFollowingParams,
+  GetFollowingCursorParams,
   GetMutualFollowsParams,
+  GetMutualFollowsCursorParams,
 } from '@/types/request';
 import type {
   FollowUserResponse,
   UnfollowUserResponse,
   GetFollowStatusResponse,
   GetFollowersResponse,
+  GetFollowersCursorResponse,
   GetFollowingResponse,
+  GetFollowingCursorResponse,
   GetMutualFollowsResponse,
+  GetMutualFollowsCursorResponse,
 } from '@/types/response';
 
 /**
@@ -52,29 +58,43 @@ const followService = {
   },
 
   /**
-   * ดึงรายชื่อผู้ติดตามของผู้ใช้
+   * ดึงรายชื่อผู้ติดตามของผู้ใช้ (Cursor-based)
    * @param userId - ID ของผู้ใช้
-   * @param params - พารามิเตอร์ (offset, limit)
-   * @returns Promise<GetFollowersResponse>
+   * @param params - พารามิเตอร์ (cursor, limit)
+   * @returns Promise<GetFollowersCursorResponse>
    */
   getFollowers: async (
     userId: string,
-    params?: GetFollowersParams
-  ): Promise<GetFollowersResponse> => {
-    return apiService.get<GetFollowersResponse>(API.FOLLOW.FOLLOWERS(userId), params);
+    params?: GetFollowersCursorParams
+  ): Promise<GetFollowersCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.FOLLOW.FOLLOWERS(userId)}?${queryString}` : API.FOLLOW.FOLLOWERS(userId);
+
+    return apiService.get<GetFollowersCursorResponse>(url);
   },
 
   /**
-   * ดึงรายชื่อผู้ใช้ที่กำลังติดตาม
+   * ดึงรายชื่อผู้ใช้ที่กำลังติดตาม (Cursor-based)
    * @param userId - ID ของผู้ใช้
-   * @param params - พารามิเตอร์ (offset, limit)
-   * @returns Promise<GetFollowingResponse>
+   * @param params - พารามิเตอร์ (cursor, limit)
+   * @returns Promise<GetFollowingCursorResponse>
    */
   getFollowing: async (
     userId: string,
-    params?: GetFollowingParams
-  ): Promise<GetFollowingResponse> => {
-    return apiService.get<GetFollowingResponse>(API.FOLLOW.FOLLOWING(userId), params);
+    params?: GetFollowingCursorParams
+  ): Promise<GetFollowingCursorResponse> => {
+    const queryParams = new URLSearchParams();
+    if (params?.cursor) queryParams.append('cursor', params.cursor);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${API.FOLLOW.FOLLOWING(userId)}?${queryString}` : API.FOLLOW.FOLLOWING(userId);
+
+    return apiService.get<GetFollowingCursorResponse>(url);
   },
 
   /**

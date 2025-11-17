@@ -105,7 +105,9 @@ function CreatePostContent() {
     );
   }
 
-  const isSubmitting = createPost.isPending || createCrosspost.isPending;
+  // ✅ Phase 1: ไม่ต้องแสดง loading เพราะใช้ Optimistic UI
+  // isSubmitting จะเป็น true ก็ต่อเมื่อเป็น crosspost เท่านั้น
+  const isSubmitting = sourcePost ? createCrosspost.isPending : false;
 
   return (
     <AppLayout
@@ -134,7 +136,7 @@ function CreatePostContent() {
             sourcePost={sourcePost}
             isSubmitting={isSubmitting}
             initialTags={tagParam ? [tagParam] : undefined}
-            enableOptimisticUI={true}
+            usePhase1Mode={true}  // ✅ Phase 1: Anticipatory Upload + Optimistic UI
           />
         </div>
       </PageWrap>

@@ -9,11 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "@/config/icons";
 import { PAGINATION } from "@/config";
 import { useInfinitePosts } from "@/features/posts";
+import { useOptimisticPostCleanup } from "@/features/posts/hooks/useOptimisticPostCleanup";
 
 export const dynamic = 'force-dynamic';
 
 export default function Home() {
   const router = useRouter();
+
+  // ✅ Auto-cleanup old/failed optimistic posts from localStorage
+  useOptimisticPostCleanup();
 
   // Infinite scroll query
   const {
@@ -30,7 +34,7 @@ export default function Home() {
 
   // Flatten posts from all pages
   const posts = useMemo(() => {
-    return data?.pages.flatMap((page) => page.posts) ?? [];
+    return data?.pages.flatMap((page: any) => page.posts) ?? [];
   }, [data]);
 
   return (

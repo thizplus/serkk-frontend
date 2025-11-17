@@ -6,10 +6,10 @@
 // ============================================================================
 
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import notificationService from '../services/notification.service';
-import type { UpdateNotificationSettingsRequest } from '@/types/request';
+import type { UpdateNotificationSettingsRequest, GetNotificationsCursorParams } from '@/types/request';
 
 // ============================================================================
 // QUERY KEYS
@@ -140,6 +140,67 @@ export function useNotifications(params?: { offset?: number; limit?: number }) {
       }
       return response.data;
     },
+  });
+}
+
+// ============================================================================
+// INFINITE SCROLL QUERIES - NEW (Cursor-based)
+// ============================================================================
+
+/**
+ * Infinite scroll สำหรับรายการ notifications ทั้งหมด (Cursor-based)
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteNotifications({ limit: 20 });
+ */
+export function useInfiniteNotifications(params?: Omit<GetNotificationsCursorParams, 'cursor'>) {
+  return useInfiniteQuery({
+    queryKey: [...notificationKeys.lists(), 'infinite', params] as const,
+    queryFn: async ({ pageParam }) => {
+      const response = await notificationService.getAll({
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch notifications');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      // ใช้ hasMore และ nextCursor จาก backend
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+/**
+ * Infinite scroll สำหรับ unread notifications (Cursor-based)
+ *
+ * @example
+ * const { data, fetchNextPage, hasNextPage } = useInfiniteUnreadNotifications({ limit: 20 });
+ */
+export function useInfiniteUnreadNotifications(params?: Omit<GetNotificationsCursorParams, 'cursor'>) {
+  return useInfiniteQuery({
+    queryKey: [...notificationKeys.unread(), 'infinite', params] as const,
+    queryFn: async ({ pageParam }) => {
+      const response = await notificationService.getUnread({
+        ...params,
+        cursor: pageParam,
+        limit: params?.limit || 20,
+      });
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch unread notifications');
+      }
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+    },
+    initialPageParam: undefined,
+    staleTime: 2 * 60 * 1000,
   });
 }
 

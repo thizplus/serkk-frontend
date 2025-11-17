@@ -11,6 +11,7 @@ import type {
   TargetType,
   UserRole,
   PostStatus,
+  PostType,
 } from './common';
 
 /**
@@ -98,6 +99,7 @@ export interface Post {
   content: string;
   author: UserSummary;
   status?: PostStatus; // draft | published (optional สำหรับ backward compatibility)
+  type: PostType; // text | image | gallery | video (auto-detected by backend)
   votes: number;
   commentCount: number;
   media: Media[];
@@ -119,6 +121,7 @@ export interface PostSummary {
   content: string;
   author: UserSummary;
   status?: PostStatus; // draft | published (optional)
+  type?: PostType; // text | image | gallery | video (optional)
   votes: number;
   commentCount: number;
   media?: Media[]; // Added for crosspost display

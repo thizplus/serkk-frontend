@@ -1,12 +1,13 @@
 "use client";
 
+import { useMemo, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Users, Loader2 } from "@/config/icons";
 import AppLayout from "@/components/layouts/AppLayout";
 import { PageWrap } from "@/shared/components/layouts/PageWrap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useFollowers } from "@/features/profile";
+import { useInfiniteFollowers } from "@/features/profile";
 import { useUserProfile } from "@/features/profile";
 import { useUser, useHasHydrated } from '@/features/auth';
 import { UserCard } from "@/features/profile";
@@ -33,17 +34,49 @@ export default function FollowersPage() {
   const profileUser = isOwnProfile ? currentUser : profileData;
   const userId = profileUser?.id;
 
-  // Fetch followers
+  // Fetch followers with infinite scroll
   const {
-    data: followersData,
+    data,
     isLoading: isLoadingFollowers,
     error: followersError,
-  } = useFollowers(userId || '', { limit: PAGINATION.MESSAGE_LIMIT }, {
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteFollowers(userId || '', {
+    limit: PAGINATION.DEFAULT_LIMIT,
+  }, {
     enabled: !!userId,
   });
 
-  const followers = followersData?.users || [];
-  const totalCount = followersData?.meta?.total || 0;
+  // Flatten followers from all pages
+  const followers = useMemo(() => {
+    return data?.pages.flatMap((page: any) => page.users) ?? [];
+  }, [data]);
+
+  // Get total count from first page meta
+  const totalCount = (data?.pages[0] as any)?.meta?.total || followers.length;
+
+  // Infinite scroll with IntersectionObserver
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '500px', threshold: 0 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Loading state
   if (!hasHydrated || isLoadingProfile) {
@@ -138,11 +171,25 @@ export default function FollowersPage() {
             </CardContent>
           </Card>
         ) : followers.length > 0 ? (
-          <div className="space-y-3">
-            {followers.map((user) => (
-              <UserCard key={user.id} user={user} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3">
+              {followers.map((user) => (
+                <UserCard key={user.id} user={user} />
+              ))}
+            </div>
+
+            {/* Load More Trigger */}
+            <div ref={loadMoreRef} className="py-4">
+              {isFetchingNextPage && (
+                <Card>
+                  <CardContent className="py-8 text-center">
+                    <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary mb-2" />
+                    <p className="text-sm text-muted-foreground">กำลังโหลดเพิ่มเติม...</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </>
         ) : (
           <Card>
             <CardContent className="py-16 text-center">

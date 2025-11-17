@@ -19,6 +19,7 @@ interface SingleVideoPlayerProps extends BaseMediaProps {
  * - ✅ Native video controls (play, pause, volume, fullscreen)
  * - ✅ Responsive sizing (max-height based on variant)
  * - ✅ Poster image support
+ * - ✅ aspect-video wrapper (16:9) for virtual scroll stability
  *
  * Behavior:
  * - Feed mode: max-h-[600px]
@@ -42,23 +43,19 @@ export function SingleVideoPlayer({
     : MEDIA_DISPLAY.MAX_HEIGHT.FEED;
 
   return (
-    <div className={cn(
-      "w-full bg-black overflow-hidden flex items-center justify-center",
-      className
-    )}>
-      <video
-        src={media.url}
-        poster={media.thumbnail}
-        controls={MEDIA_DISPLAY.VIDEO.CONTROLS}
-        preload={MEDIA_DISPLAY.VIDEO.PRELOAD}
-        className={cn(
-          "max-w-full h-auto",
-          `max-h-[${maxHeight}px]`
-        )}
-        style={{ maxHeight: `${maxHeight}px` }}
-      >
-        Your browser does not support the video tag.
-      </video>
+    // ✅ Expert Recommendation: aspect-video wrapper + max-height for predictable height
+    <div className={cn("w-full", className)} style={{ maxHeight: `${maxHeight}px` }}>
+      <div className={MEDIA_DISPLAY.ASPECT_RATIO.VIDEO}> {/* aspect-video */}
+        <video
+          src={media.url}
+          poster={media.thumbnail}
+          controls={MEDIA_DISPLAY.VIDEO.CONTROLS}
+          preload={MEDIA_DISPLAY.VIDEO.PRELOAD}
+          className="w-full h-full bg-black"
+        >
+          Your browser does not support the video tag.
+        </video>
+      </div>
     </div>
   );
 }

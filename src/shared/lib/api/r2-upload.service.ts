@@ -189,14 +189,33 @@ export async function requestBatchPresignedURLs(
 
 /**
  * Upload file to R2 using Presigned URL
+ * ✅ With timeout protection (10 minutes default)
  */
 export async function uploadToR2(
   uploadUrl: string,
   file: File,
-  onProgress?: UploadProgressCallback
+  onProgress?: UploadProgressCallback,
+  timeoutMs: number = 10 * 60 * 1000 // 10 minutes default
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+
+    // ✅ Timeout protection
+    let timeoutId: NodeJS.Timeout | null = null;
+    if (timeoutMs > 0) {
+      timeoutId = setTimeout(() => {
+        xhr.abort();
+        reject(new Error(`Upload timeout - ใช้เวลานานเกิน ${timeoutMs / 1000}s`));
+      }, timeoutMs);
+    }
+
+    // Helper to clear timeout
+    const clearTimeoutIfExists = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
 
     // Track upload progress
     if (onProgress) {
@@ -210,6 +229,7 @@ export async function uploadToR2(
 
     // Success
     xhr.addEventListener('load', () => {
+      clearTimeoutIfExists();
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve();
       } else {
@@ -219,11 +239,13 @@ export async function uploadToR2(
 
     // Error
     xhr.addEventListener('error', () => {
+      clearTimeoutIfExists();
       reject(new Error('Network error during upload'));
     });
 
     // Abort
     xhr.addEventListener('abort', () => {
+      clearTimeoutIfExists();
       reject(new Error('Upload cancelled'));
     });
 

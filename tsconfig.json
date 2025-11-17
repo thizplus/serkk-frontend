@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -20,27 +24,59 @@
     ],
     "paths": {
       // Feature-based paths (NEW)
-      "@/features/*": ["./src/features/*"],
-      "@/shared/*": ["./src/shared/*"],
-      "@/providers/*": ["./src/providers/*"],
-      "@/docs/*": ["./src/docs/*"],
-      "@/poc/*": ["./src/poc/*"],
-
+      "@/features/*": [
+        "./src/features/*"
+      ],
+      "@/shared/*": [
+        "./src/shared/*"
+      ],
+      "@/providers/*": [
+        "./src/providers/*"
+      ],
+      "@/docs/*": [
+        "./src/docs/*"
+      ],
+      "@/poc/*": [
+        "./src/poc/*"
+      ],
       // Convenience aliases (point to shared)
-      "@/types": ["./src/shared/types"],
-      "@/types/*": ["./src/shared/types/*"],
-      "@/hooks": ["./src/shared/hooks"],
-      "@/hooks/*": ["./src/shared/hooks/*"],
-      "@/components": ["./src/shared/components"],
-      "@/components/*": ["./src/shared/components/*"],
-      "@/lib": ["./src/shared/lib"],
-      "@/lib/*": ["./src/shared/lib/*"],
-      "@/config": ["./src/shared/config"],
-      "@/config/*": ["./src/shared/config/*"],
-      "@/utils": ["./src/shared/lib/utils"],
-
+      "@/types": [
+        "./src/shared/types"
+      ],
+      "@/types/*": [
+        "./src/shared/types/*"
+      ],
+      "@/hooks": [
+        "./src/shared/hooks"
+      ],
+      "@/hooks/*": [
+        "./src/shared/hooks/*"
+      ],
+      "@/components": [
+        "./src/shared/components"
+      ],
+      "@/components/*": [
+        "./src/shared/components/*"
+      ],
+      "@/lib": [
+        "./src/shared/lib"
+      ],
+      "@/lib/*": [
+        "./src/shared/lib/*"
+      ],
+      "@/config": [
+        "./src/shared/config"
+      ],
+      "@/config/*": [
+        "./src/shared/config/*"
+      ],
+      "@/utils": [
+        "./src/shared/lib/utils"
+      ],
       // Keep old path as fallback (for old code)
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
@@ -51,5 +87,7 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

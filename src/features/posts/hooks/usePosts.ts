@@ -3,7 +3,7 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import postService from '../services/post.service';
-import type { GetPostsParams, CreatePostRequest, UpdatePostRequest, CreateCrosspostRequest } from '@/types/request';
+import type { GetPostsParams, GetPostsCursorParams, CreatePostRequest, UpdatePostRequest, CreateCrosspostRequest } from '@/types/request';
 import type { Post } from '@/types/models';
 import { toast } from 'sonner';
 import { TOAST_MESSAGES } from '@/config';
@@ -128,15 +128,15 @@ export function useFeed(params?: GetPostsParams) {
 // ============================================================================
 
 /**
- * Infinite scroll สำหรับรายการโพสต์ทั้งหมด
+ * Infinite scroll สำหรับรายการโพสต์ทั้งหมด (Cursor-based)
  */
-export function useInfinitePosts(params?: Omit<GetPostsParams, 'offset'>) {
+export function useInfinitePosts(params?: Omit<GetPostsCursorParams, 'cursor'>) {
   return useInfiniteQuery({
     queryKey: [...postKeys.lists(), 'infinite', params] as const,
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam }) => {
       const response = await postService.list({
         ...params,
-        offset: pageParam,
+        cursor: pageParam,
         limit: params?.limit || 20,
       });
       if (!response.success || !response.data) {
@@ -145,26 +145,24 @@ export function useInfinitePosts(params?: Omit<GetPostsParams, 'offset'>) {
       return response.data;
     },
     getNextPageParam: (lastPage) => {
-      const { posts, meta } = lastPage;
-      const nextOffset = meta.offset + posts.length;
-      // ถ้ายังมีข้อมูลเหลืออยู่ ให้ return offset ถัดไป
-      return nextOffset < meta.total ? nextOffset : undefined;
+      // ใช้ hasMore และ nextCursor จาก backend
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: 0,
+    initialPageParam: undefined,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
 /**
- * Infinite scroll สำหรับ personalized feed
+ * Infinite scroll สำหรับ personalized feed (Cursor-based)
  */
-export function useInfiniteFeed(params?: Omit<GetPostsParams, 'offset'>) {
+export function useInfiniteFeed(params?: Omit<GetPostsCursorParams, 'cursor'>) {
   return useInfiniteQuery({
     queryKey: [...postKeys.feed(), 'infinite', params] as const,
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam }) => {
       const response = await postService.getFeed({
         ...params,
-        offset: pageParam,
+        cursor: pageParam,
         limit: params?.limit || 20,
       });
       if (!response.success || !response.data) {
@@ -173,29 +171,28 @@ export function useInfiniteFeed(params?: Omit<GetPostsParams, 'offset'>) {
       return response.data;
     },
     getNextPageParam: (lastPage) => {
-      const { posts, meta } = lastPage;
-      const nextOffset = meta.offset + posts.length;
-      return nextOffset < meta.total ? nextOffset : undefined;
+      // ใช้ hasMore และ nextCursor จาก backend
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: 0,
+    initialPageParam: undefined,
     staleTime: 2 * 60 * 1000,
   });
 }
 
 /**
- * Infinite scroll สำหรับโพสต์ของ user
+ * Infinite scroll สำหรับโพสต์ของ user (Cursor-based)
  */
 export function useInfiniteUserPosts(
   userId: string,
-  params?: Omit<GetPostsParams, 'offset'>,
+  params?: Omit<GetPostsCursorParams, 'cursor'>,
   options?: { enabled?: boolean }
 ) {
   return useInfiniteQuery({
     queryKey: [...postKeys.byAuthor(userId), 'infinite', params] as const,
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam }) => {
       const response = await postService.getByAuthor(userId, {
         ...params,
-        offset: pageParam,
+        cursor: pageParam,
         limit: params?.limit || 20,
       });
       if (!response.success || !response.data) {
@@ -204,30 +201,29 @@ export function useInfiniteUserPosts(
       return response.data;
     },
     getNextPageParam: (lastPage) => {
-      const { posts, meta } = lastPage;
-      const nextOffset = meta.offset + posts.length;
-      return nextOffset < meta.total ? nextOffset : undefined;
+      // ใช้ hasMore และ nextCursor จาก backend
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: 0,
+    initialPageParam: undefined,
     enabled: options?.enabled !== undefined ? options.enabled : !!userId,
     staleTime: 2 * 60 * 1000,
   });
 }
 
 /**
- * Infinite scroll สำหรับโพสต์ที่มี tag ระบุ (by tag ID)
+ * Infinite scroll สำหรับโพสต์ที่มี tag ระบุ (by tag ID) - Cursor-based
  */
 export function useInfinitePostsByTagId(
   tagId: string,
-  params?: Omit<GetPostsParams, 'offset'>,
+  params?: Omit<GetPostsCursorParams, 'cursor'>,
   options?: { enabled?: boolean }
 ) {
   return useInfiniteQuery({
     queryKey: [...postKeys.byTagId(tagId), 'infinite', params] as const,
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam }) => {
       const response = await postService.getByTagId(tagId, {
         ...params,
-        offset: pageParam,
+        cursor: pageParam,
         limit: params?.limit || 20,
       });
       if (!response.success || !response.data) {
@@ -236,11 +232,10 @@ export function useInfinitePostsByTagId(
       return response.data;
     },
     getNextPageParam: (lastPage) => {
-      const { posts, meta } = lastPage;
-      const nextOffset = meta.offset + posts.length;
-      return nextOffset < meta.total ? nextOffset : undefined;
+      // ใช้ hasMore และ nextCursor จาก backend
+      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: 0,
+    initialPageParam: undefined,
     enabled: options?.enabled !== undefined ? options.enabled : !!tagId,
     staleTime: 2 * 60 * 1000,
   });

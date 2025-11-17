@@ -3,7 +3,7 @@
  * API response structures
  */
 
-import type { ApiResponse, PaginationMeta, UserVote } from './common';
+import type { ApiResponse, PaginationMeta, CursorPaginationMeta, UserVote } from './common';
 import type {
   User,
   UserWithFollowStatus,
@@ -75,9 +75,18 @@ export type UpdatePostResponse = ApiResponse<Post>;
 
 export type DeletePostResponse = ApiResponse<null>;
 
+/**
+ * @deprecated Use ListPostsCursorResponse instead
+ */
 export type ListPostsResponse = ApiResponse<{
   posts: Post[];
   meta: PaginationMeta;
+}>;
+
+/** Cursor-based - NEW */
+export type ListPostsCursorResponse = ApiResponse<{
+  posts: Post[];
+  meta: CursorPaginationMeta;
 }>;
 
 export type SearchPostsResponse = ApiResponse<{
@@ -87,14 +96,32 @@ export type SearchPostsResponse = ApiResponse<{
 
 export type CreateCrosspostResponse = ApiResponse<Post>;
 
+/**
+ * @deprecated Use GetCrosspostsCursorResponse instead
+ */
 export type GetCrosspostsResponse = ApiResponse<{
   posts: Post[];
   meta: PaginationMeta;
 }>;
 
+/** Cursor-based - NEW */
+export type GetCrosspostsCursorResponse = ApiResponse<{
+  posts: Post[];
+  meta: CursorPaginationMeta;
+}>;
+
+/**
+ * @deprecated Use GetFeedCursorResponse instead
+ */
 export type GetFeedResponse = ApiResponse<{
   posts: Post[];
   meta: PaginationMeta;
+}>;
+
+/** Cursor-based - NEW */
+export type GetFeedCursorResponse = ApiResponse<{
+  posts: Post[];
+  meta: CursorPaginationMeta;
 }>;
 
 /**
@@ -108,19 +135,46 @@ export type UpdateCommentResponse = ApiResponse<Comment>;
 
 export type DeleteCommentResponse = ApiResponse<null>;
 
+/**
+ * @deprecated Use ListCommentsCursorResponse instead
+ */
 export type ListCommentsResponse = ApiResponse<{
   comments: Comment[];
   meta: PaginationMeta;
 }>;
 
+/** Cursor-based - NEW */
+export type ListCommentsCursorResponse = ApiResponse<{
+  comments: Comment[];
+  meta: CursorPaginationMeta;
+}>;
+
+/**
+ * @deprecated Use ListCommentsByAuthorCursorResponse instead
+ */
 export type ListCommentsByAuthorResponse = ApiResponse<{
   comments: CommentWithPost[];
   meta: PaginationMeta;
 }>;
 
+/** Cursor-based - NEW */
+export type ListCommentsByAuthorCursorResponse = ApiResponse<{
+  comments: CommentWithPost[];
+  meta: CursorPaginationMeta;
+}>;
+
+/**
+ * @deprecated Use GetCommentRepliesCursorResponse instead
+ */
 export type GetCommentRepliesResponse = ApiResponse<{
   comments: Comment[];
   meta: PaginationMeta;
+}>;
+
+/** Cursor-based - NEW */
+export type GetCommentRepliesCursorResponse = ApiResponse<{
+  comments: Comment[];
+  meta: CursorPaginationMeta;
 }>;
 
 export type GetCommentTreeResponse = ApiResponse<{
@@ -166,19 +220,46 @@ export type GetFollowStatusResponse = ApiResponse<{
   followedAt: string | null;
 }>;
 
+/**
+ * @deprecated Use GetFollowersCursorResponse instead
+ */
 export type GetFollowersResponse = ApiResponse<{
   users: UserWithFollowStatus[];
   meta: PaginationMeta;
 }>;
 
+/** Cursor-based - NEW */
+export type GetFollowersCursorResponse = ApiResponse<{
+  users: UserWithFollowStatus[];
+  meta: CursorPaginationMeta;
+}>;
+
+/**
+ * @deprecated Use GetFollowingCursorResponse instead
+ */
 export type GetFollowingResponse = ApiResponse<{
   users: UserWithFollowStatus[];
   meta: PaginationMeta;
 }>;
 
+/** Cursor-based - NEW */
+export type GetFollowingCursorResponse = ApiResponse<{
+  users: UserWithFollowStatus[];
+  meta: CursorPaginationMeta;
+}>;
+
+/**
+ * @deprecated Use GetMutualFollowsCursorResponse instead
+ */
 export type GetMutualFollowsResponse = ApiResponse<{
   users: UserWithFollowStatus[];
   meta: PaginationMeta;
+}>;
+
+/** Cursor-based - NEW */
+export type GetMutualFollowsCursorResponse = ApiResponse<{
+  users: UserWithFollowStatus[];
+  meta: CursorPaginationMeta;
 }>;
 
 /**
@@ -197,22 +278,51 @@ export type GetSavedStatusResponse = ApiResponse<{
   savedAt: string | null;
 }>;
 
+/**
+ * @deprecated Use GetSavedPostsCursorResponse instead
+ */
 export type GetSavedPostsResponse = ApiResponse<{
   posts: SavedPost[];
   meta: PaginationMeta;
 }>;
 
+/** Cursor-based - NEW */
+export type GetSavedPostsCursorResponse = ApiResponse<{
+  posts: SavedPost[];
+  meta: CursorPaginationMeta;
+}>;
+
 /**
  * Notification Responses
+ */
+/**
+ * @deprecated Use GetNotificationsCursorResponse instead
  */
 export type GetNotificationsResponse = ApiResponse<{
   notifications: Notification[];
   meta: PaginationMeta & { unreadCount: number };
 }>;
 
+/** Cursor-based - NEW */
+export type GetNotificationsCursorResponse = ApiResponse<{
+  notifications: Notification[];
+  unreadCount: number;
+  meta: CursorPaginationMeta;
+}>;
+
+/**
+ * @deprecated Use GetUnreadNotificationsCursorResponse instead
+ */
 export type GetUnreadNotificationsResponse = ApiResponse<{
   notifications: Notification[];
   meta: PaginationMeta & { unreadCount: number };
+}>;
+
+/** Cursor-based - NEW */
+export type GetUnreadNotificationsCursorResponse = ApiResponse<{
+  notifications: Notification[];
+  unreadCount: number;
+  meta: CursorPaginationMeta;
 }>;
 
 export type GetNotificationUnreadCountResponse = ApiResponse<{
@@ -264,6 +374,11 @@ export type SearchAllResponse = ApiResponse<{
 export type SearchPostsOnlyResponse = ApiResponse<{
   query: string;
   posts: Post[];
+  meta?: {
+    hasMore: boolean;
+    nextCursor?: string;
+    limit: number;
+  };
 }>;
 
 export type SearchUsersOnlyResponse = ApiResponse<{

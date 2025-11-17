@@ -54,23 +54,30 @@ export function SingleImageViewer({
 
   return (
     <>
+      {/* ✅ Expert Recommendation: aspect ratio + max-height for virtual scroll stability */}
       <div
         className={cn(
-          "w-full overflow-hidden",
+          "relative w-full overflow-hidden",
           !disableLightbox && "cursor-pointer hover:opacity-95 transition-opacity",
           className
         )}
-        onClick={handleClick}
+        style={{ maxHeight: `${maxHeight}px` }}
       >
-        <img
-          src={media.url}
-          alt="Post image"
+        {/* Aspect ratio container: Instagram-style on mobile, landscape on desktop */}
+        <div
           className={cn(
-            "max-w-full h-auto object-contain",
-            `max-h-[${maxHeight}px]`
+            "w-full",
+            MEDIA_DISPLAY.ASPECT_RATIO.SINGLE_IMAGE_MOBILE,      // aspect-[4/5]
+            `sm:${MEDIA_DISPLAY.ASPECT_RATIO.SINGLE_IMAGE_DESKTOP}` // sm:aspect-[16/9]
           )}
-          style={{ maxHeight: `${maxHeight}px` }}
-        />
+        >
+          <img
+            src={media.url}
+            alt="Post image"
+            className="w-full h-full object-cover transition-opacity"
+            loading="lazy"
+          />
+        </div>
       </div>
 
       {/* Lightbox for zoom - only if not disabled */}

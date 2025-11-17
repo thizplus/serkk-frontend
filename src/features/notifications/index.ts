@@ -3,6 +3,8 @@
 // Hooks
 export {
   useNotifications,
+  useInfiniteNotifications,
+  useInfiniteUnreadNotifications,
   useNotificationSettings,
   useUpdateNotificationSettings,
   useUnreadNotificationCount,

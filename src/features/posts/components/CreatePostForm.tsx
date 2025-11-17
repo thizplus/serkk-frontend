@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, ImageIcon, Upload, Video, Loader2 } from "@/config/icons";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import mediaService from "@/lib/api/media.service";
 import type { Post, Media } from "@/types/models";
 import { useOptimisticPost } from "@/features/posts/hooks/useOptimisticPost";
+import { useDraftAutoSave } from "@/features/posts/hooks/useDraftAutoSave";
 import { MediaGrid } from "@/components/media/MediaGrid";
 import { uploadMultipleFiles } from "@/lib/upload/concurrentUpload";
 import type { UploadProgress } from "@/lib/upload/types";
@@ -40,6 +41,7 @@ interface CreatePostFormProps {
   initialTags?: string[];
   autoUploadMedia?: boolean;  // Auto-upload files immediately (default: true)
   enableOptimisticUI?: boolean;  // Enable optimistic UI (background upload after post)
+  usePhase1Mode?: boolean;  // ✅ Phase 1: Anticipatory Upload + Optimistic UI
 }
 
 export function CreatePostForm({
@@ -50,6 +52,7 @@ export function CreatePostForm({
   initialTags = [],
   autoUploadMedia = true,  // ✅ ใช้ R2 auto-upload mode
   enableOptimisticUI = false,  // ✅ Optimistic UI mode
+  usePhase1Mode = false,  // ✅ Phase 1 mode (best of both worlds)
 }: CreatePostFormProps) {
   // ✅ ใช้ custom hook สำหรับ optimistic post
   const { createOptimisticPost } = useOptimisticPost();
@@ -78,41 +81,209 @@ export function CreatePostForm({
     preview: string;
   }[]>([]);
 
+  // ✅ Phase 1 state: เก็บทั้ง Files และ mediaIds (Anticipatory Upload + Optimistic UI)
+  const [phase1MediaFiles, setPhase1MediaFiles] = useState<{
+    file: File;
+    preview: string;
+    mediaId?: string;  // ถ้า upload เสร็จแล้ว
+    url?: string;
+    uploadStatus: 'pending' | 'uploading' | 'completed' | 'failed';
+    uploadProgress: number;
+  }[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ✅ Phase 1: เก็บ Upload Promise เพื่อ sync กับการ Post
+  const uploadPromiseRef = useRef<Promise<any> | null>(null);
+
+  // ✅ ป้องกันการกดซ้ำ
+  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false);
+
+  // ============================================================================
+  // ✅ Phase 2: Draft Auto-save with IndexedDB
+  // ============================================================================
+
+  const {
+    lastSaved,
+    isSaving: isDraftSaving,
+    clearDraft,
+    draftId,
+  } = useDraftAutoSave({
+    formData: {
+      title,
+      content,
+      tags,
+      files: phase1MediaFiles.map(m => m.file).filter(Boolean) as File[], // ✅ Filter out undefined
+    },
+    onRestoreDraft: (draft) => {
+      // Restore draft callback
+      setTitle(draft.title);
+      setContent(draft.content);
+      setTags(draft.tags);
+
+      // Restore files to Phase 1 state
+      if (draft.files.length > 0) {
+        console.log(`🔄 Restoring ${draft.files.length} files from draft...`);
+
+        const restoredFiles = draft.files.map((file) => ({
+          file,
+          preview: URL.createObjectURL(file),
+          uploadStatus: 'pending' as const,
+          uploadProgress: 0,
+        }));
+
+        setPhase1MediaFiles(restoredFiles);
+
+        toast.success(`กู้คืน draft พร้อม ${draft.files.length} ไฟล์`);
+      }
+    },
+    enabled: usePhase1Mode, // Only enable for Phase 1 mode
+  });
+
+  // ✅ Blob URL Cleanup: revoke blob URLs เมื่อ component unmount
+  useEffect(() => {
+    return () => {
+      // Cleanup Phase 1 mode blob URLs
+      phase1MediaFiles.forEach(media => {
+        if (media.preview) {
+          URL.revokeObjectURL(media.preview);
+        }
+      });
+
+      // Cleanup Optimistic UI mode blob URLs
+      optimisticMediaFiles.forEach(media => {
+        if (media.preview) {
+          URL.revokeObjectURL(media.preview);
+        }
+      });
+    };
+  }, []); // Empty deps = run only on unmount
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim() || !content.trim() || isSubmitting) {
+    // ✅ ป้องกันการกดซ้ำ
+    if (!title.trim() || !content.trim() || isSubmitting || isSubmittingLocal) {
       return;
     }
 
     try {
-      // ✅ OPTIMISTIC UI MODE: ใช้ custom hook
-      if (enableOptimisticUI) {
-        // Case 1: With media - use optimistic flow
-        if (optimisticMediaFiles.length > 0) {
+      // ✅ PHASE 1 MODE: TRUE Optimistic UI (ไม่รอ upload เสร็จ!)
+      if (usePhase1Mode) {
+        // Check if there are any failed uploads
+        const anyFailed = phase1MediaFiles.some(f => f.uploadStatus === 'failed');
+
+        if (anyFailed) {
+          toast.error('มีไฟล์ที่อัปโหลดล้มเหลว กรุณาลบออกหรือลองใหม่');
+          return;
+        }
+
+        // ✅ Lock form เพื่อป้องกันการกดซ้ำ
+        setIsSubmittingLocal(true);
+
+        try {
+          // ============================================
+          // ✅ เรียก createOptimisticPost ทันที (ไม่รอ upload!)
+          // ส่ง uploadPromise เข้าไปให้ useOptimisticPost รอเอง
+          // ============================================
+
+          const completedMedia = phase1MediaFiles.filter(f => f.uploadStatus === 'completed');
+          const uploadingMedia = phase1MediaFiles.filter(f => f.uploadStatus === 'uploading' || f.uploadStatus === 'pending');
+
+          console.log(`🔍 [DEBUG] Submit Phase 1:`, {
+            completedCount: completedMedia.length,
+            uploadingCount: uploadingMedia.length,
+            hasOngoingUpload: !!uploadPromiseRef.current,
+          });
+
+          // ✅ เรียก createOptimisticPost (จะ redirect ทันที!)
+          // ส่ง uploadPromise เข้าไปเพื่อให้รอใน background
           await createOptimisticPost({
             title: title.trim(),
             content: content.trim(),
             tags,
-            mediaFiles: optimisticMediaFiles,
+            mediaFiles: phase1MediaFiles.map(f => ({
+              // ✅ Phase 2: ส่ง file object + metadata เพื่อเก็บใน IndexedDB
+              file: f.file,  // ✅ ส่ง File object ตัวจริง!
+              fileId: `${f.file.name}_${f.file.lastModified}`,
+              fileName: f.file.name,
+              fileType: f.file.type,
+              fileSize: f.file.size,
+              preview: f.preview,
+            })),
+            uploadPromise: uploadPromiseRef.current,  // ✅ ส่ง promise เข้าไปให้รอใน background
           });
+
+          // ✅ Clear draft หลังจากสำเร็จเท่านั้น
+          clearDraft();
 
           // Reset form
           setTitle('');
           setContent('');
           setTags([]);
-          setOptimisticMediaFiles([]);
+          setPhase1MediaFiles([]);
+
+          // ✅ หมายเหตุ: ไม่ต้อง unlock (setIsSubmittingLocal(false)) เพราะจะ redirect ออกไปแล้ว
+
+        } catch (error) {
+          console.error('Failed to create optimistic post:', error);
+          toast.error(error instanceof Error ? error.message : 'สร้างโพสต์ล้มเหลว');
+          setIsSubmittingLocal(false);  // ✅ Unlock เมื่อ error
+        }
+        return;
+      }
+
+      // ✅ OPTIMISTIC UI MODE: ใช้ custom hook
+      if (enableOptimisticUI) {
+        // Case 1: With media - use optimistic flow
+        if (optimisticMediaFiles.length > 0) {
+          try {
+            await createOptimisticPost({
+              title: title.trim(),
+              content: content.trim(),
+              tags,
+              mediaFiles: optimisticMediaFiles.map(f => ({
+                // ✅ Phase 2: ส่ง file object + metadata เพื่อเก็บใน IndexedDB
+                file: f.file,  // ✅ ส่ง File object ตัวจริง!
+                fileId: `${f.file.name}_${f.file.lastModified}`,
+                fileName: f.file.name,
+                fileType: f.file.type,
+                fileSize: f.file.size,
+                preview: f.preview,
+              })),
+            });
+
+            // ✅ Clear draft หลังจากสำเร็จเท่านั้น
+            clearDraft();
+
+            // Reset form
+            setTitle('');
+            setContent('');
+            setTags([]);
+            setOptimisticMediaFiles([]);
+          } catch (error) {
+            console.error('Failed to create optimistic post:', error);
+            toast.error('สร้างโพสต์ล้มเหลว กรุณาลองใหม่อีกครั้ง');
+            // Draft ยังอยู่
+          }
           return;
         } else {
           // Case 2: No media - just create post normally (no optimistic needed)
-          await onSubmit({
-            title: title.trim(),
-            content: content.trim(),
-            tags: tags.length > 0 ? tags : undefined,
-            mediaIds: undefined,
-          });
+          try {
+            await onSubmit({
+              title: title.trim(),
+              content: content.trim(),
+              tags: tags.length > 0 ? tags : undefined,
+              mediaIds: undefined,
+            });
+
+            // ✅ Clear draft หลังจากสำเร็จเท่านั้น
+            clearDraft();
+          } catch (error) {
+            console.error('Failed to create post:', error);
+            toast.error('สร้างโพสต์ล้มเหลว กรุณาลองใหม่อีกครั้ง');
+            // Draft ยังอยู่
+          }
           return;
         }
       }
@@ -173,6 +344,95 @@ export function CreatePostForm({
 
     if (validFiles.length === 0) {
       toast.error('กรุณาเลือกไฟล์รูปภาพหรือวิดีโอเท่านั้น');
+      return;
+    }
+
+    // ✅ PHASE 1 MODE: Anticipatory Upload (upload ทันทีที่เลือก!)
+    if (usePhase1Mode) {
+      const currentCount = phase1MediaFiles.length;
+      const maxNewFiles = Math.min(validFiles.length, FORM_LIMITS.MEDIA.MAX_FILES - currentCount);
+
+      if (maxNewFiles === 0) {
+        toast.error(`คุณเลือกไฟล์ครบ ${FORM_LIMITS.MEDIA.MAX_FILES} ไฟล์แล้ว`);
+        return;
+      }
+
+      const filesToUpload = validFiles.slice(0, maxNewFiles);
+
+      // สร้าง preview URLs และเพิ่มใน state ก่อน (แสดง UI ทันที)
+      const newMediaFiles = filesToUpload.map(file => ({
+        file,
+        preview: URL.createObjectURL(file),
+        uploadStatus: 'pending' as const,
+        uploadProgress: 0,
+      }));
+
+      setPhase1MediaFiles(prev => [...prev, ...newMediaFiles]);
+
+      // ✅ เริ่ม upload ทันที! (Anticipatory Upload)
+      setIsUploading(true);
+
+      // ✅ เก็บ Promise ไว้เพื่อ sync กับการ Post
+      const uploadPromise = uploadMultipleFiles(filesToUpload, {
+        concurrency: FORM_LIMITS.MEDIA.CONCURRENT_UPLOADS,
+        onProgress: (progress: UploadProgress) => {
+          // Update progress ของแต่ละไฟล์
+          setPhase1MediaFiles(prev => {
+            const updated = [...prev];
+            const index = currentCount + progress.fileIndex;
+            if (updated[index]) {
+              updated[index] = {
+                ...updated[index],
+                uploadStatus: progress.status === 'completed' ? 'completed' :
+                              progress.status === 'failed' ? 'failed' : 'uploading',
+                uploadProgress: progress.progress,
+                mediaId: progress.mediaId,
+                url: progress.url,
+              };
+            }
+            return updated;
+          });
+        },
+        onComplete: (results: UploadProgress[]) => {
+          const successCount = results.filter(r => r.status === 'completed').length;
+          const failCount = results.filter(r => r.status === 'failed').length;
+
+          if (successCount > 0) {
+            toast.success(`อัปโหลดสำเร็จ ${successCount}/${results.length} ไฟล์`);
+          }
+          if (failCount > 0) {
+            toast.error(`อัปโหลดล้มเหลว ${failCount} ไฟล์`);
+          }
+
+          setIsUploading(false);
+        },
+        onError: (error: Error, fileIndex: number) => {
+          console.error(`Upload failed for file ${fileIndex}:`, error);
+        },
+      });
+
+      // ✅ เก็บ Promise ไว้ใน ref
+      uploadPromiseRef.current = uploadPromise;
+
+      // ✅ ไม่ await ตรงนี้! ให้ upload ทำงานใน background
+      // แต่จับ promise เพื่อ cleanup
+      uploadPromise
+        .then(() => {
+          console.log('✅ Anticipatory Upload completed in background');
+        })
+        .catch((error) => {
+          console.error('❌ Anticipatory Upload failed:', error);
+          toast.error('อัปโหลดล้มเหลว');
+          setIsUploading(false);
+        })
+        .finally(() => {
+          uploadPromiseRef.current = null;  // ✅ Clear เมื่อเสร็จหรือ error
+        });
+
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return;
     }
 
@@ -300,7 +560,16 @@ export function CreatePostForm({
   };
 
   const handleRemoveMedia = (index: number) => {
-    if (enableOptimisticUI) {
+    if (usePhase1Mode) {
+      // Phase 1 mode: remove from phase1 media files
+      const removedMedia = phase1MediaFiles[index];
+
+      // Revoke blob URL to free memory
+      URL.revokeObjectURL(removedMedia.preview);
+
+      setPhase1MediaFiles(prev => prev.filter((_, i) => i !== index));
+      toast.success(`ลบ ${removedMedia.file.name} แล้ว`);
+    } else if (enableOptimisticUI) {
       // Optimistic UI mode: remove from optimistic media files
       const removedMedia = optimisticMediaFiles[index];
 
@@ -449,7 +718,15 @@ export function CreatePostForm({
           )}
           {/* Title */}
           <Field>
-            <FieldLabel htmlFor="title">หัวข้อ *</FieldLabel>
+            <div className="flex justify-between items-center">
+              <FieldLabel htmlFor="title">หัวข้อ *</FieldLabel>
+              {/* ✅ Draft saved indicator */}
+              {lastSaved && (
+                <span className="text-xs text-muted-foreground">
+                  บันทึกอัตโนมัติเมื่อ {lastSaved.toLocaleTimeString('th-TH')}
+                </span>
+              )}
+            </div>
             <Input
               id="title"
               type="text"
@@ -518,8 +795,82 @@ export function CreatePostForm({
             <Field>
               <FieldLabel>รูปภาพ/วิดีโอ (ไม่บังคับ)</FieldLabel>
 
+              {/* Preview Grid - Phase 1 Mode (with upload progress) */}
+              {usePhase1Mode && phase1MediaFiles.length > 0 && (
+                <div className="mb-3 space-y-2">
+                  {phase1MediaFiles.map((media, index) => {
+                    const isVideo = media.file.type.startsWith('video/');
+                    const isCompleted = media.uploadStatus === 'completed';
+                    const isFailed = media.uploadStatus === 'failed';
+                    const isUploading = media.uploadStatus === 'uploading';
+
+                    return (
+                      <div key={index} className="relative group rounded-lg border overflow-hidden bg-muted/30">
+                        {/* Preview */}
+                        <div className="aspect-video relative">
+                          {isVideo ? (
+                            <video
+                              src={media.url || media.preview}
+                              className="w-full h-full object-cover"
+                              controls={isCompleted}
+                            />
+                          ) : (
+                            <Image
+                              src={media.url || media.preview}
+                              alt={media.file.name}
+                              fill
+                              className="object-cover"
+                            />
+                          )}
+
+                          {/* Remove button */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveMedia(index)}
+                            className="absolute top-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          >
+                            <X size={16} />
+                          </button>
+
+                          {/* Status badge */}
+                          <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/70 text-white text-xs rounded flex items-center gap-1">
+                            {isCompleted && <span>✅ เสร็จแล้ว</span>}
+                            {isFailed && <span className="text-red-400">❌ ล้มเหลว</span>}
+                            {isUploading && <Loader2 size={12} className="animate-spin" />}
+                            {!isCompleted && !isFailed && !isUploading && <span>⏳ รอ...</span>}
+                          </div>
+                        </div>
+
+                        {/* Progress bar */}
+                        {!isCompleted && !isFailed && (
+                          <div className="p-2 space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="truncate flex-1 mr-2">{media.file.name}</span>
+                              <span className="font-medium">{media.uploadProgress}%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted-foreground/20 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary transition-all duration-300"
+                                style={{ width: `${media.uploadProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* File info (เมื่อ upload เสร็จ) */}
+                        {isCompleted && (
+                          <div className="p-2 text-xs text-muted-foreground truncate">
+                            {media.file.name} ({(media.file.size / 1024 / 1024).toFixed(1)} MB)
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Preview Grid - Optimistic UI Mode */}
-              {enableOptimisticUI && optimisticMediaFiles.length > 0 && (
+              {enableOptimisticUI && !usePhase1Mode && optimisticMediaFiles.length > 0 && (
                 <div className="mb-3">
                   <MediaGrid
                     media={optimisticMediaFiles.map((m, index) => ({
@@ -598,8 +949,8 @@ export function CreatePostForm({
                 </div>
               )}
 
-              {/* Show overall upload progress */}
-              {autoUploadMedia && isUploading && (
+              {/* Show overall upload progress (ไม่แสดงในโหมด Phase 1 เพราะใช้ per-file progress แทน) */}
+              {autoUploadMedia && isUploading && !usePhase1Mode && (
                 <div className="mb-3 space-y-2">
                   <div className="p-3 bg-muted rounded-lg">
                     <div className="flex justify-between text-sm mb-1">
@@ -617,7 +968,7 @@ export function CreatePostForm({
               )}
 
               {/* Upload Buttons - Facebook Style */}
-              {((enableOptimisticUI ? optimisticMediaFiles.length : autoUploadMedia ? uploadedMedia.length : mediaFiles.length)) < FORM_LIMITS.MEDIA.MAX_FILES && (
+              {((usePhase1Mode ? phase1MediaFiles.length : enableOptimisticUI ? optimisticMediaFiles.length : autoUploadMedia ? uploadedMedia.length : mediaFiles.length)) < FORM_LIMITS.MEDIA.MAX_FILES && (
                 <div>
                  
                   <div className="flex gap-2">
@@ -636,7 +987,7 @@ export function CreatePostForm({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={!enableOptimisticUI && isUploading}
+                      disabled={(!enableOptimisticUI && !usePhase1Mode) && isUploading}
                       className="block border border-border items-center cursor-pointer  justify-center gap-2 p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Upload className="h-5 w-5 m-auto" />
@@ -649,7 +1000,7 @@ export function CreatePostForm({
                 </div>
               )}
 
-              {((enableOptimisticUI ? optimisticMediaFiles.length : autoUploadMedia ? uploadedMedia.length : mediaFiles.length)) >= FORM_LIMITS.MEDIA.MAX_FILES && (
+              {((usePhase1Mode ? phase1MediaFiles.length : enableOptimisticUI ? optimisticMediaFiles.length : autoUploadMedia ? uploadedMedia.length : mediaFiles.length)) >= FORM_LIMITS.MEDIA.MAX_FILES && (
                 <p className="text-xs text-muted-foreground">
                   คุณเลือกไฟล์ครบ {FORM_LIMITS.MEDIA.MAX_FILES} ไฟล์แล้ว (สูงสุด)
                 </p>
@@ -662,18 +1013,24 @@ export function CreatePostForm({
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={!title.trim() || !content.trim() || isSubmitting || (!enableOptimisticUI && isUploading)}
+              disabled={
+                !title.trim() ||
+                !content.trim() ||
+                isSubmitting ||
+                (usePhase1Mode && phase1MediaFiles.some(f => f.uploadStatus === 'failed')) ||
+                (!enableOptimisticUI && !usePhase1Mode && isUploading)
+              }
               className="flex-1"
             >
               {isSubmitting ? (
                 "กำลังสร้างโพสต์..."
-              ) : (!enableOptimisticUI && isUploading) ? (
+              ) : (!enableOptimisticUI && !usePhase1Mode && isUploading) ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   กำลังอัปโหลด... {overallProgress}%
                 </>
               ) : (
-                "โพสต์"
+                "โพส"
               )}
             </Button>
             {onCancel && (

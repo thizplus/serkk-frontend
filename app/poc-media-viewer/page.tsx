@@ -38,7 +38,7 @@ export default function POCMediaViewerPage() {
   // Flatten posts from all pages
   const posts = useMemo(() => {
     if (!data?.pages) return [];
-    const allPosts = data.pages.flatMap((page) => page.posts || []);
+    const allPosts = data.pages.flatMap((page: any) => page.posts || []);
     return allPosts.filter((post) => post && post.id);
   }, [data]);
 
