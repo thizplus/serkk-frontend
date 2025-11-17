@@ -12,6 +12,7 @@ import {
   MessageCircle,
   LifeBuoy,
   Send,
+  Star,
 } from "@/config/icons"
 
 import { NavMain } from "@/components/navigation/NavMain"
@@ -80,7 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       title: "โพสต์ที่บันทึก",
       url: "/saved",
-      icon: Bookmark,
+      icon: Star,
       isActive: pathname === "/saved",
     },
   ];

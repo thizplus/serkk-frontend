@@ -66,7 +66,9 @@
       "Bash(npx next build:*)",
       "Bash(git reset:*)",
       "Bash(del nul 2)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(\"D:\\Admin\\Desktop\\MY PROJECT\\__serkk\\nextjs-frontend\\public\\service-worker-temp.js\")",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []
