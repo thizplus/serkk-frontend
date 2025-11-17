@@ -39,7 +39,6 @@ const notificationService = {
     const queryParams = new URLSearchParams();
     if (params?.cursor) queryParams.append('cursor', params.cursor);
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.type) queryParams.append('type', params.type);
 
     const queryString = queryParams.toString();
     const url = queryString ? `${API.NOTIFICATION.LIST}?${queryString}` : API.NOTIFICATION.LIST;
@@ -58,7 +57,6 @@ const notificationService = {
     const queryParams = new URLSearchParams();
     if (params?.cursor) queryParams.append('cursor', params.cursor);
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.type) queryParams.append('type', params.type);
 
     const queryString = queryParams.toString();
     const url = queryString ? `${API.NOTIFICATION.UNREAD}?${queryString}` : API.NOTIFICATION.UNREAD;

@@ -54,7 +54,7 @@ export function useSavedPosts(params?: GetSavedPostsParams) {
 export function useInfiniteSavedPosts(params?: Omit<GetSavedPostsCursorParams, 'cursor'>) {
   return useInfiniteQuery({
     queryKey: [...savedKeys.lists(), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await savedService.getSavedPosts({
         ...params,
         cursor: pageParam,
@@ -65,11 +65,11 @@ export function useInfiniteSavedPosts(params?: Omit<GetSavedPostsCursorParams, '
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       // ใช้ hasMore และ nextCursor จาก backend
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }

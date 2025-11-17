@@ -156,7 +156,7 @@ export function useNotifications(params?: { offset?: number; limit?: number }) {
 export function useInfiniteNotifications(params?: Omit<GetNotificationsCursorParams, 'cursor'>) {
   return useInfiniteQuery({
     queryKey: [...notificationKeys.lists(), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await notificationService.getAll({
         ...params,
         cursor: pageParam,
@@ -167,11 +167,11 @@ export function useInfiniteNotifications(params?: Omit<GetNotificationsCursorPar
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       // ใช้ hasMore และ nextCursor จาก backend
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
@@ -185,7 +185,7 @@ export function useInfiniteNotifications(params?: Omit<GetNotificationsCursorPar
 export function useInfiniteUnreadNotifications(params?: Omit<GetNotificationsCursorParams, 'cursor'>) {
   return useInfiniteQuery({
     queryKey: [...notificationKeys.unread(), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await notificationService.getUnread({
         ...params,
         cursor: pageParam,
@@ -196,10 +196,10 @@ export function useInfiniteUnreadNotifications(params?: Omit<GetNotificationsCur
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     staleTime: 2 * 60 * 1000,
   });
 }

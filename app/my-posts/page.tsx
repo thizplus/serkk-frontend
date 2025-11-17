@@ -41,7 +41,7 @@ export default function MyPostsPage() {
 
   // Flatten posts from all pages
   const myPosts = useMemo(() => {
-    return data?.pages.flatMap((page) => page.posts) ?? [];
+    return data?.pages.flatMap((page: any) => page.posts) ?? [];
   }, [data]);
 
   // รอให้ hydration เสร็จก่อน (ป้องกัน flash ของ "กรุณาล็อกอิน")

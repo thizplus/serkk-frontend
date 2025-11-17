@@ -83,15 +83,16 @@ export function useOptimisticPost() {
     console.log(`🔍 [DEBUG] postData.mediaFiles:`, postData.mediaFiles);
 
     const mediaWithFileIds = postData.mediaFiles?.map(m => {
+      const mAny = m as any;
       console.log(`🔍 [DEBUG] mediaFile item:`, {
         hasFile: !!m.file,
-        fileId: m.fileId,
-        fileName: m.fileName,
+        fileId: mAny.fileId,
+        fileName: mAny.fileName,
         preview: m.preview?.substring(0, 50) + '...',
         allKeys: Object.keys(m),
       });
 
-      const fileId = m.fileId || `file_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+      const fileId = mAny.fileId || `file_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
       return {
         ...m,
         fileId, // Store the generated fileId
@@ -304,11 +305,11 @@ export function useOptimisticPost() {
         postTimeoutPromise,
       ]);
 
-      if (!response || !response.success) {
+      if (!response || !response.success || !response.data) {
         throw new Error(response?.message || 'สร้างโพสต์ล้มเหลว');
       }
 
-      console.log(`✅ Backend post created:`, response.data.id);
+      console.log(`✅ Backend post created:`, response.data!.id);
 
       // Invalidate React Query cache
       if (response.data) {
@@ -320,7 +321,7 @@ export function useOptimisticPost() {
       }
 
       // Mark post complete
-      markPostComplete(tempId, response.data.id);
+      markPostComplete(tempId, response.data!.id);
       toast.success('โพสต์สำเร็จ!');
 
     } catch (error) {
@@ -477,11 +478,11 @@ export function useOptimisticPost() {
       // Step E: Validate Backend Response
       // ============================================================================
 
-      if (!response || !response.success) {
+      if (!response || !response.success || !response.data) {
         throw new Error(response?.message || 'สร้างโพสต์ล้มเหลว');
       }
 
-      console.log(`✅ Backend post created:`, response.data.id);
+      console.log(`✅ Backend post created:`, response.data!.id);
 
       // ============================================================================
       // Step F: Invalidate React Query Cache
@@ -499,7 +500,7 @@ export function useOptimisticPost() {
       // Step G: Mark Post Complete (Auto-remove หลัง 2s)
       // ============================================================================
 
-      markPostComplete(tempId, response.data.id);
+      markPostComplete(tempId, response.data!.id);
       toast.success('โพสต์สำเร็จ!');
 
     } catch (error) {

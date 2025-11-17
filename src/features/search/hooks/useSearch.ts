@@ -92,7 +92,7 @@ export function useInfiniteSearch(
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       // ใช้ hasMore และ nextCursor จาก backend (รอ backend implement)
       return lastPage.meta?.hasMore ? lastPage.meta?.nextCursor : undefined;
     },

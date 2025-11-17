@@ -207,7 +207,7 @@ export function useInfiniteFollowers(
 ) {
   return useInfiniteQuery({
     queryKey: [...followKeys.followers(userId), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await followService.getFollowers(userId, {
         ...params,
         cursor: pageParam,
@@ -218,10 +218,10 @@ export function useInfiniteFollowers(
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     enabled: options?.enabled !== undefined ? options.enabled : !!userId,
     staleTime: 2 * 60 * 1000,
   });
@@ -244,7 +244,7 @@ export function useInfiniteFollowing(
 ) {
   return useInfiniteQuery({
     queryKey: [...followKeys.following(userId), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await followService.getFollowing(userId, {
         ...params,
         cursor: pageParam,
@@ -255,10 +255,10 @@ export function useInfiniteFollowing(
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     enabled: options?.enabled !== undefined ? options.enabled : !!userId,
     staleTime: 2 * 60 * 1000,
   });

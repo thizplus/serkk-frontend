@@ -141,7 +141,7 @@ export function useInfiniteReplies(
 ) {
   return useInfiniteQuery({
     queryKey: [...commentKeys.all, 'replies', commentId, 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await commentService.getReplies(commentId, {
         ...params,
         cursor: pageParam,
@@ -152,10 +152,10 @@ export function useInfiniteReplies(
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     enabled: !!commentId,
     staleTime: 2 * 60 * 1000,
   });
@@ -174,7 +174,7 @@ export function useInfiniteCommentsByAuthor(
 ) {
   return useInfiniteQuery({
     queryKey: [...commentKeys.all, 'author', userId, 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await commentService.getByAuthor(userId, {
         ...params,
         cursor: pageParam,
@@ -185,10 +185,10 @@ export function useInfiniteCommentsByAuthor(
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     enabled: options?.enabled !== undefined ? options.enabled : !!userId,
     staleTime: 2 * 60 * 1000,
   });

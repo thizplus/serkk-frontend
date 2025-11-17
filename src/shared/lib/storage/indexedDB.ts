@@ -465,7 +465,7 @@ export async function getDatabaseStats(): Promise<{
   return {
     totalPosts: allPosts.length,
     uploadingPosts: allPosts.filter(p =>
-      p.status === 'uploading_media' || p.status === 'creating_post'
+      p.status === 'uploading' || p.status === 'creating_post'
     ).length,
     completedPosts: allPosts.filter(p => p.status === 'completed').length,
     failedPosts: allPosts.filter(p => p.status === 'failed').length,

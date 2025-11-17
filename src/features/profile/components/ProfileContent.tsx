@@ -20,7 +20,8 @@ import {
   TrendingUp,
   MessageSquare,
   FileText,
-  MessageCircle
+  MessageCircle,
+  Loader2
 } from "@/config/icons";
 import { useUser, useHasHydrated } from '@/features/auth';
 import { useInfiniteUserPosts } from "@/features/posts";
@@ -127,7 +128,7 @@ export function ProfileContent({ params }: ProfileContentProps) {
 
   // Flatten comments from all pages
   const userComments = useMemo(() => {
-    return commentsData?.pages.flatMap((page) => page.comments) ?? [];
+    return commentsData?.pages.flatMap((page: any) => page.comments) ?? [];
   }, [commentsData]);
 
   // Infinite scroll for comments

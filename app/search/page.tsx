@@ -50,7 +50,7 @@ function SearchPageContent() {
 
   // Flatten posts from all pages
   const posts = useMemo(() => {
-    return data?.pages.flatMap((page) => page.posts) ?? [];
+    return data?.pages.flatMap((page: any) => page.posts) ?? [];
   }, [data]);
 
   const handleSearch = (e: React.FormEvent) => {

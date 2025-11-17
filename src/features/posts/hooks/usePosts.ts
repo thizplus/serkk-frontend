@@ -133,7 +133,7 @@ export function useFeed(params?: GetPostsParams) {
 export function useInfinitePosts(params?: Omit<GetPostsCursorParams, 'cursor'>) {
   return useInfiniteQuery({
     queryKey: [...postKeys.lists(), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await postService.list({
         ...params,
         cursor: pageParam,
@@ -144,11 +144,11 @@ export function useInfinitePosts(params?: Omit<GetPostsCursorParams, 'cursor'>) 
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       // ใช้ hasMore และ nextCursor จาก backend
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
@@ -159,7 +159,7 @@ export function useInfinitePosts(params?: Omit<GetPostsCursorParams, 'cursor'>) 
 export function useInfiniteFeed(params?: Omit<GetPostsCursorParams, 'cursor'>) {
   return useInfiniteQuery({
     queryKey: [...postKeys.feed(), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await postService.getFeed({
         ...params,
         cursor: pageParam,
@@ -170,11 +170,11 @@ export function useInfiniteFeed(params?: Omit<GetPostsCursorParams, 'cursor'>) {
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       // ใช้ hasMore และ nextCursor จาก backend
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     staleTime: 2 * 60 * 1000,
   });
 }
@@ -189,7 +189,7 @@ export function useInfiniteUserPosts(
 ) {
   return useInfiniteQuery({
     queryKey: [...postKeys.byAuthor(userId), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await postService.getByAuthor(userId, {
         ...params,
         cursor: pageParam,
@@ -200,11 +200,11 @@ export function useInfiniteUserPosts(
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       // ใช้ hasMore และ nextCursor จาก backend
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     enabled: options?.enabled !== undefined ? options.enabled : !!userId,
     staleTime: 2 * 60 * 1000,
   });
@@ -220,7 +220,7 @@ export function useInfinitePostsByTagId(
 ) {
   return useInfiniteQuery({
     queryKey: [...postKeys.byTagId(tagId), 'infinite', params] as const,
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const response = await postService.getByTagId(tagId, {
         ...params,
         cursor: pageParam,
@@ -231,11 +231,11 @@ export function useInfinitePostsByTagId(
       }
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       // ใช้ hasMore และ nextCursor จาก backend
       return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
     },
-    initialPageParam: undefined,
+    initialPageParam: undefined as string | undefined,
     enabled: options?.enabled !== undefined ? options.enabled : !!tagId,
     staleTime: 2 * 60 * 1000,
   });
