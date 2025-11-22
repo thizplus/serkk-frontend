@@ -58,22 +58,33 @@ export function SingleImageViewer({
     }
   };
 
-  // ✅ Use limited aspect ratio based on orientation (prevents too tall images)
-  const orientation = getMediaOrientation(media.width, media.height);
+  // ✅ Detail mode: Use actual aspect ratio from metadata
+  // ✅ Feed mode: Use limited aspect ratio (prevents too tall images)
+  const useActualRatio = variant === 'detail' && media.width && media.height;
 
-  // Choose aspect ratio based on orientation
-  let aspectRatioClass: string;
-  if (orientation === 'landscape') {
-    aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.IMAGE_LANDSCAPE; // 4:3
-  } else if (orientation === 'portrait') {
-    aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.IMAGE_PORTRAIT; // 4:5 (not too tall!)
+  let aspectRatioClass: string | undefined;
+  let aspectRatioStyle: React.CSSProperties = {};
+
+  if (useActualRatio) {
+    // Detail: Actual aspect ratio from width/height
+    aspectRatioStyle = {
+      aspectRatio: `${media.width} / ${media.height}`,
+    };
   } else {
-    aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.IMAGE_SQUARE; // 1:1
+    // Feed: Limited aspect ratio based on orientation
+    const orientation = getMediaOrientation(media.width, media.height);
+
+    if (orientation === 'landscape') {
+      aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.IMAGE_LANDSCAPE; // 4:3
+    } else if (orientation === 'portrait') {
+      aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.IMAGE_PORTRAIT; // 4:5 (not too tall!)
+    } else {
+      aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.IMAGE_SQUARE; // 1:1
+    }
   }
 
   return (
     <>
-      {/* ✅ Limited aspect ratio based on orientation (reasonable height) */}
       <div
         className={cn(
           "relative w-full overflow-hidden",
@@ -81,7 +92,7 @@ export function SingleImageViewer({
           aspectRatioClass,
           className
         )}
-        style={{ maxHeight: `${maxHeight}px` }}
+        style={{ maxHeight: `${maxHeight}px`, ...aspectRatioStyle }}
         onClick={handleClick}
       >
         <img

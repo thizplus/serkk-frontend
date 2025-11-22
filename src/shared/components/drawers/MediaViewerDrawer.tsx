@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Drawer,
   DrawerContent,
@@ -15,6 +17,9 @@ import { usePost } from "@/features/posts/hooks/usePosts";
 import { useCommentTree, useCreateComment, useUpdateComment, useDeleteComment } from "@/features/comments";
 import { Separator } from "@/components/ui/separator";
 import { MessageSquare } from "lucide-react";
+import { LinkifiedContent } from "@/components/common";
+import { formatDistanceToNow } from "date-fns";
+import { th } from "date-fns/locale";
 import type { Post, CommentWithReplies } from "@/types/models";
 
 interface MediaItem {
@@ -52,6 +57,7 @@ export function MediaViewerDrawer({
   onClose,
 }: MediaViewerDrawerProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Hooks
   const { handleVote } = useToggleVote();
@@ -65,6 +71,12 @@ export function MediaViewerDrawer({
   const createComment = useCreateComment();
   const updateComment = useUpdateComment();
   const deleteComment = useDeleteComment();
+
+  // Format time
+  const timeAgo = formatDistanceToNow(new Date(currentPost.createdAt), {
+    addSuffix: true,
+    locale: th
+  });
 
   // Scroll to initial index when opening
   useEffect(() => {
@@ -185,6 +197,60 @@ export function MediaViewerDrawer({
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Post Details Section */}
+          <div className="px-4 pb-4">
+            {/* Author Info */}
+            <div className="flex items-center gap-2 mb-3">
+              <Image
+                src={currentPost.author.avatar || "/icon-white.svg"}
+                alt={currentPost.author.displayName}
+                width={40}
+                height={40}
+                className="rounded-full h-10 w-10 object-cover cursor-pointer"
+                onClick={() => router.push(`/profile/${currentPost.author.username}`)}
+              />
+              <div className="flex-1">
+                <div
+                  className="font-medium text-foreground hover:underline cursor-pointer"
+                  onClick={() => router.push(`/profile/${currentPost.author.username}`)}
+                >
+                  {currentPost.author.displayName}
+                </div>
+                <div className="text-xs text-muted-foreground">{timeAgo}</div>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="font-bold text-lg mb-2">
+              {currentPost.title}
+            </h2>
+
+            {/* Content */}
+            {currentPost.content && (
+              <div className="text-sm text-foreground/90 mb-3 whitespace-pre-wrap">
+                <LinkifiedContent>{currentPost.content}</LinkifiedContent>
+              </div>
+            )}
+
+            {/* Tags */}
+            {currentPost.tags && currentPost.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {currentPost.tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="px-2 py-1 bg-accent/50 text-xs rounded-full hover:bg-accent cursor-pointer transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/tag/${encodeURIComponent(tag.name)}`);
+                    }}
+                  >
+                    #{tag.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Interaction Section */}

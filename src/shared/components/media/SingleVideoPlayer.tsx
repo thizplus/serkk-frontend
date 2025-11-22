@@ -83,48 +83,47 @@ export function SingleVideoPlayer({
     };
   }, []);
 
-  // ✅ Use limited aspect ratio based on orientation (prevents too tall videos)
-  const orientation = getMediaOrientation(media.width, media.height);
+  // ✅ Detail mode: Use actual aspect ratio from metadata
+  // ✅ Feed mode: Use limited aspect ratio (prevents too tall videos)
+  const useActualRatio = variant === 'detail' && media.width && media.height;
 
-  // Choose aspect ratio based on orientation
-  let aspectRatioClass: string;
-  if (orientation === 'landscape') {
-    aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.VIDEO_LANDSCAPE; // 16:9
-  } else if (orientation === 'portrait') {
-    aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.VIDEO_PORTRAIT; // 3:4 (not too tall!)
+  let aspectRatioClass: string | undefined;
+  let aspectRatioStyle: React.CSSProperties = {};
+
+  if (useActualRatio) {
+    // Detail: Actual aspect ratio from width/height
+    aspectRatioStyle = {
+      aspectRatio: `${media.width} / ${media.height}`,
+    };
   } else {
-    aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.VIDEO_SQUARE; // 1:1
+    // Feed: Limited aspect ratio based on orientation
+    const orientation = getMediaOrientation(media.width, media.height);
+
+    if (orientation === 'landscape') {
+      aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.VIDEO_LANDSCAPE; // 16:9
+    } else if (orientation === 'portrait') {
+      aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.VIDEO_PORTRAIT; // 3:4 (not too tall!)
+    } else {
+      aspectRatioClass = MEDIA_DISPLAY.ASPECT_RATIO.VIDEO_SQUARE; // 1:1
+    }
   }
 
-  // 🔍 Debug: Check what orientation we detected
-  console.log('🎬 SingleVideoPlayer - Orientation:', {
-    id: media.id,
-    url: media.url?.substring(0, 50) + '...',
-    width: media.width,
-    height: media.height,
-    orientation,
-    aspectRatioClass,
-    isMobile,
-    controls: !isMobile, // Mobile: no controls (open drawer), Desktop: controls (play inline)
-  });
-
   return (
-    // ✅ Limited aspect ratio based on orientation (reasonable height)
     <div className={cn("w-full", className)} style={{ maxHeight: `${maxHeight}px` }}>
-      <div className={aspectRatioClass}>
+      <div className={aspectRatioClass} style={aspectRatioStyle}>
         <video
           ref={videoRef}
           src={media.url}
           poster={media.thumbnail}
-          controls={!isMobile} // ✅ Mobile: no controls (ให้คลิกเปิด drawer), Desktop: controls (เล่น inline)
+          controls={variant === 'detail' || !isMobile} // ✅ Detail: always show controls, Feed+Mobile: no controls (open drawer)
           preload={MEDIA_DISPLAY.VIDEO.PRELOAD}
           className={cn(
             "w-full h-full bg-black",
             // ✅ Feed: object-cover (ไม่มีขอบดำ, ตัดขอบนิดหน่อย)
             // ✅ Fullscreen: object-contain (แสดงเต็ม, อาจมีขอบดำ)
             isFullscreen ? "object-contain" : "object-cover",
-            // ✅ Mobile: cursor-pointer (บอกให้รู้ว่าคลิกได้)
-            isMobile && "cursor-pointer"
+            // ✅ Feed+Mobile: cursor-pointer (บอกให้รู้ว่าคลิกได้เปิด drawer)
+            isMobile && variant === 'feed' && "cursor-pointer"
           )}
         >
           Your browser does not support the video tag.

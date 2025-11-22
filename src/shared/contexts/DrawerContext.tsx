@@ -53,14 +53,15 @@ export function DrawerProvider({ children }: { children: ReactNode }) {
   const openDrawer = (type: DrawerType, data: DrawerData) => {
     setDrawer({ type, data, isOpen: true });
 
-    // Update URL for browser back button support
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('drawer', type);
-      if (data.post?.id) {
-        url.searchParams.set('id', data.post.id);
-      }
-      window.history.pushState({}, '', url);
+    // ✅ Instagram pattern: Change URL to /post/[id] for SEO
+    // ✅ Use History API directly (NOT Next.js router) to preserve scroll
+    if (typeof window !== 'undefined' && data.post?.id) {
+      // Push new URL state without triggering Next.js navigation
+      window.history.pushState(
+        { drawer: type, postId: data.post.id },
+        '',
+        `/post/${data.post.id}`
+      );
     }
   };
 
@@ -74,12 +75,9 @@ export function DrawerProvider({ children }: { children: ReactNode }) {
 
     setDrawer({ type: null, data: null, isOpen: false });
 
-    // Clean URL
+    // ✅ Go back to previous URL - preserves scroll position
     if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('drawer');
-      url.searchParams.delete('id');
-      window.history.pushState({}, '', url);
+      window.history.back();
     }
   };
 
@@ -93,12 +91,14 @@ export function DrawerProvider({ children }: { children: ReactNode }) {
   // Handle browser back button
   useEffect(() => {
     const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const hasDrawerParam = params.has('drawer');
-
-      if (!hasDrawerParam && drawer.isOpen) {
-        // User clicked back button, close drawer
+      // If drawer is open and user clicked back, close it
+      if (drawer.isOpen) {
         setDrawer({ type: null, data: null, isOpen: false });
+
+        // Pause videos
+        document.querySelectorAll('video').forEach((video) => {
+          video.pause();
+        });
       }
     };
 
