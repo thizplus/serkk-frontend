@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { MEDIA_DISPLAY } from "@/config/constants";
 import { getMediaOrientation } from "@/shared/utils/mediaUtils";
+import { useIsMobile } from "@/shared/hooks/useDeviceType";
 import type { MediaItem, BaseMediaProps } from "./types";
 
 interface SingleVideoPlayerProps extends BaseMediaProps {
@@ -30,8 +31,9 @@ interface SingleVideoPlayerProps extends BaseMediaProps {
  * - Landscape: 16:9 aspect ratio
  * - Portrait: 3:4 aspect ratio (not too tall!)
  * - Square: 1:1 aspect ratio
- * - Always show controls
- * - No lightbox wrapper
+ * - Mobile: No controls (click opens drawer for full view)
+ * - Desktop: Show controls (play inline)
+ * - Fullscreen: object-contain (show full video)
  *
  * @example
  * <SingleVideoPlayer
@@ -46,6 +48,7 @@ export function SingleVideoPlayer({
 }: SingleVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isMobile = useIsMobile();
 
   const maxHeight = variant === 'detail'
     ? MEDIA_DISPLAY.MAX_HEIGHT.DETAIL
@@ -101,6 +104,8 @@ export function SingleVideoPlayer({
     height: media.height,
     orientation,
     aspectRatioClass,
+    isMobile,
+    controls: !isMobile, // Mobile: no controls (open drawer), Desktop: controls (play inline)
   });
 
   return (
@@ -111,13 +116,15 @@ export function SingleVideoPlayer({
           ref={videoRef}
           src={media.url}
           poster={media.thumbnail}
-          controls={MEDIA_DISPLAY.VIDEO.CONTROLS}
+          controls={!isMobile} // ✅ Mobile: no controls (ให้คลิกเปิด drawer), Desktop: controls (เล่น inline)
           preload={MEDIA_DISPLAY.VIDEO.PRELOAD}
           className={cn(
             "w-full h-full bg-black",
             // ✅ Feed: object-cover (ไม่มีขอบดำ, ตัดขอบนิดหน่อย)
             // ✅ Fullscreen: object-contain (แสดงเต็ม, อาจมีขอบดำ)
-            isFullscreen ? "object-contain" : "object-cover"
+            isFullscreen ? "object-contain" : "object-cover",
+            // ✅ Mobile: cursor-pointer (บอกให้รู้ว่าคลิกได้)
+            isMobile && "cursor-pointer"
           )}
         >
           Your browser does not support the video tag.

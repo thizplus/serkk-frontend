@@ -158,7 +158,7 @@ export function POC5_Drawer({
                     poster={item.thumbnail}
                     controls
                     playsInline
-                    className="w-full max-h-[70vh] object-contain bg-black"
+                    className="w-full max-h-[85vh] object-contain bg-black"
                   >
                     <source src={item.url} type="video/mp4" />
                   </video>

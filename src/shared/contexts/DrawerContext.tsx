@@ -16,6 +16,9 @@ interface MediaItem {
   type: 'image' | 'video';
   url: string;
   thumbnail?: string;
+  width?: number;      // ✅ For orientation detection
+  height?: number;     // ✅ For orientation detection
+  duration?: number;   // ✅ For videos (seconds)
 }
 
 export interface DrawerData {

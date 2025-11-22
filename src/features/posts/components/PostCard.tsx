@@ -132,6 +132,10 @@ export function PostCard({
           url: m.url,
           type,
           thumbnail: m.thumbnail || undefined,
+          // ✅ Include metadata for drawer (same as MediaDisplay)
+          width: m.width,
+          height: m.height,
+          duration: m.duration,
         };
       });
 

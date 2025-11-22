@@ -147,7 +147,7 @@ export function MediaViewerDrawer({
 
   return (
     <Drawer open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DrawerContent className="h-[100vh]">
+      <DrawerContent className="h-screen data-[vaul-drawer-direction=bottom]:max-h-[95vh]">
         <DrawerHeader className="sr-only">
           <DrawerTitle>Media Viewer</DrawerTitle>
         </DrawerHeader>
@@ -163,14 +163,15 @@ export function MediaViewerDrawer({
               <div
                 key={item.id}
                 data-index={index}
-                className="w-full"
+                className="w-full relative"
               >
+                {/* Media Content - Natural Loading (No Skeleton) */}
                 {item.type === 'video' ? (
                   <video
                     poster={item.thumbnail}
                     controls
                     playsInline
-                    className="w-full max-h-[70vh] object-contain bg-black"
+                    className="w-full max-h-[85vh] object-contain bg-black"
                   >
                     <source src={item.url} type="video/mp4" />
                   </video>
