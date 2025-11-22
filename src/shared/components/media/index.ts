@@ -16,14 +16,13 @@ export { MultiMediaGrid } from './MultiMediaGrid';
 export { GridLayout2 } from './GridLayout2';
 export { GridLayout3 } from './GridLayout3';
 export { GridLayout4 } from './GridLayout4';
+export { GridLayout5 } from './GridLayout5';
+export { GridLayout6 } from './GridLayout6';
 export { GridLayout5Plus } from './GridLayout5Plus';
 
 // Reusable components
 export { MediaItem } from './MediaItem';
 export { MediaLightbox } from './MediaLightbox';
-
-// Legacy component (deprecated - use MediaDisplay instead)
-export { MediaGrid } from './MediaGrid';
 
 // Types
 export type {

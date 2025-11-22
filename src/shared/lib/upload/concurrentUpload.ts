@@ -8,6 +8,7 @@ import {
 } from '@/lib/api/r2-upload.service';
 import type { UploadProgress, UploadOptions, UploadResult } from './types';
 import { FORM_LIMITS } from '@/config';
+import { extractMediaMetadata } from './extractMetadata';
 
 /**
  * Upload หลายไฟล์พร้อมกัน (concurrent) ด้วย p-limit + Batch API
@@ -81,6 +82,14 @@ export async function uploadMultipleFiles(
     const step1Duration = ((Date.now() - step1Start) / 1000).toFixed(2);
     console.log(`⏱️ STEP 1 (Presigned URLs): ${step1Duration}s for ${files.length} files`);
 
+    // 🔍 Debug: Show batch response from backend
+    console.log('\n📦 Batch Presigned Response from Backend:', {
+      total: batchPresignedData.total,
+      uploadsCount: batchPresignedData.uploads.length,
+      firstUpload: batchPresignedData.uploads[0],
+      fullResponse: batchPresignedData,
+    });
+
     // ============================================================================
     // STEP 2: Upload files to R2 concurrently (p-limit)
     // ============================================================================
@@ -92,6 +101,9 @@ export async function uploadMultipleFiles(
       fileKey: string;
       fileSize: number;
       contentType: string;
+      width?: number;
+      height?: number;
+      duration?: number;
       index: number;
     }> = [];
 
@@ -109,6 +121,16 @@ export async function uploadMultipleFiles(
           onProgress?.(uploadingProgress);
 
           const presignedData = batchPresignedData.uploads[index];
+
+          // 🔍 Debug: Show presigned data from backend
+          console.log(`\n📦 Presigned Data [${index + 1}/${files.length}]:`, {
+            mediaId: presignedData.mediaId,
+            fileUrl: presignedData.fileUrl,
+            fileKey: presignedData.fileKey,
+            uploadUrl: presignedData.uploadUrl.substring(0, 50) + '...',
+            expiresAt: presignedData.expiresAt,
+            fullData: presignedData, // ✅ Show complete object
+          });
 
           // Upload to R2 with progress tracking
           await uploadToR2(
@@ -140,15 +162,37 @@ export async function uploadMultipleFiles(
             `Speed: ${speedMBps} MB/s`
           );
 
+          // ✅ Extract metadata from image/video files
+          const metadataStartTime = Date.now();
+          const metadata = await extractMediaMetadata(file);
+          const metadataTime = ((Date.now() - metadataStartTime) / 1000).toFixed(3);
+
+          // 🔍 Debug: Show extracted metadata
+          console.log(`\n📊 Extracted Metadata [${index + 1}/${files.length}] (${metadataTime}s):`, {
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            mediaId: presignedData.mediaId,
+            fileUrl: presignedData.fileUrl,
+            fileKey: presignedData.fileKey,
+            // ✅ Extracted metadata:
+            width: metadata.width || 'N/A',
+            height: metadata.height || 'N/A',
+            duration: metadata.duration ? `${metadata.duration.toFixed(2)}s` : 'N/A',
+          });
+
           // ✅ Mark this file as 100% complete
           fileProgressMap.set(index, 100);
 
-          // ✅ เก็บข้อมูลสำหรับ batch confirm (ยังไม่ confirm ทันที)
+          // ✅ เก็บข้อมูลสำหรับ batch confirm (พร้อม metadata)
           successfulUploads.push({
             mediaId: presignedData.mediaId,
             fileKey: presignedData.fileKey,
             fileSize: file.size,
             contentType: file.type,
+            width: metadata.width,
+            height: metadata.height,
+            duration: metadata.duration,
             index,
           });
 
@@ -214,12 +258,28 @@ export async function uploadMultipleFiles(
     if (successfulUploads.length > 0) {
       try {
         const step3Start = Date.now();
+
+        // 🔍 Debug: Show what metadata we're sending to backend
+        console.log('\n📤 Sending metadata to backend (confirmBatchUpload):', {
+          totalFiles: successfulUploads.length,
+          sampleFile: successfulUploads[0],
+          allUploads: successfulUploads.map(u => ({
+            fileName: files[u.index].name,
+            width: u.width,
+            height: u.height,
+            duration: u.duration,
+          })),
+        });
+
         await confirmBatchUpload(
           successfulUploads.map(upload => ({
             mediaId: upload.mediaId,
             fileKey: upload.fileKey,
             fileSize: upload.fileSize,
             contentType: upload.contentType,
+            width: upload.width,      // ✅ Send metadata to backend
+            height: upload.height,    // ✅ Send metadata to backend
+            duration: upload.duration, // ✅ Send metadata to backend
           }))
         );
         const step3Duration = ((Date.now() - step3Start) / 1000).toFixed(2);

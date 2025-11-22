@@ -119,15 +119,31 @@ export const MEDIA_DISPLAY = {
     GAP: 2, // Tailwind gap-2 (default)
     GAP_COMPACT: 1, // Tailwind gap-1 (for fixed-height galleries)
     HEIGHT_FIXED: 320, // pixels - fixed height for all gallery layouts (virtual scroll optimization)
-    PREVIEW_MAX_DISPLAY: 5, // Show max 5 items in grid
+    PREVIEW_MAX_DISPLAY: 6, // Show max 6 items in grid (7+ shows +N overlay)
   },
   // Aspect ratio settings (for virtual scroll stability)
   // ⚠️ เก็บเป็น class name เต็มเพื่อให้ Tailwind JIT detect ได้
   ASPECT_RATIO: {
-    SINGLE_IMAGE_MOBILE: 'aspect-[4/5]', // Instagram-style for mobile
-    SINGLE_IMAGE_DESKTOP: 'aspect-[16/9]', // Landscape for desktop
-    VIDEO: 'aspect-video', // 16:9 aspect ratio (Tailwind built-in)
-    SQUARE: 'aspect-square', // 1:1 aspect ratio (Tailwind built-in)
+    // ✅ ใหม่: Single media (ปรับให้ดูดีทั้ง desktop และ mobile)
+    SINGLE_IMAGE_MOBILE: 'aspect-square',     // ✅ เปลี่ยนจาก aspect-[4/5] → 1:1
+    SINGLE_IMAGE_DESKTOP: 'aspect-square',    // ✅ เปลี่ยนจาก aspect-[16/9] → 1:1 (ไม่แบน)
+
+    // Video aspect ratios (orientation-based)
+    VIDEO_LANDSCAPE: 'aspect-video',          // 16:9 (YouTube horizontal)
+    VIDEO_PORTRAIT: 'aspect-[3/4]',           // 3:4 (TikTok, Instagram Reels)
+    VIDEO_SQUARE: 'aspect-square',            // 1:1 (Instagram square)
+
+    // Image aspect ratios (orientation-based)
+    IMAGE_LANDSCAPE: 'aspect-[4/3]',          // 4:3 (slightly landscape)
+    IMAGE_PORTRAIT: 'aspect-[4/5]',           // 4:5 (Instagram portrait)
+    IMAGE_SQUARE: 'aspect-square',            // 1:1 (square)
+
+    // Grid items (ใช้ในทุก grid layouts)
+    GRID_ITEM: 'aspect-square',               // 1:1 (consistent across all grids)
+
+    // Legacy (เก็บไว้เผื่อ backward compatibility)
+    VIDEO: 'aspect-video',                    // 16:9 (default video)
+    SQUARE: 'aspect-square',                  // 1:1
   },
   // Lightbox settings
   LIGHTBOX: {

@@ -14,9 +14,10 @@ import type { GridLayoutProps } from "./types";
  * Layout:
  * ┌─────────┬─────────┐
  * │    1    │    2    │
+ * │   1:1   │   1:1   │
  * └─────────┴─────────┘
  *
- * ✅ Expert Recommendation: Fixed height (320px) for virtual scroll stability
+ * ✅ ใช้ aspect-square (1:1) สำหรับ responsive design
  */
 export function GridLayout2({
   media,
@@ -28,21 +29,26 @@ export function GridLayout2({
   return (
     <div
       className={cn(
-        "grid grid-cols-2 overflow-hidden",
-        `gap-${MEDIA_DISPLAY.GRID.GAP_COMPACT}`,
+        "grid grid-cols-2 gap-1",
         className
       )}
-      style={{ height: `${MEDIA_DISPLAY.GRID.HEIGHT_FIXED}px` }}
     >
       {media.slice(0, 2).map((item, index) => (
-        <MediaItem
+        <div
           key={item.id}
-          media={item}
-          index={index}
-          editable={editable}
-          onClick={onMediaClick}
-          onRemove={onRemove}
-        />
+          className={cn(
+            MEDIA_DISPLAY.ASPECT_RATIO.GRID_ITEM,  // aspect-square (1:1)
+            "overflow-hidden rounded-lg bg-muted"
+          )}
+        >
+          <MediaItem
+            media={item}
+            index={index}
+            editable={editable}
+            onClick={onMediaClick}
+            onRemove={onRemove}
+          />
+        </div>
       ))}
     </div>
   );

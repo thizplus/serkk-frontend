@@ -13,7 +13,7 @@ import mediaService from "@/lib/api/media.service";
 import type { Post, Media } from "@/types/models";
 import { useOptimisticPost } from "@/features/posts/hooks/useOptimisticPost";
 import { useDraftAutoSave } from "@/features/posts/hooks/useDraftAutoSave";
-import { MediaGrid } from "@/components/media/MediaGrid";
+import { MediaDisplay } from "@/components/media";
 import { uploadMultipleFiles } from "@/lib/upload/concurrentUpload";
 import type { UploadProgress } from "@/lib/upload/types";
 
@@ -872,15 +872,14 @@ export function CreatePostForm({
               {/* Preview Grid - Optimistic UI Mode */}
               {enableOptimisticUI && !usePhase1Mode && optimisticMediaFiles.length > 0 && (
                 <div className="mb-3">
-                  <MediaGrid
+                  <MediaDisplay
                     media={optimisticMediaFiles.map((m, index) => ({
                       id: `preview-${index}`,
                       url: m.preview,
                       type: m.file.type.startsWith('video/') ? 'video' : 'image',
                     }))}
-                    maxDisplay={FORM_LIMITS.MEDIA.PREVIEW_MAX_DISPLAY}
-                    onRemove={handleRemoveMedia}
                     editable
+                    onRemove={handleRemoveMedia}
                   />
                   {optimisticMediaFiles.length > FORM_LIMITS.MEDIA.PREVIEW_MAX_DISPLAY && (
                     <p className="text-xs text-muted-foreground mt-2">
@@ -893,7 +892,7 @@ export function CreatePostForm({
               {/* Preview Grid - Auto Upload Mode */}
               {autoUploadMedia && !enableOptimisticUI && uploadedMedia.length > 0 && (
                 <div className="mb-3">
-                  <MediaGrid
+                  <MediaDisplay
                     media={uploadedMedia.map((m) => {
                       // ✅ Fallback: เช็คจาก URL extension ถ้า m.type อาจผิด
                       const urlLower = m.url.toLowerCase();
@@ -916,9 +915,8 @@ export function CreatePostForm({
                         thumbnail: m.thumbnail || undefined,
                       };
                     })}
-                    maxDisplay={FORM_LIMITS.MEDIA.PREVIEW_MAX_DISPLAY}
-                    onRemove={handleRemoveMedia}
                     editable
+                    onRemove={handleRemoveMedia}
                   />
                   {uploadedMedia.length > FORM_LIMITS.MEDIA.PREVIEW_MAX_DISPLAY && (
                     <p className="text-xs text-muted-foreground mt-2">
@@ -931,15 +929,14 @@ export function CreatePostForm({
               {/* Preview Grid - Old Mode (Backward Compatibility) */}
               {!autoUploadMedia && mediaPreviews.length > 0 && (
                 <div className="mb-3">
-                  <MediaGrid
+                  <MediaDisplay
                     media={mediaPreviews.map((preview, index) => ({
                       id: `old-preview-${index}`,
                       url: preview,
                       type: mediaFiles[index].type.startsWith('video/') ? 'video' : 'image',
                     }))}
-                    maxDisplay={FORM_LIMITS.MEDIA.PREVIEW_MAX_DISPLAY}
-                    onRemove={handleRemoveMedia}
                     editable
+                    onRemove={handleRemoveMedia}
                   />
                   {mediaPreviews.length > FORM_LIMITS.MEDIA.PREVIEW_MAX_DISPLAY && (
                     <p className="text-xs text-muted-foreground mt-2">

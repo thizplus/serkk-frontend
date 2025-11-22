@@ -7,6 +7,9 @@ export interface MediaItem {
   url: string;
   type: 'image' | 'video';
   thumbnail?: string;
+  width?: number;      // ✅ สำหรับคำนวณ orientation
+  height?: number;     // ✅ สำหรับคำนวณ orientation
+  duration?: number;   // ✅ สำหรับวิดีโอ (seconds)
 }
 
 export type MediaDisplayVariant = 'feed' | 'detail';

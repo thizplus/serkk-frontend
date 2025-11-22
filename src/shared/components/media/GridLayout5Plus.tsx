@@ -8,21 +8,21 @@ import type { GridLayoutProps } from "./types";
 /**
  * GridLayout5Plus Component
  *
- * Layout สำหรับ 5+ media items
- * แสดงแบบ Instagram-style mixed layout
- * - แสดงสูงสุด 5 items
- * - Item สุดท้ายจะแสดง "+N" overlay ถ้ามีเกิน 5 items
+ * Layout สำหรับ 7+ media items
+ * แสดงแบบ 2x3 grid (เหมือน GridLayout6)
+ * - แสดงสูงสุด 6 items
+ * - Item สุดท้ายจะแสดง "+N" overlay ถ้ามีเกิน 6 items
  *
- * Layout (5 items):
- * ┌───────────────┬─────┐
- * │               │  2  │
- * │       1       ├─────┤
- * │               │  3  │
- * ├───────┬───────┼─────┤
- * │   4   │   5   │     │
- * └───────┴───────┴─────┘
+ * Layout (6 items):
+ * ┌─────┬─────┬─────┐
+ * │  1  │  2  │  3  │
+ * │ 1:1 │ 1:1 │ 1:1 │
+ * ├─────┼─────┼─────┤
+ * │  4  │  5  │ 6+N │
+ * │ 1:1 │ 1:1 │ 1:1 │
+ * └─────┴─────┴─────┘
  *
- * ✅ Expert Recommendation: Fixed height (320px) for virtual scroll stability
+ * ✅ ใช้ aspect-square (1:1) สำหรับ responsive design
  */
 export function GridLayout5Plus({
   media,
@@ -37,60 +37,34 @@ export function GridLayout5Plus({
   return (
     <div
       className={cn(
-        "grid grid-cols-3 overflow-hidden",
-        `gap-${MEDIA_DISPLAY.GRID.GAP_COMPACT}`,
+        "grid grid-cols-3 gap-1",
         className
       )}
-      style={{ height: `${MEDIA_DISPLAY.GRID.HEIGHT_FIXED}px` }}
     >
-      {/* Large top-left (spans 2 rows, 2 cols) */}
-      <div className="col-span-2 row-span-2">
-        <MediaItem
-          media={displayMedia[0]}
-          index={0}
-          editable={editable}
-          onClick={onMediaClick}
-          onRemove={onRemove}
-        />
-      </div>
+      {displayMedia.map((item, index) => {
+        const isLastItem = index === displayMedia.length - 1;
+        const showOverlay = isLastItem && remainingCount > 0;
 
-      {/* Right top */}
-      <MediaItem
-        media={displayMedia[1]}
-        index={1}
-        editable={editable}
-        onClick={onMediaClick}
-        onRemove={onRemove}
-      />
-
-      {/* Right middle */}
-      <MediaItem
-        media={displayMedia[2]}
-        index={2}
-        editable={editable}
-        onClick={onMediaClick}
-        onRemove={onRemove}
-      />
-
-      {/* Bottom left */}
-      <MediaItem
-        media={displayMedia[3]}
-        index={3}
-        editable={editable}
-        onClick={onMediaClick}
-        onRemove={onRemove}
-      />
-
-      {/* Bottom right (with +N overlay if more items) */}
-      <MediaItem
-        media={displayMedia[4]}
-        index={4}
-        editable={editable}
-        onClick={onMediaClick}
-        onRemove={onRemove}
-        showOverlay={remainingCount > 0}
-        remainingCount={remainingCount}
-      />
+        return (
+          <div
+            key={item.id}
+            className={cn(
+              MEDIA_DISPLAY.ASPECT_RATIO.GRID_ITEM,  // aspect-square (1:1)
+              "overflow-hidden rounded-lg bg-muted"
+            )}
+          >
+            <MediaItem
+              media={item}
+              index={index}
+              editable={editable}
+              onClick={onMediaClick}
+              onRemove={onRemove}
+              showOverlay={showOverlay}
+              remainingCount={remainingCount}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -346,6 +346,10 @@ export function PostCard({
                   url: m.url,
                   type,
                   thumbnail: m.thumbnail || undefined,
+                  // ✅ Include metadata for dynamic aspect ratio
+                  width: m.width,
+                  height: m.height,
+                  duration: m.duration,
                 };
               })}
               variant={disableNavigation ? 'detail' : 'feed'}

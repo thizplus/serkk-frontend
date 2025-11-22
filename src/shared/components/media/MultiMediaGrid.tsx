@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { GridLayout2 } from "./GridLayout2";
 import { GridLayout3 } from "./GridLayout3";
 import { GridLayout4 } from "./GridLayout4";
+import { GridLayout5 } from "./GridLayout5";
+import { GridLayout6 } from "./GridLayout6";
 import { GridLayout5Plus } from "./GridLayout5Plus";
 import { MediaLightbox } from "./MediaLightbox";
 import type { MediaDisplayProps } from "./types";
@@ -25,7 +27,9 @@ import type { MediaDisplayProps } from "./types";
  * - 2 items → GridLayout2 (2 columns)
  * - 3 items → GridLayout3 (1 large + 2 small)
  * - 4 items → GridLayout4 (2x2 grid)
- * - 5+ items → GridLayout5Plus (Instagram style)
+ * - 5 items → GridLayout5 (mixed layout)
+ * - 6 items → GridLayout6 (3x2 grid)
+ * - 7+ items → GridLayout5Plus (3x2 with +N overlay)
  *
  * @example
  * <MultiMediaGrid
@@ -62,6 +66,10 @@ export function MultiMediaGrid({
         return GridLayout3;
       case 4:
         return GridLayout4;
+      case 5:
+        return GridLayout5;
+      case 6:
+        return GridLayout6;
       default:
         return GridLayout5Plus;
     }

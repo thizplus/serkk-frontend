@@ -26,8 +26,8 @@ interface VirtualizedPostFeedProps {
  * - ✅ Window scroll (ไม่ใช่ container scroll)
  *
  * Expert Recommendations:
- * - Start with low overscan (2-5)
- * - Don't use defaultItemHeight initially (layout already predictable)
+ * - ✅ Use defaultItemHeight for better initial rendering with aspect-square layouts
+ * - ✅ Use overscan={5} for smoother scrolling with dynamic heights
  * - Accept scroll position loss on refresh (simple approach)
  */
 export function VirtualizedPostFeed({
@@ -53,8 +53,9 @@ export function VirtualizedPostFeed({
       {/* ✅ Real Posts - Virtualized */}
       <Virtuoso
         data={posts}
-        useWindowScroll  // ✅ ใช้ window scroll แทน container scroll
-        overscan={2}     // ✅ เริ่มต่ำก่อน (render 2 items นอก viewport)
+        useWindowScroll       // ✅ ใช้ window scroll แทน container scroll
+        defaultItemHeight={500}  // ✅ Estimated height for better initial rendering
+        overscan={5}          // ✅ Render 5 items outside viewport for smoother scroll
         itemContent={(_, post) => (
           <div className="mb-4">
             <PostCard post={post} />
