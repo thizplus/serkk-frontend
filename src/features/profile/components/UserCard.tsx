@@ -71,7 +71,7 @@ export function UserCard({ user, showFollowButton = true }: UserCardProps) {
                 </span>
 
                 <span>
-                  <span className="font-semibold text-foreground">{user.karma || 0}</span> Karma
+                  <span className="font-semibold text-foreground">{user.karma || 0}</span> SUEKK
                 </span>
               </div>
             </div>

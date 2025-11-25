@@ -354,7 +354,7 @@ export function ProfileContent({ params }: ProfileContentProps) {
               <div className="flex items-center gap-1">
                 <TrendingUp size={14} className="text-primary" />
                 <span className="font-bold">{profileUser.karma?.toLocaleString() || 0}</span>
-                <span className="text-muted-foreground">Karma</span>
+                <span className="text-muted-foreground">SUEKK</span>
               </div>
               <button
                 className="flex items-center gap-1 hover:underline"

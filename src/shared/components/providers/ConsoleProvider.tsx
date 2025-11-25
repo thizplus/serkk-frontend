@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { setupProductionConsole } from "@/shared/lib/utils/console";
 
 /**
  * ConsoleProvider - ปิด console.log ใน production
@@ -9,7 +8,20 @@ import { setupProductionConsole } from "@/shared/lib/utils/console";
  */
 export function ConsoleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    setupProductionConsole();
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
+
+    // Disable console.log in production
+    if (process.env.NODE_ENV === 'production') {
+      // Disable non-critical logs
+      console.log = () => {};
+      console.debug = () => {};
+      console.info = () => {};
+
+      // Keep error and warn for monitoring
+      // console.error remains active
+      // console.warn remains active
+    }
   }, []);
 
   return <>{children}</>;
