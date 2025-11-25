@@ -47,9 +47,12 @@ export interface UserSummary {
 
 /**
  * User with Follow Status
+ * isFollowing เป็น optional เพราะ backend ส่งมาก็ต่อเมื่อมี token
+ * - ถ้ามี token → isFollowing: true/false
+ * - ถ้าไม่มี token (guest) → isFollowing = undefined
  */
 export interface UserWithFollowStatus extends User {
-  isFollowing: boolean;
+  isFollowing?: boolean;
   followedAt?: string;
 }
 
