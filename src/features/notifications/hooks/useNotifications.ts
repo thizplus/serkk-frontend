@@ -101,10 +101,34 @@ export function useUnreadNotificationCount() {
       setHasToken(tokenExists);
     };
 
+    // ✅ Initial check
     checkToken();
-    const interval = setInterval(checkToken, 500);
 
-    return () => clearInterval(interval);
+    // ✅ Check on storage change (when auth state changes in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'auth_token' || e.key === 'auth-storage') {
+        checkToken();
+      }
+    };
+
+    // ✅ Check when tab becomes visible again (user switches back)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkToken();
+      }
+    };
+
+    // ✅ Periodic check (reduced from 500ms to 30s - 98% less!)
+    const interval = setInterval(checkToken, 30000);
+
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   return useQuery({
