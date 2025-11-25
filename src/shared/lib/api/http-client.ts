@@ -15,16 +15,40 @@ const TOKEN_KEY = 'auth_token';
 
 /**
  * ดึง token จาก Zustand store (primary) หรือ localStorage (fallback)
+ *
+ * Performance: ใช้ Zustand store เป็น primary source เพื่อหลีกเลี่ยง localStorage reads
+ * Fallback เฉพาะเมื่อ Zustand ไม่มีค่า (hydration ยังไม่เสร็จ)
  */
 const getToken = (): string | null => {
   if (typeof window === 'undefined') return null;
 
-  // Try Zustand store first
+  // ✅ Primary: Try Zustand store first (in-memory, fast!)
   const zustandToken = useAuthStore.getState().token;
-  if (zustandToken) return zustandToken;
+  if (zustandToken) {
+    return zustandToken;
+  }
 
-  // Fallback to localStorage
-  return localStorage.getItem(TOKEN_KEY);
+  // ⚠️ Fallback: localStorage (slower, only if Zustand empty)
+  // This happens during SSR hydration or when Zustand hasn't loaded yet
+  const localToken = localStorage.getItem(TOKEN_KEY);
+  if (localToken) {
+    return localToken;
+  }
+
+  // Last resort: Try auth-storage (Zustand persist key)
+  const authStorage = localStorage.getItem('auth-storage');
+  if (authStorage) {
+    try {
+      const parsed = JSON.parse(authStorage);
+      if (parsed?.state?.token) {
+        return parsed.state.token;
+      }
+    } catch (e) {
+      // Silently fail, not critical
+    }
+  }
+
+  return null;
 };
 
 /**

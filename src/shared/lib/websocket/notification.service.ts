@@ -5,6 +5,20 @@
 
 type NotificationMessageType =
   | 'connection.success'
+  // Notification events (from backend)
+  | 'notification:new'
+  | 'notification:read'
+  | 'notification:read_all'
+  | 'notification:count_updated'
+  // Post events (from backend)
+  | 'post:new'
+  | 'post:updated'
+  | 'post:deleted'
+  | 'post:auto_published'  // Colon notation
+  | 'post.auto_published'  // Dot notation (backend may use this)
+  | 'post.published'  // Legacy
+  // Vote events (from backend)
+  | 'vote:updated'
   // Video encoding events (global)
   | 'video:encoding:updated'
   | 'video:encoding:completed'
@@ -13,10 +27,6 @@ type NotificationMessageType =
   | 'video.encoding.progress'
   | 'video.encoding.completed'
   | 'video.encoding.failed'
-  // Post events
-  | 'post:auto_published'  // Colon notation
-  | 'post.auto_published'  // Dot notation (backend may use this)
-  | 'post.published'  // Legacy
   // Message/Chat video events
   | 'message:video:updated'
   | 'message:video:completed'

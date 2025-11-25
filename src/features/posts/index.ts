@@ -31,6 +31,10 @@ export { useSavedPosts, useInfiniteSavedPosts, useSavePost, useUnsavePost, useTo
 export { useUploadMultipleMedia as useUploadMedia, useUploadImage, useUploadVideo, useDeleteMedia, useUploadMultipleMedia } from './hooks/useMedia';
 export { useOptimisticPost } from './hooks/useOptimisticPost'; // ✅ Phase 2
 
+// WebSocket hooks
+export { usePostWebSocket } from './hooks/usePostWebSocket';
+export { useVoteWebSocket } from './hooks/useVoteWebSocket';
+
 // Stores
 export { useOptimisticPostStore } from './stores/optimisticPostStore'; // ✅ Phase 2
 export type { OptimisticPost } from './stores/optimisticPostStore'; // ✅ Phase 2

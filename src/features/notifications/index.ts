@@ -14,6 +14,8 @@ export {
   notificationKeys
 } from './hooks/useNotifications';
 
+export { useNotificationWebSocket } from './hooks/useNotificationWebSocket';
+
 // Types (re-export shared types for convenience)
 export type {
   Notification,

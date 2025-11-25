@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/features/auth";
 import notificationService from "@/lib/websocket/notification.service";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNotificationWebSocket } from "@/features/notifications/hooks/useNotificationWebSocket";
+import { usePostWebSocket } from "@/features/posts/hooks/usePostWebSocket";
+import { useVoteWebSocket } from "@/features/posts/hooks/useVoteWebSocket";
 
 /**
  * Notification Provider
@@ -19,6 +22,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const router = useRouter();
   const { token, isAuthenticated } = useAuthStore();
   const queryClient = useQueryClient();
+
+  // ✅ Enable WebSocket event listeners for real-time updates
+  useNotificationWebSocket();
+  usePostWebSocket();
+  useVoteWebSocket();
 
   useEffect(() => {
     // Only connect if user is authenticated
