@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserPlus, UserMinus } from "lucide-react";
 import { useUser } from '@/features/auth';
 import { useToggleFollow } from "../hooks/useFollowMutations";
@@ -44,16 +44,16 @@ export function UserCard({ user, showFollowButton = true }: UserCardProps) {
             className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
             onClick={() => router.push(`/profile/${user.username}`)}
           >
-            {/* Avatar */}
-            <div className="relative shrink-0">
-              <Image
-                src={user.avatar || "/icon-white.svg"}
+            {/* Avatar with Fallback */}
+            <Avatar className="h-12 w-12 shrink-0">
+              <AvatarImage
+                src={user.avatar || undefined}
                 alt={user.displayName}
-                width={48}
-                height={48}
-                className="rounded-full max-h-12 object-cover border-2 border-background"
               />
-            </div>
+              <AvatarFallback className="bg-primary/10 text-primary text-lg font-bold">
+                {user.displayName?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
