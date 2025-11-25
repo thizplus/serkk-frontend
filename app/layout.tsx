@@ -11,6 +11,7 @@ import { PWAInstaller } from "@/features/pwa";
 import { DrawerProvider } from "@/shared/contexts/DrawerContext";
 import { DrawerManager } from "@/shared/components/drawers/DrawerManager";
 import { OptimisticPostsProvider } from "@/features/posts/providers/OptimisticPostsProvider";
+import { ConsoleProvider } from "@/shared/components/providers/ConsoleProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -119,26 +120,28 @@ export default function RootLayout({
         <GoogleTagManagerNoScript gtmId={gtmId} />
         <GoogleTagManager gtmId={gtmId} />
         <PWAInstaller />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <OptimisticPostsProvider>
-              <DrawerProvider>
-                <ChatProvider>
-                  <NotificationProvider>
-                    {children}
-                    <DrawerManager />
-                    <Toaster />
-                  </NotificationProvider>
-                </ChatProvider>
-              </DrawerProvider>
-            </OptimisticPostsProvider>
-          </QueryProvider>
-        </ThemeProvider>
+        <ConsoleProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              <OptimisticPostsProvider>
+                <DrawerProvider>
+                  <ChatProvider>
+                    <NotificationProvider>
+                      {children}
+                      <DrawerManager />
+                      <Toaster />
+                    </NotificationProvider>
+                  </ChatProvider>
+                </DrawerProvider>
+              </OptimisticPostsProvider>
+            </QueryProvider>
+          </ThemeProvider>
+        </ConsoleProvider>
       </body>
     </html>
   );

@@ -70,7 +70,8 @@
       "Bash(\"D:\\Admin\\Desktop\\MY PROJECT\\__serkk\\nextjs-frontend\\public\\service-worker-temp.js\")",
       "Bash(git restore:*)",
       "Bash(del bug-log.txt POST_FEED_RECOMMEND.txt change_backend.txt service_worker_recommend.txt)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(cut:*)"
     ],
     "deny": [],
     "ask": []
