@@ -3,6 +3,7 @@
 import { useDrawer } from '@/shared/contexts/DrawerContext';
 import { MediaViewerDrawer } from './MediaViewerDrawer';
 import { CommentDrawer } from './CommentDrawer';
+import { PostDetailDrawer } from './PostDetailDrawer';
 
 /**
  * DrawerManager - Master Component for All Drawers
@@ -45,10 +46,14 @@ export function DrawerManager() {
         />
       );
 
-    // Future drawer types
     case 'post-detail':
-      // TODO: Implement PostDetailDrawer (full post + media + comments)
-      return null;
+      return (
+        <PostDetailDrawer
+          post={drawer.data?.post!}
+          open={drawer.isOpen}
+          onClose={closeDrawer}
+        />
+      );
 
     case 'user-profile':
       // TODO: Implement UserProfileDrawer

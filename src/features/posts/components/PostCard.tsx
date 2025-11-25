@@ -66,6 +66,13 @@ export function PostCard({
   // Handlers
   const handlePostClick = () => {
     if (!disableNavigation) {
+      // ✅ Mobile: Open post detail drawer
+      if (isMobile) {
+        openDrawer('post-detail', { post });
+        return;
+      }
+
+      // Desktop: Navigate to post page
       router.push(`/post/${post.id}`);
     }
   };
@@ -109,45 +116,15 @@ export function PostCard({
     // Don't trigger on optimistic posts
     if (isOptimistic || disableNavigation) return;
 
-    // Mobile: Open media viewer drawer
-    if (isMobile && post.media && post.media.length > 0) {
-      e.preventDefault();
-      e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-      const mediaItems = post.media.map((m) => {
-        const urlLower = m.url.toLowerCase();
-        const isVideoByUrl = /\.(mp4|webm|mov|avi)$/i.test(urlLower);
-        const isImageByUrl = /\.(jpg|jpeg|png|gif|webp)$/i.test(urlLower);
-
-        let type: 'image' | 'video' = 'image';
-        if (isVideoByUrl) {
-          type = 'video';
-        } else if (isImageByUrl) {
-          type = 'image';
-        } else {
-          type = m.type === 'video' ? 'video' : 'image';
-        }
-
-        return {
-          id: m.id,
-          url: m.url,
-          type,
-          thumbnail: m.thumbnail || undefined,
-          // ✅ Include metadata for drawer (same as MediaDisplay)
-          width: m.width,
-          height: m.height,
-          duration: m.duration,
-        };
-      });
-
-      openDrawer('media-viewer', {
-        post,
-        media: mediaItems,
-        initialIndex: 0,
-      });
+    // Mobile: Open post detail drawer (same as clicking title/content)
+    if (isMobile) {
+      openDrawer('post-detail', { post });
     }
-    // Desktop: Navigate to post page (default behavior)
-    else if (!isMobile) {
+    // Desktop: Navigate to post page
+    else {
       router.push(`/post/${post.id}`);
     }
   };
