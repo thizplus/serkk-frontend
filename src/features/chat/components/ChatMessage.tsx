@@ -46,8 +46,8 @@ export function ChatMessage({ message, sender, isOwnMessage }: ChatMessageProps)
       {/* Avatar (only for other user) */}
       {!isOwnMessage && (
         <Avatar className="h-8 w-8 shrink-0">
-          <AvatarImage src={senderAvatar || undefined} alt={sender.displayName} />
-          <AvatarFallback className="text-xs">{sender.displayName.charAt(0)}</AvatarFallback>
+          <AvatarImage src={senderAvatar || undefined} alt={sender.displayName || sender.username} />
+          <AvatarFallback className="text-xs">{(sender.displayName || sender.username)?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
         </Avatar>
       )}
 
@@ -62,7 +62,7 @@ export function ChatMessage({ message, sender, isOwnMessage }: ChatMessageProps)
         {/* Sender Name (only for other user) */}
         {!isOwnMessage && (
           <span className="text-xs text-muted-foreground px-2">
-            {sender.displayName}
+            {sender.displayName || sender.username}
           </span>
         )}
 

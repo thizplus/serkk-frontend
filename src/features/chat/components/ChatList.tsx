@@ -18,7 +18,7 @@ export function ChatList({ conversations, currentUserId, activeUsername }: ChatL
 
   // Filter conversations by search query
   const filteredConversations = conversations.filter((conv) =>
-    conv.otherUser.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (conv.otherUser.displayName || conv.otherUser.username).toLowerCase().includes(searchQuery.toLowerCase()) ||
     conv.otherUser.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

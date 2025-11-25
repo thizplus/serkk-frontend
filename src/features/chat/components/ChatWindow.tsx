@@ -336,7 +336,7 @@ export function ChatWindow({
             <MessageSquare className="h-16 w-16 text-muted-foreground/50 mb-4" />
             <h3 className="font-semibold text-lg mb-2">เริ่มต้นการสนทนา</h3>
             <p className="text-muted-foreground text-sm">
-              ส่งข้อความเพื่อเริ่มคุยกับ {otherUser.displayName}
+              ส่งข้อความเพื่อเริ่มคุยกับ {otherUser.displayName || otherUser.username}
             </p>
           </div>
         )}

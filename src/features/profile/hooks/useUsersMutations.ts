@@ -10,7 +10,7 @@ import { userKeys } from './useUsers';
 
 /**
  * Update Profile mutation
- * อัปเดตข้อมูล profile ของผู้ใช้ปัจจุบัน
+ * ⭐ Simplified: อัปเดตทุก fields ผ่าน Backend Service (8080) เพียง 1 API call
  */
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
@@ -20,10 +20,12 @@ export function useUpdateProfile() {
 
   return useMutation({
     mutationFn: async (data: UpdateProfileRequest) => {
-      console.log('🔄 Update profile mutation started');
+      console.log('🔄 Profile update mutation started');
+
+      // ⭐ Single API call to Backend Service
       const response = await userService.updateProfile(data);
 
-      console.log('📡 Update profile API response:', {
+      console.log('📡 Profile update API response:', {
         success: response.success,
         hasData: !!response.data,
       });
@@ -34,33 +36,33 @@ export function useUpdateProfile() {
 
       return response.data;
     },
-    onSuccess: (data) => {
-      console.log('✅ Update profile mutation onSuccess:', {
-        hasData: !!data,
-        username: data?.username,
-      });
+    onSuccess: async (data) => {
+      console.log('✅ Profile update onSuccess:', data);
 
-      // ⭐ อัปเดต Zustand store
+      // Update Zustand store
       if (data) {
+        console.log('🔄 Updating Zustand store with profile data');
         setUser(data);
       }
 
-      // Invalidate profile query เพื่อให้ refetch
-      queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+      // Invalidate and refetch React Query cache
+      await queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+      await queryClient.refetchQueries({ queryKey: userKeys.profile() });
 
       toast.success('อัปเดตโปรไฟล์สำเร็จ!');
 
-      // Redirect ไปหน้า profile
+      // Wait for state update
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Redirect to profile page
       if (user?.username) {
         router.push(`/profile/${user.username}`);
-      } else if (data?.username) {
-        router.push(`/profile/${data.username}`);
       } else {
         router.push('/');
       }
     },
     onError: (error: Error) => {
-      console.error('❌ Update profile error:', error);
+      console.error('❌ Profile update error:', error);
       toast.error(error.message || 'ไม่สามารถอัปเดตโปรไฟล์ได้');
     },
   });

@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import authService from '../services/auth.service';
+import userService from '@/features/profile/services/user.service';
 import { useAuthStore } from '../stores/authStore';
 import type { LoginRequest, RegisterRequest } from '@/types/request';
 import type { User } from '@/types/models';
@@ -36,21 +37,46 @@ export function useLogin() {
 
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('✅ Login mutation onSuccess:', {
         hasToken: !!data.token,
         hasUser: !!data.user,
         username: data.user?.username,
       });
 
-      // ⭐ ใช้ Zustand setAuth - จะจัดการ localStorage และ cookie อัตโนมัติ
-      console.log('🎯 Calling setAuth...');
+      // ⭐ Step 1: Store token first (basic user from Auth Service)
+      console.log('🎯 Calling setAuth with basic user info...');
       setAuth(data.token, data.user);
+
+      // ⭐ Step 2: Fetch complete profile from Backend Service
+      try {
+        console.log('📡 Fetching complete profile from Backend Service...');
+        const profileResponse = await userService.getProfile();
+
+        if (profileResponse.success && profileResponse.data) {
+          console.log('✅ Complete profile fetched:', {
+            username: profileResponse.data.username,
+            hasBio: !!profileResponse.data.bio,
+            hasKarma: profileResponse.data.karma !== undefined,
+            followersCount: profileResponse.data.followersCount,
+            followingCount: profileResponse.data.followingCount,
+          });
+
+          // Update Zustand with complete profile
+          const setUser = useAuthStore.getState().setUser;
+          setUser(profileResponse.data);
+
+          console.log('✅ Zustand updated with complete profile');
+        }
+      } catch (error) {
+        console.error('⚠️ Failed to fetch complete profile (using basic user):', error);
+        // Continue with basic user info if profile fetch fails
+      }
 
       // ตรวจสอบ localStorage ทันที
       setTimeout(() => {
         const stored = localStorage.getItem('auth-storage');
-        console.log('💾 localStorage after setAuth:', stored ? JSON.parse(stored) : 'EMPTY');
+        console.log('💾 localStorage after login:', stored ? JSON.parse(stored) : 'EMPTY');
       }, 500);
 
       toast.success(TOAST_MESSAGES.AUTH.LOGIN_SUCCESS);
@@ -102,13 +128,16 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      // ⭐ ใช้ Zustand clearAuth - จะจัดการ localStorage และ cookie อัตโนมัติ
+      // ⭐ 1. Cancel all ongoing queries first (ป้องกัน API call หลัง logout)
+      await queryClient.cancelQueries();
+
+      // ⭐ 2. Clear auth state (Zustand + localStorage + cookie)
       clearAuth();
+
+      // ⭐ 3. Clear all React Query cache
+      queryClient.clear();
     },
     onSuccess: () => {
-      // Clear all React Query cache
-      queryClient.clear();
-
       toast.success(TOAST_MESSAGES.AUTH.LOGOUT_SUCCESS);
       router.push('/login');
     },
@@ -170,7 +199,7 @@ export function useGoogleOAuthCallback() {
 
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('✅ Google OAuth callback onSuccess:', {
         hasToken: !!data.token,
         hasUser: !!data.user,
@@ -179,9 +208,34 @@ export function useGoogleOAuthCallback() {
         needsProfile: data.needsProfile,
       });
 
-      // ⭐ ใช้ Zustand setAuth - จะจัดการ localStorage และ cookie อัตโนมัติ
+      // ⭐ Step 1: Store token first (basic user from Auth Service)
       console.log('🎯 Calling setAuth from Google OAuth...');
       setAuth(data.token, data.user);
+
+      // ⭐ Step 2: Fetch complete profile from Backend Service (same as normal login)
+      try {
+        console.log('📡 Fetching complete profile from Backend Service (Google OAuth)...');
+        const profileResponse = await userService.getProfile();
+
+        if (profileResponse.success && profileResponse.data) {
+          console.log('✅ Complete profile fetched (Google OAuth):', {
+            username: profileResponse.data.username,
+            hasBio: !!profileResponse.data.bio,
+            hasKarma: profileResponse.data.karma !== undefined,
+            followersCount: profileResponse.data.followersCount,
+            followingCount: profileResponse.data.followingCount,
+          });
+
+          // Update Zustand with complete profile
+          const setUser = useAuthStore.getState().setUser;
+          setUser(profileResponse.data);
+
+          console.log('✅ Zustand updated with complete profile (Google OAuth)');
+        }
+      } catch (error) {
+        console.error('⚠️ Failed to fetch complete profile (Google OAuth, using basic user):', error);
+        // Continue with basic user info if profile fetch fails
+      }
 
       // ตรวจสอบ localStorage ทันที
       setTimeout(() => {

@@ -74,8 +74,8 @@ export function ChatHeader({ user, onBlock, showBackButton = false }: ChatHeader
       >
         <div className="relative shrink-0">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={userAvatar || undefined} alt={user.displayName} />
-            <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+            <AvatarImage src={userAvatar || undefined} alt={user.displayName || user.username} />
+            <AvatarFallback>{(user.displayName || user.username)?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
           <OnlineStatus
             isOnline={user.isOnline}
@@ -85,7 +85,7 @@ export function ChatHeader({ user, onBlock, showBackButton = false }: ChatHeader
         </div>
 
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-sm truncate">{user.displayName}</h2>
+          <h2 className="font-semibold text-sm truncate">{user.displayName || user.username}</h2>
           <p className="text-xs text-muted-foreground truncate">{statusText}</p>
         </div>
       </Link>

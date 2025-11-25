@@ -3,7 +3,7 @@
 // จัดการการเรียก API ที่เกี่ยวกับ Authentication
 // ============================================================================
 
-import apiService, { setToken, clearToken } from '@/lib/api/http-client';
+import { authService as httpClient, setToken, clearToken } from '@/lib/api/http-client';
 import { API } from '@/lib/constants/api';
 import type { LoginRequest, RegisterRequest } from '@/types/request';
 import type {
@@ -24,7 +24,7 @@ const authService = {
    * @returns Promise<RegisterResponse>
    */
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {
-    return apiService.post<RegisterResponse>(API.AUTH.REGISTER, data);
+    return httpClient.post<RegisterResponse>(API.AUTH.REGISTER, data);
   },
 
   /**
@@ -33,7 +33,7 @@ const authService = {
    * @returns Promise<LoginResponse>
    */
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiService.post<LoginResponse>(API.AUTH.LOGIN, data);
+    const response = await httpClient.post<LoginResponse>(API.AUTH.LOGIN, data);
 
     // บันทึก token หลังจาก login สำเร็จ
     if (response.success && response.data?.token) {
@@ -60,7 +60,7 @@ const authService = {
    * @returns Promise<GoogleOAuthUrlResponse>
    */
   getGoogleOAuthUrl: async (): Promise<GoogleOAuthUrlResponse> => {
-    return apiService.get<GoogleOAuthUrlResponse>(API.AUTH.GOOGLE);
+    return httpClient.get<GoogleOAuthUrlResponse>(API.AUTH.GOOGLE);
   },
 
   /**
@@ -75,7 +75,7 @@ const authService = {
     state: string
   ): Promise<GoogleOAuthCallbackResponse> => {
     // ⭐ ใช้ POST /auth/exchange แทน GET /auth/google/callback
-    const response = await apiService.post<GoogleOAuthCallbackResponse>(
+    const response = await httpClient.post<GoogleOAuthCallbackResponse>(
       API.AUTH.EXCHANGE,
       { code, state }
     );

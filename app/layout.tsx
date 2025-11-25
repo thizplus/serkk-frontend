@@ -25,7 +25,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "SUEKK - ใครไม่เสือก ไทยเสือก",
+    default: "SUEKK - แพลตฟอร์มไทย เพื่อคนไทย",
     template: "%s | SUEKK",
   },
   description: "แพลตฟอร์มโซเชียลมีเดียไทยแท้ แบ่งปันเรื่องราว ความคิด และเชื่อมต่อกับคนไทย",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     locale: "th_TH",
     url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     siteName: "SUEKK",
-    title: "SUEKK - ใครไม่เสือก ไทยเสือก",
+    title: "SUEKK - แพลตฟอร์มไทย เพื่อคนไทย",
     description: "แพลตฟอร์มโซเชียลมีเดียไทยแท้ แบ่งปันเรื่องราว ความคิด และเชื่อมต่อกับคนไทย",
     images: [
       {
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SUEKK - ใครไม่เสือก ไทยเสือก",
+    title: "SUEKK - แพลตฟอร์มไทย เพื่อคนไทย",
     description: "แพลตฟอร์มโซเชียลมีเดียไทยแท้ แบ่งปันเรื่องราว ความคิด และเชื่อมต่อกับคนไทย",
     images: ["/icon-white.svg"],
     creator: "@suekk",

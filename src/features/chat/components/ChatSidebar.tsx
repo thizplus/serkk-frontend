@@ -81,7 +81,7 @@ export function ChatSidebar({ conversations, activeUsername, isLoading = false }
                   alt={getUserDisplayName(currentUser)}
                 />
                 <AvatarFallback>
-                  {getUserDisplayName(currentUser)?.charAt(0).toUpperCase()}
+                  {getUserDisplayName(currentUser)?.[0]?.toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               <OnlineStatus

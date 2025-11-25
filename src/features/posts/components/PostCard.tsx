@@ -8,6 +8,7 @@ import { ShareDropdown } from "./ShareDropdown";
 import { PostActions } from "./PostActions";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/models";
 import { formatDistanceToNow } from "date-fns";
@@ -186,17 +187,21 @@ export function PostCard({
         {/* Header: Author + Time */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Image
-              src={post.author.avatar || "/icon-white.svg"}
-              alt={post.author.displayName}
-              width={32}
-              height={32}
+            <Avatar
               className={cn(
-                "rounded-full h-8 w-8 object-cover",
+                "h-8 w-8",
                 !isOptimistic && "cursor-pointer"
               )}
               onClick={!isOptimistic ? () => router.push(`/profile/${post.author.username}`) : undefined}
-            />
+            >
+              <AvatarImage
+                src={post.author.avatar || undefined}
+                alt={post.author.displayName || post.author.username}
+              />
+              <AvatarFallback className="rounded-full">
+                {(post.author.displayName || post.author.username)?.[0]?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
             <span
               className={cn(
                 "font-medium text-foreground",
@@ -204,7 +209,7 @@ export function PostCard({
               )}
               onClick={!isOptimistic ? () => router.push(`/profile/${post.author.username}`) : undefined}
             >
-              {post.author.displayName}
+              {post.author.displayName || post.author.username}
             </span>
             <span>•</span>
             <span>{timeAgo}</span>

@@ -19,7 +19,7 @@ export interface RegisterRequest {
   email: string;
   username: string;
   password: string;
-  displayName?: string;
+  displayName: string;  // ✅ Required (1-100 characters)
 }
 
 export interface LoginRequest {
@@ -30,12 +30,16 @@ export interface LoginRequest {
 /**
  * User Requests
  */
+/**
+ * Update Profile (Backend Service - port 8080)
+ * ⭐ Now handles ALL profile fields including displayName and avatar
+ */
 export interface UpdateProfileRequest {
-  displayName?: string;
-  avatar?: string;
-  bio?: string;
-  location?: string;
-  website?: string;
+  displayName?: string;  // ⭐ NEW: 1-100 characters
+  avatar?: string;       // ⭐ NEW: Valid URL, max 500 characters
+  bio?: string;          // max 500 characters
+  location?: string;     // max 100 characters
+  website?: string;      // Valid URL, max 255 characters
 }
 
 /**

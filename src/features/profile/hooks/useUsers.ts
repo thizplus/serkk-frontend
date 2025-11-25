@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
 import userService from '../services/user.service';
+import { useToken } from '@/features/auth/stores/authStore';
 import type { PaginationParams } from '@/types/common';
 
 /**
@@ -33,28 +33,9 @@ export const userKeys = {
  * ```
  */
 export function useProfile() {
-  // ใช้ state เพื่อ track token แทนการตรวจสอบโดยตรง
-  const [hasToken, setHasToken] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return !!(localStorage.getItem('auth_token') || document.cookie.includes('auth_token='));
-  });
-
-  // ตรวจสอบ token เมื่อ component mount และเมื่อมีการเปลี่ยนแปลง
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const checkToken = () => {
-      const tokenExists = !!(localStorage.getItem('auth_token') || document.cookie.includes('auth_token='));
-      setHasToken(tokenExists);
-    };
-
-    // ตรวจสอบทันทีและทุกๆ 500ms
-    checkToken();
-    const interval = setInterval(checkToken, 500);
-
-    // Cleanup
-    return () => clearInterval(interval);
-  }, []);
+  // ⭐ อ่าน token จาก Zustand authStore แทน localStorage
+  // เพื่อให้ enabled update ทันทีเมื่อ logout (clearAuth)
+  const token = useToken();
 
   return useQuery({
     queryKey: userKeys.profile(),
@@ -70,13 +51,14 @@ export function useProfile() {
           throw new Error('No profile data returned');
         }
 
+        console.log('✅ Profile fetched successfully from Backend Service (port 8080)');
         return response.data;
       } catch (error) {
         console.error('❌ Error fetching profile:', error);
         throw error instanceof Error ? error : new Error('An unknown error occurred');
       }
     },
-    enabled: hasToken, // เรียก API เฉพาะเมื่อมี token เท่านั้น
+    enabled: !!token, // ⭐ เรียก API เฉพาะเมื่อมี token ใน Zustand (update ทันทีเมื่อ logout)
     staleTime: 2 * 60 * 1000, // 2 minutes - ลดเวลาเพื่อให้อัพเดทเร็วขึ้น
     refetchOnWindowFocus: true, // ✅ เปิด auto refetch เมื่อ focus window
     retry: false, // ไม่ retry เมื่อ error

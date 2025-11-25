@@ -10,9 +10,9 @@ export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   const manifest = {
-    name: 'SUEKK - ใครไม่เสือก ไทยเสือก',
+    name: 'SUEKK - แพลตฟอร์มไทย เพื่อคนไทย',
     short_name: 'SUEKK',
-    description: 'ใครไม่เสือก ไทยเสือก',
+    description: 'แพลตฟอร์มไทย เพื่อคนไทย',
     start_url: '/?v=1',
     display: 'standalone',
     background_color: '#ffffff',

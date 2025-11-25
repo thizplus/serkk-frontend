@@ -1,26 +1,11 @@
 // ============================================================================
-// HTTP Client (API Service)
-// Axios instance with interceptors for authentication and error handling
+// HTTP Client (Dual API Service for Microservices)
+// Axios instances for Auth Service and Backend Service
 // ============================================================================
 
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
-import { API_BASE_URL } from '@/lib/constants/api';
+import { AUTH_BASE_URL, BACKEND_BASE_URL } from '@/lib/constants/api';
 import { useAuthStore } from '@/features/auth';
-
-// ============================================================================
-// AXIOS INSTANCE
-// ============================================================================
-
-/**
- * สร้าง axios instance สำหรับเรียกใช้ API
- */
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 30000, // 30 seconds timeout
-});
 
 // ============================================================================
 // TOKEN MANAGEMENT
@@ -34,11 +19,9 @@ const TOKEN_KEY = 'auth_token';
 const getToken = (): string | null => {
   if (typeof window === 'undefined') return null;
 
-  // Try to get from Zustand store first (more reliable after hydration)
+  // Try Zustand store first
   const zustandToken = useAuthStore.getState().token;
-  if (zustandToken) {
-    return zustandToken;
-  }
+  if (zustandToken) return zustandToken;
 
   // Fallback to localStorage
   return localStorage.getItem(TOKEN_KEY);
@@ -61,26 +44,33 @@ export const clearToken = (): void => {
 };
 
 // ============================================================================
-// REQUEST INTERCEPTOR
+// AUTH SERVICE CLIENT (Port 8088)
 // ============================================================================
 
 /**
- * Interceptor สำหรับเพิ่ม token ใน header ทุกครั้งที่มีการเรียก API
+ * Axios instance สำหรับ Auth Service
+ * จัดการ: Authentication, User Management
  */
-apiClient.interceptors.request.use(
+export const authClient: AxiosInstance = axios.create({
+  baseURL: AUTH_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000,
+});
+
+// Request Interceptor - เพิ่ม Authorization token
+authClient.interceptors.request.use(
   (config) => {
     const token = getToken();
 
-    // Debug logging (only in development)
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔑 API Request:', config.method?.toUpperCase(), config.url);
-
+      console.log('🔑 [Auth Service] Request:', config.method?.toUpperCase(), config.url);
       if (!token) {
-        console.warn('⚠️ NO TOKEN - Request will be unauthenticated');
+        console.warn('⚠️ [Auth Service] NO TOKEN - Request will be unauthenticated');
       }
     }
 
-    // Add Authorization header if token exists
     if (token && config.headers) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -88,93 +78,61 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('❌ Request interceptor error:', error);
+    console.error('❌ [Auth Service] Request error:', error);
     return Promise.reject(error);
   }
 );
 
-// ============================================================================
-// RESPONSE INTERCEPTOR
-// ============================================================================
-
-/**
- * Interceptor สำหรับจัดการ response และ error handling
- */
-apiClient.interceptors.response.use(
+// Response Interceptor - จัดการ response และ error
+authClient.interceptors.response.use(
   (response) => {
-    // Debug logging (remove in production)
     if (process.env.NODE_ENV === 'development') {
-      console.log('✅ API Response:', response.config.url, response.status);
+      console.log('✅ [Auth Service] Response:', response.config.url, response.status);
     }
     return response;
   },
   async (error) => {
-    // Log error สำหรับ debugging
-    console.error('❌ API Error:', {
+    console.error('❌ [Auth Service] Error:', {
       status: error.response?.status,
-      statusText: error.response?.statusText,
       url: error.config?.url,
       data: error.response?.data,
     });
 
-    // ถ้าเป็น error 401 (Unauthorized)
     if (error.response?.status === 401) {
       const requestUrl = error.config?.url || '';
 
-      // Public pages ที่ไม่ต้อง redirect (ปล่อยให้ component จัดการเอง)
-      const publicPages = ['/', '/post', '/tag', '/profile', '/search'];
-      const isPublicPage = typeof window !== 'undefined' && publicPages.some(page =>
-        window.location.pathname === page || window.location.pathname.startsWith(page + '/')
-      );
-
-      // Public endpoints ที่ไม่ควรมีการ redirect (optional calls)
-      const publicEndpoints = ['/users/profile', '/notifications/unread-count'];
+      // Public endpoints ที่ไม่ควร redirect
+      const publicEndpoints = ['/users/profile'];
       const isPublicEndpoint = publicEndpoints.some(endpoint => requestUrl.includes(endpoint));
 
-      // ถ้าเป็น public page หรือ public endpoint → ไม่ต้อง redirect (ปล่อยให้ fail เงียบๆ)
-      if (isPublicPage || isPublicEndpoint) {
-        console.log('⚠️ 401 on public page/endpoint - not redirecting to login');
-        return Promise.reject(error);
-      }
+      if (!isPublicEndpoint) {
+        clearToken();
 
-      // ล้างข้อมูล auth
-      clearToken();
+        if (typeof window !== 'undefined') {
+          document.cookie = 'auth_token=; path=/; max-age=0';
 
-      // ล้าง cookie
-      if (typeof window !== 'undefined') {
-        document.cookie = 'auth_token=; path=/; max-age=0';
-      }
+          const currentPath = window.location.pathname;
+          const isAuthPage = ['/login', '/register', '/auth/callback'].includes(currentPath);
 
-      // redirect ไปหน้า login เฉพาะเมื่อไม่ได้อยู่หน้า auth และไม่ใช่ public page
-      if (typeof window !== 'undefined') {
-        const currentPath = window.location.pathname;
-        const isAuthPage = ['/login', '/register', '/auth/callback'].includes(currentPath);
-
-        if (!isAuthPage) {
-          window.location.href = '/login';
+          if (!isAuthPage) {
+            window.location.href = '/login';
+          }
         }
       }
     }
 
-    // จัดการ error response จาก backend
+    // Return error data
     if (error.response?.data) {
-      const errorData = error.response.data;
-
-      // สร้าง enhanced error object ที่มี backend error message
-      const enhancedError = {
-        ...errorData,
+      return Promise.reject({
+        ...error.response.data,
         status: error.response.status,
-        statusText: error.response.statusText,
         originalError: error,
-      };
-
-      return Promise.reject(enhancedError);
+      });
     }
 
-    // ถ้าไม่มี response data (เช่น network error)
     return Promise.reject({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย',
+      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ Auth Service',
       error: error.message,
       status: 0,
       originalError: error,
@@ -183,144 +141,214 @@ apiClient.interceptors.response.use(
 );
 
 // ============================================================================
-// API SERVICE
+// BACKEND SERVICE CLIENT (Port 8080)
 // ============================================================================
 
 /**
- * Service สำหรับเรียกใช้ API
+ * Axios instance สำหรับ Backend Service
+ * จัดการ: Posts, Comments, Follows, Media, Tags, Search, Chat, Notifications
+ */
+export const backendClient: AxiosInstance = axios.create({
+  baseURL: BACKEND_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000,
+});
+
+// Request Interceptor - เพิ่ม Authorization token
+backendClient.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔑 [Backend Service] Request:', config.method?.toUpperCase(), config.url);
+      if (!token) {
+        console.warn('⚠️ [Backend Service] NO TOKEN - Request will be unauthenticated');
+      }
+    }
+
+    if (token && config.headers) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    console.error('❌ [Backend Service] Request error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response Interceptor - จัดการ response และ error
+backendClient.interceptors.response.use(
+  (response) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ [Backend Service] Response:', response.config.url, response.status);
+    }
+    return response;
+  },
+  async (error) => {
+    console.error('❌ [Backend Service] Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      data: error.response?.data,
+    });
+
+    if (error.response?.status === 401) {
+      const requestUrl = error.config?.url || '';
+
+      // Public pages
+      const publicPages = ['/', '/post', '/tag', '/profile', '/search'];
+      const isPublicPage = typeof window !== 'undefined' && publicPages.some(page =>
+        window.location.pathname === page || window.location.pathname.startsWith(page + '/')
+      );
+
+      if (!isPublicPage) {
+        clearToken();
+
+        if (typeof window !== 'undefined') {
+          document.cookie = 'auth_token=; path=/; max-age=0';
+
+          const currentPath = window.location.pathname;
+          const isAuthPage = ['/login', '/register', '/auth/callback'].includes(currentPath);
+
+          if (!isAuthPage) {
+            window.location.href = '/login';
+          }
+        }
+      }
+    }
+
+    // Return error data
+    if (error.response?.data) {
+      return Promise.reject({
+        ...error.response.data,
+        status: error.response.status,
+        originalError: error,
+      });
+    }
+
+    return Promise.reject({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ Backend Service',
+      error: error.message,
+      status: 0,
+      originalError: error,
+    });
+  }
+);
+
+// ============================================================================
+// API SERVICE WRAPPERS
+// ============================================================================
+
+/**
+ * Auth Service API Wrapper
+ * ใช้สำหรับ Authentication และ User Management
+ */
+export const authService = {
+  get: async <T>(url: string, params?: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await authClient.get<T>(url, { params, ...config });
+    return response.data;
+  },
+
+  post: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await authClient.post<T>(url, data, config);
+    return response.data;
+  },
+
+  put: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await authClient.put<T>(url, data, config);
+    return response.data;
+  },
+
+  patch: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await authClient.patch<T>(url, data, config);
+    return response.data;
+  },
+
+  delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await authClient.delete<T>(url, config);
+    return response.data;
+  },
+
+  putFormData: async <T>(url: string, formData: FormData): Promise<T> => {
+    const response = await authClient.put<T>(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+};
+
+/**
+ * Backend Service API Wrapper
+ * ใช้สำหรับ Posts, Comments, Follows, Media, Tags, Search, etc.
  */
 const apiService = {
-  /**
-   * ส่งคำขอ GET
-   * @param url - URL ปลายทาง
-   * @param params - พารามิเตอร์สำหรับ query string
-   * @param config - ค่า config เพิ่มเติมสำหรับ axios
-   */
   get: async <T>(url: string, params?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await apiClient.get<T>(url, { params, ...config });
+    const response = await backendClient.get<T>(url, { params, ...config });
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ POST
-   * @param url - URL ปลายทาง
-   * @param data - ข้อมูลที่จะส่งไปยัง API
-   * @param config - ค่า config เพิ่มเติมสำหรับ axios
-   */
   post: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await apiClient.post<T>(url, data, config);
+    const response = await backendClient.post<T>(url, data, config);
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ PUT
-   * @param url - URL ปลายทาง
-   * @param data - ข้อมูลที่จะส่งไปยัง API
-   * @param config - ค่า config เพิ่มเติมสำหรับ axios
-   */
   put: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await apiClient.put<T>(url, data, config);
+    const response = await backendClient.put<T>(url, data, config);
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ PUT พร้อม FormData (สำหรับการอัพโหลดไฟล์)
-   * @param url - URL ปลายทาง
-   * @param formData - FormData ที่มีข้อมูลและไฟล์
-   */
   putFormData: async <T>(url: string, formData: FormData): Promise<T> => {
-    const response = await apiClient.put<T>(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const response = await backendClient.put<T>(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ PATCH
-   * @param url - URL ปลายทาง
-   * @param data - ข้อมูลที่จะส่งไปยัง API
-   * @param config - ค่า config เพิ่มเติมสำหรับ axios
-   */
   patch: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await apiClient.patch<T>(url, data, config);
+    const response = await backendClient.patch<T>(url, data, config);
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ PATCH พร้อม FormData (สำหรับการอัพโหลดไฟล์)
-   * @param url - URL ปลายทาง
-   * @param formData - FormData ที่มีข้อมูลและไฟล์
-   */
   patchFormData: async <T>(url: string, formData: FormData): Promise<T> => {
-    const response = await apiClient.patch<T>(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const response = await backendClient.patch<T>(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ DELETE
-   * @param url - URL ปลายทาง
-   * @param config - ค่า config เพิ่มเติมสำหรับ axios
-   */
   delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await apiClient.delete<T>(url, config);
+    const response = await backendClient.delete<T>(url, config);
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ DELETE พร้อม data ใน request body
-   * @param url - URL ปลายทาง
-   * @param data - ข้อมูลที่จะส่งไปยัง API
-   * @param config - ค่า config เพิ่มเติมสำหรับ axios
-   */
   deleteWithData: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await apiClient.delete<T>(url, { data, ...config });
+    const response = await backendClient.delete<T>(url, { data, ...config });
     return response.data;
   },
 
-  /**
-   * ส่งคำขอแบบกำหนดเองได้เต็มรูปแบบ
-   * @param config - ค่า config สำหรับ axios request
-   */
   request: async <T>(config: AxiosRequestConfig): Promise<T> => {
-    const response = await apiClient.request<T>(config);
+    const response = await backendClient.request<T>(config);
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ POST พร้อม FormData (สำหรับการอัพโหลดไฟล์)
-   * @param url - URL ปลายทาง
-   * @param formData - FormData ที่มีข้อมูลและไฟล์
-   */
   postFile: async <T>(url: string, formData: FormData): Promise<T> => {
-    const response = await apiClient.post<T>(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const response = await backendClient.post<T>(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
 
-  /**
-   * ส่งคำขอ Upload ไฟล์
-   * @param url - URL ปลายทาง
-   * @param formData - FormData ที่มีไฟล์ที่จะอัปโหลด
-   * @param onProgress - callback สำหรับติดตามความคืบหน้าในการอัปโหลด
-   */
   upload: async <T>(
     url: string,
     formData: FormData,
     onProgress?: (percentage: number) => void
   ): Promise<T> => {
-    const response = await apiClient.post<T>(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const response = await backendClient.post<T>(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -336,7 +364,11 @@ const apiService = {
 // EXPORTS
 // ============================================================================
 
+// Default export (Backend Service) - for backward compatibility
 export default apiService;
 
-// Export axios instance for advanced usage (if needed)
-export { apiClient };
+// Named exports
+export { apiService };
+
+// Export axios instances for advanced usage
+export { authClient as apiClient };

@@ -69,14 +69,14 @@ export function ChatListItem({ conversation, currentUserId, isActive = false }: 
         asChild
         isActive={isActive}
         className="h-auto py-3"
-        tooltip={otherUser.displayName}
+        tooltip={otherUser.displayName || otherUser.username}
       >
         <Link href={`/chat/${otherUser.username}`} className="flex items-center gap-3 w-full">
           {/* Avatar with Online Status */}
           <div className="relative shrink-0">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={otherUser.avatar || undefined} alt={otherUser.displayName} />
-              <AvatarFallback className="text-xs">{otherUser.displayName.charAt(0)}</AvatarFallback>
+              <AvatarImage src={otherUser.avatar || undefined} alt={otherUser.displayName || otherUser.username} />
+              <AvatarFallback className="text-xs">{(otherUser.displayName || otherUser.username)?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
             <OnlineStatus
               isOnline={otherUser.isOnline}
@@ -92,7 +92,7 @@ export function ChatListItem({ conversation, currentUserId, isActive = false }: 
                 "font-semibold text-sm truncate",
                 unreadCount > 0 && "text-primary"
               )}>
-                {otherUser.displayName}
+                {otherUser.displayName || otherUser.username}
               </h3>
               {isMounted && lastMessage && (
                 <span className="text-xs text-muted-foreground shrink-0 ml-2">

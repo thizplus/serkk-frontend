@@ -3,7 +3,29 @@
 // Auto-generated from backend route specifications
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+// ============================================================================
+// BASE URLs for Microservices
+// ============================================================================
+
+/**
+ * Auth Service - จัดการ Authentication และ User Management
+ * - Register, Login, OAuth
+ * - User Profile Management
+ */
+export const AUTH_BASE_URL =
+  process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8088/api/v1';
+
+/**
+ * Backend Service - จัดการ Social Features
+ * - Posts, Comments, Follows
+ * - Media, Tags, Search
+ * - Chat, Notifications
+ */
+export const BACKEND_BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:8080/api/v1';
+
+// Legacy export for backward compatibility (deprecated)
+const API_BASE_URL = BACKEND_BASE_URL;
 
 // ============================================================================
 // AUTHENTICATION & AUTHORIZATION
@@ -23,10 +45,12 @@ export const AUTH_API = {
 // ============================================================================
 
 export const USER_API = {
-  // Public endpoints
-  PROFILE: '/users/profile',                       // GET /api/v1/users/profile
-  UPDATE_PROFILE: '/users/profile',                // PUT /api/v1/users/profile
+  // Auth Service endpoints (port 8088)
   DELETE_ACCOUNT: '/users/profile',                // DELETE /api/v1/users/profile
+
+  // Backend Service endpoints (port 8080)
+  ME: '/users/me',                                 // GET /api/v1/users/me (complete profile)
+  UPDATE_PROFILE: '/users/profile',                // PATCH /api/v1/users/profile (⭐ ALL fields: displayName, avatar, bio, location, website)
   LIST: '/users',                                  // GET /api/v1/users
 };
 

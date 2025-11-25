@@ -40,8 +40,18 @@ export function RegisterForm({
     e.preventDefault();
 
     // Validation
-    if (!email || !username || !password || !confirmPassword) {
+    if (!email || !username || !displayName || !password || !confirmPassword) {
       toast.error(TOAST_MESSAGES.AUTH.REQUIRED_FIELDS);
+      return;
+    }
+
+    if (displayName.trim().length === 0) {
+      toast.error('กรุณากรอกชื่อที่แสดง');
+      return;
+    }
+
+    if (displayName.trim().length > 100) {
+      toast.error('ชื่อที่แสดงต้องไม่เกิน 100 ตัวอักษร');
       return;
     }
 
@@ -59,7 +69,7 @@ export function RegisterForm({
       email,
       username,
       password,
-      displayName: displayName || username,
+      displayName: displayName.trim(),
     });
   };
 
@@ -114,16 +124,21 @@ export function RegisterForm({
               </Field>
               <Field>
                 <FieldLabel htmlFor="displayName">
-                  ชื่อที่แสดง (ไม่บังคับ)
+                  ชื่อที่แสดง
                 </FieldLabel>
                 <Input
                   id="displayName"
                   type="text"
-                  placeholder="Display Name"
+                  placeholder="ชื่อที่จะแสดงในโปรไฟล์"
+                  required
+                  maxLength={100}
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   disabled={registerMutation.isPending}
                 />
+                <FieldDescription>
+                  1-100 ตัวอักษร
+                </FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="email">อีเมล</FieldLabel>

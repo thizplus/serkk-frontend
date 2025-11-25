@@ -16,8 +16,7 @@ import type {
   UploadProgressCallback,
   UploadAdditionalData,
 } from '@/types/upload';
-import { API_BASE_URL } from '@/lib/constants/api';
-import { MEDIA_API } from '@/lib/constants/api';
+import { BACKEND_BASE_URL as API_BASE_URL, MEDIA_API } from '@/lib/constants/api';
 
 /**
  * Get JWT token from storage

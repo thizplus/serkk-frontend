@@ -146,7 +146,7 @@ export function UserSearchDialog({ trigger }: UserSearchDialogProps) {
             alt={user.displayName || user.username}
           />
           <AvatarFallback>
-            {(user.displayName || user.username).charAt(0).toUpperCase()}
+            {(user.displayName || user.username)?.[0]?.toUpperCase() || 'U'}
           </AvatarFallback>
         </Avatar>
         <OnlineStatus

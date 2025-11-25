@@ -134,19 +134,56 @@ export function useInfinitePosts(params?: Omit<GetPostsCursorParams, 'cursor'>) 
   return useInfiniteQuery({
     queryKey: [...postKeys.lists(), 'infinite', params] as const,
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+      console.log('[DEBUG] 📡 Fetching posts with cursor:', pageParam);
+
       const response = await postService.list({
         ...params,
         cursor: pageParam,
         limit: params?.limit || 20,
       });
+
       if (!response.success || !response.data) {
         throw new Error('Failed to fetch posts');
       }
+
+      console.log('[DEBUG] ✅ Backend response:', {
+        postsCount: response.data.posts.length,
+        meta: response.data.meta,
+        firstPostId: response.data.posts[0]?.id,
+        lastPostId: response.data.posts[response.data.posts.length - 1]?.id,
+      });
+
       return response.data;
     },
-    getNextPageParam: (lastPage: any) => {
+    getNextPageParam: (lastPage: any, allPages: any[]) => {
       // ใช้ hasMore และ nextCursor จาก backend
-      return lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+      const nextCursor = lastPage.meta.hasMore ? lastPage.meta.nextCursor : undefined;
+
+      // 🛡️ ตรวจสอบว่า cursor ซ้ำกับหน้าก่อนหน้าหรือไม่
+      if (allPages.length > 1 && nextCursor) {
+        const prevPage = allPages[allPages.length - 2];
+        const prevCursor = prevPage.meta.nextCursor;
+
+        if (nextCursor === prevCursor) {
+          console.error('[DEBUG] ❌ DUPLICATE CURSOR DETECTED!', {
+            currentPage: allPages.length,
+            nextCursor,
+            prevCursor,
+            message: 'Backend ส่ง cursor เดิมซ้ำ - หยุด pagination เพื่อป้องกัน infinite loop'
+          });
+          return undefined; // หยุด pagination
+        }
+      }
+
+      console.log('[DEBUG] 🔄 getNextPageParam called:', {
+        currentPage: allPages.length,
+        hasMore: lastPage.meta.hasMore,
+        nextCursor: nextCursor,
+        totalPosts: lastPage.meta.total,
+        currentPagePostsCount: lastPage.posts.length,
+      });
+
+      return nextCursor;
     },
     initialPageParam: undefined as string | undefined,
     staleTime: 2 * 60 * 1000, // 2 minutes

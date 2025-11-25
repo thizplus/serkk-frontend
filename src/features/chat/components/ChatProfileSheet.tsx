@@ -54,8 +54,8 @@ export function ChatProfileSheet({ user, open, onOpenChange, onBlock }: ChatProf
         <div className="flex flex-col items-center gap-4 py-4">
           <div className="relative">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={userAvatar || undefined} alt={user.displayName} />
-              <AvatarFallback className="text-3xl">{user.displayName.charAt(0)}</AvatarFallback>
+              <AvatarImage src={userAvatar || undefined} alt={user.displayName || user.username} />
+              <AvatarFallback className="text-3xl">{(user.displayName || user.username)?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
             <OnlineStatus
               isOnline={user.isOnline}
@@ -65,7 +65,7 @@ export function ChatProfileSheet({ user, open, onOpenChange, onBlock }: ChatProf
           </div>
 
           <div className="text-center">
-            <h3 className="text-xl font-bold">{user.displayName}</h3>
+            <h3 className="text-xl font-bold">{user.displayName || user.username}</h3>
             <p className="text-sm text-muted-foreground">@{user.username}</p>
             <p className="text-xs text-muted-foreground mt-2">{statusText}</p>
           </div>
