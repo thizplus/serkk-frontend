@@ -1,14 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { MessageSquare, ArrowUpCircle, ExternalLink } from "lucide-react";
+import { MessageSquare, Heart, Skull, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CommentWithPost } from "@/types/models";
 import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { LinkifiedContent } from "@/components/common";
+// import { useIsMobile } from "@/shared/hooks/useDeviceType";
+// import { useDrawer } from "@/shared/contexts/DrawerContext";
 
 interface ProfileCommentCardProps {
   comment: CommentWithPost;
@@ -19,10 +22,32 @@ interface ProfileCommentCardProps {
  * ใช้สำหรับแสดงรายการ comments ของผู้ใช้
  */
 export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
+  const router = useRouter();
+  // TODO: Uncomment when PostDetailDrawer is implemented
+  // const isMobile = useIsMobile();
+  // const { openDrawer } = useDrawer();
+
   const timeAgo = formatDistanceToNow(new Date(comment.createdAt), {
     addSuffix: true,
     locale: th,
   });
+
+  // Handler for "View Post" button
+  const handleViewPost = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // TODO: When PostDetailDrawer is implemented, use drawer on mobile:
+    // const isMobile = useIsMobile();
+    // const { openDrawer } = useDrawer();
+    // if (isMobile) {
+    //   openDrawer('post-detail', { postId: comment.postId });
+    //   return;
+    // }
+
+    // For now: navigate to post detail page on both mobile and desktop
+    router.push(`/post/${comment.postId}#comment-${comment.id}`);
+  };
 
   return (
     <Card className="hover:bg-accent/50 transition-colors">
@@ -52,15 +77,19 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
 
           {/* Footer: Votes, Time, Link */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            {/* Votes */}
+            {/* Votes with Heart/Skull icons */}
             <div className="flex items-center gap-1">
-              <ArrowUpCircle
-                className={cn(
-                  "h-3.5 w-3.5",
-                  comment.votes > 0 && "text-orange-500",
-                  comment.votes < 0 && "text-blue-500"
-                )}
-              />
+              {comment.votes > 0 ? (
+                <Heart
+                  className="h-3.5 w-3.5 text-orange-500 fill-orange-500"
+                />
+              ) : comment.votes < 0 ? (
+                <Skull
+                  className="h-3.5 w-3.5 text-blue-500"
+                />
+              ) : (
+                <Heart className="h-3.5 w-3.5" />
+              )}
               <span
                 className={cn(
                   "font-medium",
@@ -80,16 +109,15 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
               </div>
             )}
 
-           
 
-            {/* Link to Post */}
-            <Link
-              href={`/post/${comment.postId}#comment-${comment.id}`}
+            {/* View Post Button */}
+            <button
+              onClick={handleViewPost}
               className="ml-auto flex items-center gap-1 text-primary hover:underline"
             >
               <span>ดูโพสต์</span>
               <ExternalLink className="h-3 w-3" />
-            </Link>
+            </button>
           </div>
         </div>
       </CardContent>
