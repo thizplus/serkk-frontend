@@ -203,7 +203,7 @@ export function CommentDrawer({
 
             {/* Hint at bottom */}
             <div className="mt-8 text-center text-xs text-muted-foreground">
-              Swipe down to close
+              ปัดลงเพื่อปิด
             </div>
           </div>
         </div>

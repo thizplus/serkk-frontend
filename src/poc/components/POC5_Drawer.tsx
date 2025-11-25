@@ -219,7 +219,7 @@ export function POC5_Drawer({
 
             {/* Hint at bottom */}
             <div className="mt-6 text-center text-xs text-muted-foreground">
-              Swipe down to close
+              ปัดลงเพื่อปิด
             </div>
           </div>
         </div>

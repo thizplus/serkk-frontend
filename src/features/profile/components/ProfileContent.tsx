@@ -101,10 +101,10 @@ export function ProfileContent({ params }: ProfileContentProps) {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfiniteUserPosts(profileUser?.id || '', {
+  } = useInfiniteUserPosts(profileUser?.id ?? '', {
     limit: PAGINATION.DEFAULT_LIMIT,
   }, {
-    enabled: !!profileUser?.id,
+    enabled: !!profileUser?.id && profileUser.id !== '',
   });
 
   // Flatten posts from all pages
@@ -120,10 +120,10 @@ export function ProfileContent({ params }: ProfileContentProps) {
     hasNextPage: hasNextPageComments,
     fetchNextPage: fetchNextPageComments,
     isFetchingNextPage: isFetchingNextPageComments,
-  } = useInfiniteCommentsByAuthor(profileUser?.id || '', {
+  } = useInfiniteCommentsByAuthor(profileUser?.id ?? '', {
     limit: PAGINATION.DEFAULT_LIMIT,
   }, {
-    enabled: !!profileUser?.id,
+    enabled: !!profileUser?.id && profileUser.id !== '',
   });
 
   // Flatten comments from all pages

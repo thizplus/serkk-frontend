@@ -10,8 +10,9 @@ import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { LinkifiedContent } from "@/components/common";
-// import { useIsMobile } from "@/shared/hooks/useDeviceType";
-// import { useDrawer } from "@/shared/contexts/DrawerContext";
+import { useIsMobile } from "@/shared/hooks/useDeviceType";
+import { useDrawer } from "@/shared/contexts/DrawerContext";
+import { usePost } from "@/features/posts/hooks/usePosts";
 
 interface ProfileCommentCardProps {
   comment: CommentWithPost;
@@ -23,9 +24,13 @@ interface ProfileCommentCardProps {
  */
 export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
   const router = useRouter();
-  // TODO: Uncomment when PostDetailDrawer is implemented
-  // const isMobile = useIsMobile();
-  // const { openDrawer } = useDrawer();
+  const isMobile = useIsMobile();
+  const { openDrawer } = useDrawer();
+
+  // ✅ Fetch post data from React Query cache (for drawer)
+  const { data: post } = usePost(comment.postId, {
+    enabled: false, // Don't fetch automatically, use cache only
+  });
 
   const timeAgo = formatDistanceToNow(new Date(comment.createdAt), {
     addSuffix: true,
@@ -37,16 +42,32 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
     e.preventDefault();
     e.stopPropagation();
 
-    // TODO: When PostDetailDrawer is implemented, use drawer on mobile:
-    // const isMobile = useIsMobile();
-    // const { openDrawer } = useDrawer();
-    // if (isMobile) {
-    //   openDrawer('post-detail', { postId: comment.postId });
-    //   return;
-    // }
+    // ✅ Mobile: Open post detail drawer
+    if (isMobile) {
+      // Use cached post data if available, otherwise use comment.post
+      const postData = post || comment.post;
+      openDrawer('post-detail', { post: postData });
+      return;
+    }
 
-    // For now: navigate to post detail page on both mobile and desktop
+    // Desktop: Navigate to post detail page
     router.push(`/post/${comment.postId}#comment-${comment.id}`);
+  };
+
+  // Handler for post title click
+  const handlePostTitleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // ✅ Mobile: Open post detail drawer
+    if (isMobile) {
+      const postData = post || comment.post;
+      openDrawer('post-detail', { post: postData });
+      return;
+    }
+
+    // Desktop: Navigate to post detail page
+    router.push(`/post/${comment.postId}`);
   };
 
   return (
@@ -56,16 +77,17 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
         <div className="flex items-start gap-2 mb-3">
           <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
-            <Link
+            <a
               href={`/post/${comment.postId}`}
-              className="text-sm font-medium hover:underline line-clamp-2 text-foreground"
+              onClick={handlePostTitleClick}
+              className="text-sm font-medium hover:underline line-clamp-2 text-foreground cursor-pointer"
             >
               แสดงความคิดเห็นใน: {comment.post.title}
-            </Link>
+            </a>
             <p className="text-xs text-muted-foreground mt-0.5">
               โดย {comment.post.author.displayName}  |  {timeAgo}
             </p>
-            
+
           </div>
         </div>
 

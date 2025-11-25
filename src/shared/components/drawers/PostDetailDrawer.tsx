@@ -148,7 +148,7 @@ export function PostDetailDrawer({
 
   return (
     <Drawer open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DrawerContent className="h-[95vh]">
+      <DrawerContent className="h-screen data-[vaul-drawer-direction=bottom]:max-h-[95vh]">
         <DrawerHeader className="sr-only">
           <DrawerTitle>{currentPost.title}</DrawerTitle>
         </DrawerHeader>
@@ -295,7 +295,7 @@ export function PostDetailDrawer({
 
             {/* Hint at bottom */}
             <div className="mt-8 text-center text-xs text-muted-foreground">
-              Swipe down to close
+              ปัดลงเพื่อปิด
             </div>
           </div>
         </div>
