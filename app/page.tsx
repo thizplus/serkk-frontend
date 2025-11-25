@@ -32,9 +32,27 @@ export default function Home() {
     limit: PAGINATION.DEFAULT_LIMIT,
   });
 
-  // Flatten posts from all pages
+  // Flatten posts from all pages with deduplication
   const posts = useMemo(() => {
-    return data?.pages.flatMap((page: any) => page.posts) ?? [];
+    if (!data?.pages) return [];
+
+    const allPosts = data.pages.flatMap((page: any) => page.posts);
+
+    // 🛡️ Deduplicate posts by ID (fixes duplicate posts at page boundaries)
+    const uniquePosts = allPosts.filter((post, index, self) =>
+      index === self.findIndex((p) => p.id === post.id)
+    );
+
+    // Debug logging
+    if (allPosts.length !== uniquePosts.length) {
+      console.warn('[DEBUG] 🔄 Duplicate posts detected and removed:', {
+        total: allPosts.length,
+        unique: uniquePosts.length,
+        duplicates: allPosts.length - uniquePosts.length,
+      });
+    }
+
+    return uniquePosts;
   }, [data]);
 
   return (
