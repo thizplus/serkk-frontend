@@ -10,9 +10,6 @@ import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { LinkifiedContent } from "@/components/common";
-import { useIsMobile } from "@/shared/hooks/useDeviceType";
-import { useDrawer } from "@/shared/contexts/DrawerContext";
-import { usePost } from "@/features/posts/hooks/usePosts";
 
 interface ProfileCommentCardProps {
   comment: CommentWithPost;
@@ -24,13 +21,6 @@ interface ProfileCommentCardProps {
  */
 export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
   const router = useRouter();
-  const isMobile = useIsMobile();
-  const { openDrawer } = useDrawer();
-
-  // ✅ Fetch post data from React Query cache (for drawer)
-  const { data: post } = usePost(comment.postId, {
-    enabled: false, // Don't fetch automatically, use cache only
-  });
 
   const timeAgo = formatDistanceToNow(new Date(comment.createdAt), {
     addSuffix: true,
@@ -41,16 +31,6 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
   const handleViewPost = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // ✅ Mobile: Open post detail drawer
-    if (isMobile) {
-      // Use cached post data if available, otherwise use comment.post
-      const postData = post || comment.post;
-      openDrawer('post-detail', { post: postData });
-      return;
-    }
-
-    // Desktop: Navigate to post detail page
     router.push(`/post/${comment.postId}#comment-${comment.id}`);
   };
 
@@ -58,15 +38,6 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
   const handlePostTitleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // ✅ Mobile: Open post detail drawer
-    if (isMobile) {
-      const postData = post || comment.post;
-      openDrawer('post-detail', { post: postData });
-      return;
-    }
-
-    // Desktop: Navigate to post detail page
     router.push(`/post/${comment.postId}`);
   };
 
