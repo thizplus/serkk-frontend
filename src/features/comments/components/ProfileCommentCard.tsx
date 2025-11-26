@@ -10,6 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 import { th } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { LinkifiedContent } from "@/components/common";
+import { VOTE_COLORS } from "@/shared/config/constants";
 
 interface ProfileCommentCardProps {
   comment: CommentWithPost;
@@ -74,11 +75,11 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
             <div className="flex items-center gap-1">
               {comment.votes > 0 ? (
                 <Heart
-                  className="h-3.5 w-3.5 text-orange-500 fill-orange-500"
+                  className={cn("h-3.5 w-3.5", VOTE_COLORS.upvote.text, VOTE_COLORS.upvote.fill)}
                 />
               ) : comment.votes < 0 ? (
                 <Skull
-                  className="h-3.5 w-3.5 text-blue-500"
+                  className={cn("h-3.5 w-3.5", VOTE_COLORS.downvote.text)}
                 />
               ) : (
                 <Heart className="h-3.5 w-3.5" />
@@ -86,8 +87,8 @@ export function ProfileCommentCard({ comment }: ProfileCommentCardProps) {
               <span
                 className={cn(
                   "font-medium",
-                  comment.votes > 0 && "text-orange-500",
-                  comment.votes < 0 && "text-blue-500"
+                  comment.votes > 0 && VOTE_COLORS.upvote.text,
+                  comment.votes < 0 && VOTE_COLORS.downvote.text
                 )}
               >
                 {comment.votes > 0 ? `+${comment.votes}` : comment.votes}
